@@ -13,7 +13,7 @@ const TarjetaAsignatura = (props) => {
     useEffect(() => {
 
         let token = localStorage.getItem('token');
-        const jsonObject = JSON.stringify(Object.fromEntries({ "idAsignatura": props.idAsignatura }));
+        const jsonObject = JSON.stringify(({ "idAsignatura": props.idAsignatura }));
         fetch(`${API_URL}/get-subject-info`, {
             method: 'POST',
             headers: {
