@@ -1,4 +1,5 @@
 import CryptoJS from 'crypto-js'
+import { API_URL } from '../constants/Constants';
 
 
 const getTestFromLocalStorage = (testId) => {
@@ -45,7 +46,7 @@ export const comprobarPassword = (contra,currentTest) => {
 export const sendTest = () => {
 
   var token = localStorage.getItem('token');
-  var url = "http://127.0.0.1:8000/api/response";
+  var url = `${API_URL}/response`;
   var listaRespuestas = localStorage.getItem('answers');
   var hash = CryptoJS.SHA256(listaRespuestas).toString();
   //listaRespuestas["hash"] = hash;
@@ -74,7 +75,7 @@ export const sendTest = () => {
 export const getCorrectedTest = (idCuestionario, idAlumno) => {              //idAlumno solo se usa cuando eres profesor y quieres ver los resultados para tu alumno
 
   var token = localStorage.getItem('token');
-  var url = "http://127.0.0.1:8000/api/test-corrected";
+  var url = `${API_URL}/test-corrected`;
   const message = new Map([["idCuestionario", idCuestionario], ["idAlumno", idAlumno]]);
   const obj = JSON.stringify(Object.fromEntries(message));
 
@@ -93,7 +94,7 @@ export const getCorrectedTest = (idCuestionario, idAlumno) => {              //i
 export const sendCreatedTest = (cuestionario) => {
 
   var token = localStorage.getItem('token');
-  var url = "http://127.0.0.1:8000/api/create-quiz";
+  var url = `${API_URL}/create-quiz`;
   var jsonCuestionario = JSON.stringify(cuestionario)
   return fetch(url, {
     method: 'POST',

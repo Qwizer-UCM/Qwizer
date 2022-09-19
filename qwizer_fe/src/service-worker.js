@@ -9,6 +9,7 @@ import { precacheAndRoute} from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import {NetworkOnly } from 'workbox-strategies';
 import {BackgroundSyncPlugin} from 'workbox-background-sync';
+import { API_URL } from './constants/Constants';
 
 /*
   Some developers want to be able to publish a new service worker and have it control 
@@ -47,7 +48,7 @@ Si no hay conexion cuando el usuario va ha enviar el test,
 cachear esa peticion y cuando haya conexion enviarla.
 */
 
-const sentTestUrl = "http://127.0.0.1:8000/api/response";
+const sentTestUrl = `${API_URL}/response`;
 
 const bgSyncPlugin = new BackgroundSyncPlugin('test-post-requests', {
   maxRetentionTime: 24 * 60, // Reintentar por un maximo de 24h

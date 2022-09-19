@@ -1,6 +1,6 @@
 {
   "name": "qwizer_fe",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.4",

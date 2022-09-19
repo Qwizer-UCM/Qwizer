@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { API_URL } from '../constants/Constants';
 
 const TarjetaAsignatura = (props) => {
     const [state, setState] = useState({
@@ -13,7 +14,7 @@ const TarjetaAsignatura = (props) => {
 
         let token = localStorage.getItem('token');
         const jsonObject = JSON.stringify(Object.fromEntries({ "idAsignatura": props.idAsignatura }));
-        fetch('http://127.0.0.1:8000/api/get-subject-info', {
+        fetch(`${API_URL}/get-subject-info`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json',
@@ -30,7 +31,7 @@ const TarjetaAsignatura = (props) => {
                 });
             })
             .catch(error => console.log(error));
-    }, [])
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <div className="card asignatura-section " name={props.asignatura} id={props.idAsignatura}>

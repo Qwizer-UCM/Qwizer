@@ -1,4 +1,5 @@
 
+import { API_URL } from '../constants/Constants';
 
 export const logIn = (username, password) => {
     
@@ -6,7 +7,7 @@ export const logIn = (username, password) => {
     const loginInfo = new Map([["email", username], ["password", password]]);
     const obj = JSON.stringify(Object.fromEntries(loginInfo));
 
-    var url = "http://127.0.0.1:8000/api/login";
+    var url = `${API_URL}/login`;
     
     return fetch(url, {
       method: 'POST', 
@@ -34,7 +35,7 @@ export const logIn = (username, password) => {
 export const logOut = () => {
 
     var token = localStorage.getItem('token');
-    var url = "http://127.0.0.1:8000/api/logout";
+    var url = `${API_URL}/logout`;
     return fetch(url, {
         method: 'GET',
         headers:{
@@ -45,7 +46,7 @@ export const logOut = () => {
 
 export const getStudents = () => {
   var token = localStorage.getItem('token');
-  var url = "http://127.0.0.1:8000/api/get-students";
+  var url = `${API_URL}/get-students`;
   return fetch(url, {
     method: 'POST',
         headers:{

@@ -2,6 +2,7 @@ import { data } from 'jquery';
 import React from 'react'
 import DataTable from 'react-data-table-component';
 import VisualizarNota from './VisualizarNota';
+import { API_URL } from '../constants/Constants';
 
 const paginationComponentOptions = {
   rowsPerPageText: 'Filas por página',
@@ -32,7 +33,7 @@ class RevisionNotasContainer extends React.Component {
     const message = new Map([["idCuestionario", this.props.currentCuestionario]]);
     
     const jsonObject = JSON.stringify(Object.fromEntries(message));
-    fetch('http://127.0.0.1:8000/api/get-quiz-grades', {
+    fetch(`${API_URL}/get-quiz-grades`, {
     method: 'POST',
     headers:{
         'Content-type': 'application/json',

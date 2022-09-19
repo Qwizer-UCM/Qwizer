@@ -1,6 +1,7 @@
 import React from 'react'
 import $ from 'jquery'; 
 import ErrorModal from './common/modals/ErrorModal';
+import { API_URL } from '../constants/Constants';
 
 class TarjetaCuestionario extends React.Component {
 
@@ -84,7 +85,7 @@ class TarjetaCuestionario extends React.Component {
     /////////////////////////////////////////////////////////////
 
     getTest = (idCuestionario) => {
-        var url = 'http://127.0.0.1:8000/api/test';
+        var url = `${API_URL}/test`;
         var token = localStorage.getItem('token');
 
         const data = new Map([["idCuestionario", idCuestionario]]);
@@ -115,7 +116,7 @@ class TarjetaCuestionario extends React.Component {
         var token = localStorage.getItem('token');
         const message = new Map([["idCuestionario", this.props.idCuestionario]]);
         const jsonObject = JSON.stringify(Object.fromEntries(message));
-        fetch('http://127.0.0.1:8000/api/get-quiz-info', {
+        fetch(`${API_URL}/get-quiz-info`, {
             method: 'POST',
             headers:{
                 'Content-type': 'application/json',

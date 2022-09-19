@@ -2,6 +2,7 @@ import React from 'react'
 import DataTable from 'react-data-table-component';
 import ErrorModal from './common/modals/ErrorModal';
 import SuccessModal from './common/modals/SuccessModal';
+import { API_URL } from '../constants/Constants';
 
 
 class RegisterContainer extends React.Component {
@@ -104,7 +105,7 @@ class RegisterContainer extends React.Component {
       
       const alumn_info = new Map([["alumnos", alumnos], ["asignatura", asignatura]]);
       const jsonObject = JSON.stringify(Object.fromEntries(alumn_info));
-      var url = "http://127.0.0.1:8000/api/enroll-students";
+      var url = `${API_URL}/enroll-students`;
       var token = localStorage.getItem('token');
       
 

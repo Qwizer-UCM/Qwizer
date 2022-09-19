@@ -3,6 +3,7 @@ import $ from 'jquery';
 import ErrorModal from './common/modals/ErrorModal';
 import SuccessModal from './common/modals/SuccessModal';
 import {getSubjects} from '../utils/manage_subjects.js'
+import { API_URL } from '../constants/Constants';
 
 
 export default class UploadQuestions extends Component {
@@ -47,7 +48,7 @@ export default class UploadQuestions extends Component {
                 const jsonObject = JSON.stringify(Object.fromEntries(fichero_yaml));
                 var token = localStorage.getItem('token');
 
-                fetch('http://127.0.0.1:8000/api/upload-questions', {
+                fetch(`${API_URL}/upload-questions`, {
                 method: 'POST',
                 headers:{
                     'Content-type': 'application/json',

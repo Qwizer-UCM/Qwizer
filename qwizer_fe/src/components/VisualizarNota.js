@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import CheckIcon from '@mui/icons-material/Check';
 import ErrorIcon from '@mui/icons-material/Error';
+import { API_URL } from '../constants/Constants';
 
 
 export default class VisualizarNota extends Component {
@@ -26,7 +27,7 @@ export default class VisualizarNota extends Component {
         const message = new Map([["idCuestionario", this.props.data.idCuestionario], ["idUsuario", this.props.data.id]]);
         
         const jsonObject = JSON.stringify(Object.fromEntries(message));
-        fetch('http://127.0.0.1:8000/api/get-hashes', {
+        fetch(`${API_URL}/get-hashes`, {
         method: 'POST',
         headers:{
             'Content-type': 'application/json',

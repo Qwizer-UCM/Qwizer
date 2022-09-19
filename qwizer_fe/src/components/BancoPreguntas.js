@@ -5,6 +5,7 @@ import SuccessModal from './common/modals/SuccessModal.js'
 import DataTable from 'react-data-table-component'
 import yaml from 'js-yaml'
 import VisualizarPregunta from './VisualizarPregunta.js'
+import { API_URL } from '../constants/Constants.js'
 
 
 export default class BancoPreguntas extends React.Component {
@@ -125,7 +126,7 @@ export default class BancoPreguntas extends React.Component {
     deleteQuestion = (idPregunta) =>{
 
       var token = localStorage.getItem('token');
-      var url = "http://127.0.0.1:8000/api/delete-question";
+      var url = `${API_URL}/delete-question`;
 
       const message = new Map([["idPregunta", idPregunta]]);
       const obj = JSON.stringify(Object.fromEntries(message));
@@ -146,7 +147,7 @@ export default class BancoPreguntas extends React.Component {
     updateEditedQuestion = (question) => {
 
       var token = localStorage.getItem('token');
-      var url = "http://127.0.0.1:8000/api/update-question";
+      var url = `${API_URL}/update-question`;
 
       const message = new Map([["preguntaActualizada", question]]);
       const preguntaObj = JSON.stringify(Object.fromEntries(message));

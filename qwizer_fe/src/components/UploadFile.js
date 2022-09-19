@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import $ from 'jquery'; 
 import ErrorModal from './common/modals/ErrorModal';
 import SuccessModal from './common/modals/SuccessModal';
+import { API_URL } from '../constants/Constants';
 
 
 
@@ -34,7 +35,7 @@ export default class UploadFile extends Component {
                 const jsonObject = JSON.stringify(Object.fromEntries(fichero_yaml));
                 var token = localStorage.getItem('token');
 
-                fetch('http://127.0.0.1:8000/api/upload', {
+                fetch(`${API_URL}/upload`, {
                 method: 'POST',
                 headers:{
                     'Content-type': 'application/json',

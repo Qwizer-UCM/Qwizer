@@ -1,6 +1,7 @@
 import React from 'react'
 import ErrorModal from './common/modals/ErrorModal';
 import SuccessModal from './common/modals/SuccessModal';
+import { API_URL } from '../constants/Constants';
 
 
 class InsercionManual extends React.Component {
@@ -19,7 +20,7 @@ class InsercionManual extends React.Component {
 
     guardarDatos = () => { 
         var token = localStorage.getItem('token');
-        var url = "http://127.0.0.1:8000/api/insert-qr";
+        var url = `${API_URL}/insert-qr`;
         const message = new Map([["idUsuario", this.props.userId], ["idCuestionario", this.props.cuestionario], ["hash", this.props.generatedHash]]); 
         const obj = JSON.stringify(Object.fromEntries(message));
 
