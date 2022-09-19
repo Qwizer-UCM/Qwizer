@@ -1,8 +1,5 @@
 import React from 'react'
 import TarjetaCuestionario from './TarjetaCuestionario';
-import SideBar from './SideBar';
-
-
 
 class CuestionariosContainer extends React.Component {
 
