@@ -1,14 +1,17 @@
 {
   "name": "qwizer_fe",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.10.4",
+    "@emotion/styled": "^11.10.4",
     "@mui/icons-material": "^5.10.6",
     "@mui/material": "^5.10.6",
     "bootstrap": "^5.2.1",
     "crypto-js": "^4.1.1",
     "jquery": "^3.6.1",
     "js-yaml": "^4.1.0",
+    "popper": "^1.0.1",
     "react": "^18.2.0",
     "react-countdown": "^2.3.2",
     "react-data-table-component": "^7.5.3",
