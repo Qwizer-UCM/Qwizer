@@ -102,7 +102,7 @@ DATABASES = {
         'NAME': 'qwizer-db',
         'USER' : 'root',
         'PASSWORD' : '',
-        'HOTS' : 'localhost',
+        'HOST' : 'localhost',
         'PORT' : 3306
     }
 }

@@ -1,64 +1,33 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 
-class LoginComponent extends React.Component {
-    
-  constructor(props){
-    super(props);
-    this.state = {
-      currentPass:"",
-      currentUser:"",
-    };
+ const LoginComponent = (props) => {
+  const [currentUser, setUser] = useState({ user: "", pass: "" });
 
-    this.handleUsernameChange = this.handleUsernameChange.bind(this);
-    this.handlePasswordChange = this.handlePasswordChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    
-  }
-
-  handleUsernameChange(event){
-    this.setState({
-      currentUser: event.target.value,
-    });
-  }
-
-
-  handlePasswordChange(event){
-    this.setState({
-      currentPass: event.target.value,
-    });
-  }
-
-
-  handleSubmit(event) {
-    event.preventDefault();
-  }
-  
-  render() { 
-    return(
-        <div className="main-container login-body">
-        <form onSubmit={this.handleSubmit}>
-          <div className="form-inputs">
-            <h2 className="title">Qwizer</h2>
-            <p></p>
-            <br/>
-            <h5>Nombre de usuario</h5>
-            <input className="form-control" id="username" placeholder="Nombre de usuario" onChange={this.handleUsernameChange}></input>
-            <p></p>
-            <h5>Contraseña</h5>
-            <input type="password" className="form-control" id="password" placeholder="Contraseña" onChange={this.handlePasswordChange}></input>
-          </div>
+  return (
+    <div className="main-container login-body">
+      <form onSubmit={(e) => e.preventDefault()}>
+        <div className="form-inputs">
+          <h2 className="title">Qwizer</h2>
           <p></p>
-          <div className="buttons">
-            <button className="btn btn-primary login-button" type="submit" onClick={() => this.props.login(this.state.currentUser, this.state.currentPass)}>login</button>
-            <p></p>
-            <a onClick={this.restorePassword}>¿Has olvidado la contraseña?</a>
-          </div>
-        </form>
-      </div>
-    );
- 
-  }
+          <br />
+          <h5>Nombre de usuario</h5>
+          <input className="form-control" id="username" placeholder="Nombre de usuario" onChange={(e) => setUser({ ...currentUser , user: e.target.value })}></input>
+          <p></p>
+          <h5>Contraseña</h5>
+          <input type="password" className="form-control" id="password" placeholder="Contraseña" onChange={(e) => setUser({ ...currentUser , pass: e.target.value })}></input>
+        </div>
+        <p></p>
+        <div className="buttons">
+          <button className="btn btn-primary login-button" type="submit" onClick={() => this.props.login(currentUser.user, currentUser.pass)}>login</button>
+          <p></p>
+          <a href='""'>¿Has olvidado la contraseña?</a>
+        </div>
+      </form>
+    </div>
+  );
+
+
 
 }
 
