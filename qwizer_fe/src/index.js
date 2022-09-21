@@ -1,22 +1,26 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from "react";
+import ReactDOM from "react-dom";
 
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import './css/main.css'
-import './css/login.css'
-import '../node_modules/bootstrap/dist/css/bootstrap.css'
-import './css/index.css'
-import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-
+// Bootstrap CSS
+import "bootstrap/dist/css/bootstrap.min.css";
+// Bootstrap Bundle JS
+import "bootstrap/dist/js/bootstrap.bundle.min";
+import "./css/main.css";
+import "./css/login.css";
+import "./css/index.css";
+import { BrowserRouter } from "react-router-dom";
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById("root")
 );
 
 serviceWorkerRegistration.register();

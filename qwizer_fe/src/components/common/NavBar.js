@@ -1,63 +1,78 @@
-import React from 'react'
-import NotificationPanel from './NotificationPanel';
+import { Button } from "@mui/material";
+import React from "react";
+import { Link } from "react-router-dom";
 
+const NavBar = (props) => {
+  return (
+    <nav className="navbar navbar-expand-lg  bg-light">
+      <div class="container-fluid">
+        <Link to={"/"} className="nav-link">
+          Qwizer
+        </Link>
 
-class NavBar extends React.Component {
-    
-  constructor(props){
-    super(props);
-  }
-  
-  
-  render() {     
-            return(
-                <nav className="navbar navbar-expand-lg navbar-light bg-light">
-                    <a className="navbar-brand" onClick={() => this.props.changeCurrentPage("index")}>Qwizer</a>
-                        <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-                            <span className="navbar-toggler-icon"></span>
-                        </button>
-                    <div className="collapse navbar-collapse" id="navbarText">
-                        <ul className="navbar-nav mr-auto">
-                            <li className="nav-item active">
-                                <a className="nav-link" onClick={() => this.props.changeCurrentPage("index")}>Inicio <span className="sr-only"></span></a>
-                                
-                            </li>
-                            {localStorage.getItem("rol") === "teacher" && <li className="nav-item active">
-                                <a className="nav-link" onClick={() => this.props.changeCurrentPage("register")}>Añadir alumno<span className="sr-only"></span></a>
-                            </li>}
-                            {localStorage.getItem("rol") === "teacher" && <div className="nav-item dropdown">
-                                <a className="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Crear cuestionarios
-                                </a>
-                                <div className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                                <a className="nav-link"onClick={() => this.props.changeCurrentPage("upload-questions")}>Subir Preguntas<span className="sr-only"></span></a>
-                                <a className="nav-link" onClick={() => this.props.changeCurrentPage("upload")}>Subir test <span className="sr-only"></span></a>
-                                <a className="nav-link" onClick={() => this.props.changeCurrentPage("crear-cuestionario")}>Crear Cuestionario<span className="sr-only"></span></a>
-                                <a className="nav-link" onClick={() => this.props.changeCurrentPage("banco-preguntas")}>Banco de Preguntas<span className="sr-only"></span></a>
-                                </div>
-                            </div>}
-                            <li className="nav-item active">
-                                <a className="nav-link" onClick={() => this.props.changeCurrentPage("offline")}>Offline <span className="sr-only"></span></a>
-                            </li>
-                           
-                            
-                        </ul>
-                        <NotificationPanel></NotificationPanel>
-                        <span className="">
-                            <div className="nav-item dropdown">
-                                <a className="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                {this.props.username}
-                                </a>
-                                <div className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                                    <a className="dropdown-item" onClick={this.props.logout}>Cerrar sesión</a>
-                                </div>
-                            </div>
-                        </span>   
-                    </div>
-                </nav>
-            );                
-  }
-
-}
+        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+          <span className="navbar-toggler-icon"></span>
+        </button>
+        <div className="collapse navbar-collapse" id="navbarText">
+          <ul className="navbar-nav mr-auto">
+            <li className="nav-item">
+              <Link to={"/"} className="nav-link active">
+                Inicio <span className="sr-only"></span>
+              </Link>
+            </li>
+            {localStorage.getItem("rol") === "teacher" && (
+              <li className="nav-item">
+                <Link to={"/register"} className="nav-link active">
+                  Añadir alumno<span className="sr-only"></span>
+                </Link>
+              </li>
+            )}
+            {localStorage.getItem("rol") === "teacher" && (
+              <li className="nav-item dropdown ">
+                <a href="#" className="nav-link dropdown-toggle active" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Crear cuestionarios
+                </a>
+                <ul className="dropdown-menu">
+                  <li>
+                    <Link to={"/upload-questions"} className="dropdown-item">
+                      Subir Preguntas<span className="sr-only"></span>
+                    </Link>
+                  </li>
+                  <Link to={"/upload-questionary"} className="dropdown-item">
+                    Subir test <span className="sr-only"></span>
+                  </Link>
+                  <Link to={"/crear-cuestionario"} className="dropdown-item">
+                    Crear Cuestionario<span className="sr-only"></span>
+                  </Link>
+                  <Link to={"/banco-preguntas"} className="dropdown-item">
+                    Banco de Preguntas<span className="sr-only"></span>
+                  </Link>
+                </ul>
+              </li>
+            )}
+            <li className="nav-item active">
+              <Link to={"/offline"} className="nav-link active">
+                Offline<span className="sr-only"></span>
+              </Link>
+            </li>
+          </ul>
+          <span className="">
+            <div className="nav-item dropdown">
+              <a href="##" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {props.username}
+              </a>
+              <div className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+                {/*TODO cambiarlo por ruta logout*/}
+                <button type="button"   className="dropdown-item" onClick={props.logout}>
+                  Cerrar sesión
+                </button>
+              </div>
+            </div>
+          </span>
+        </div>
+      </div>
+    </nav>
+  );
+};
 
 export default NavBar;

@@ -20,7 +20,7 @@ class SuccessModal extends React.Component {
                         <div className="modal-content">
                         <div className="modal-header success-modal-header">
                             <h5 className="modal-title" id="exampleModalLongTitle">Todo ha ido bien</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.close_modal}>
+                            <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close" onClick={this.close_modal}>
                             <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
@@ -28,7 +28,7 @@ class SuccessModal extends React.Component {
                             {this.props.message}
                         </div>
                         <div className="modal-footer">
-                            <button type="button" className="btn btn-success" data-dismiss="modal" onClick={this.close_modal}>Cerrar</button>
+                            <button type="button" className="btn btn-success" data-bs-dismiss="modal" onClick={this.close_modal}>Cerrar</button>
                         </div>
                         </div>
                     </div>
