@@ -3,6 +3,7 @@ import QRCode from "react-qr-code";
 
 
 
+//FIXME CHANGE TO FUNCTION
 class QrContainer extends React.Component {
 
     constructor(props) {

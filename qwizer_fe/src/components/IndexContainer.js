@@ -3,6 +3,7 @@ import TarjetaAsignatura from './TarjetaAsignatura';
 
 
 
+//FIXME CHANGE TO FUNCTION
 class IndexContainer extends React.Component {
 
     constructor(props) {

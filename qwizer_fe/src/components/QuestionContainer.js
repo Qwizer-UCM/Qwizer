@@ -7,6 +7,7 @@ import QuestionNav from './QuestionNav.js'
 import Countdown from 'react-countdown';
 
 
+//FIXME CHANGE TO FUNCTION
 class QuestionContainer extends React.Component {
     
   constructor(props){

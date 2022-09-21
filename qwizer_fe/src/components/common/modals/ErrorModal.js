@@ -1,6 +1,7 @@
 import React from 'react'
 
 
+//FIXME CHANGE TO FUNCTION
 class ErrorModal extends React.Component {
     
   constructor(props){

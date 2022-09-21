@@ -1,6 +1,7 @@
 import React from 'react'
 
 
+//FIXME CHANGE TO FUNCTION
 class QuestionNav extends React.Component {
     
   constructor(props){

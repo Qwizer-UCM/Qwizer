@@ -8,6 +8,7 @@ import VisualizarPregunta from './VisualizarPregunta.js'
 import { API_URL } from '../constants/Constants.js'
 
 
+//FIXME CHANGE TO FUNCTION
 export default class BancoPreguntas extends React.Component {
 
     constructor(props) {

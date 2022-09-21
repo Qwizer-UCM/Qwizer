@@ -6,6 +6,7 @@ import TestQuestion from './TestQuestion'
 import TextQuestion from './TextQuestion'
 
 
+//FIXME CHANGE TO FUNCTION
 export default class CrearCuestionario extends React.Component {
 
     constructor(props) {

@@ -3,6 +3,7 @@ import TarjetaCuestionario from './TarjetaCuestionario';
 
 
 
+//FIXME CHANGE TO FUNCTION
 class AvailableOffline extends React.Component {
 
     constructor(props) {

@@ -2,6 +2,7 @@ import React  from 'react'
 
 
 
+//FIXME CHANGE TO FUNCTION
 class TestQuestion extends React.Component {
 
     constructor(props){

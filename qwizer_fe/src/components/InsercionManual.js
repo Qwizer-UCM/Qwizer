@@ -4,6 +4,7 @@ import SuccessModal from './common/modals/SuccessModal';
 import { API_URL } from '../constants/Constants';
 
 
+//FIXME CHANGE TO FUNCTION
 class InsercionManual extends React.Component {
 
     constructor(props) {

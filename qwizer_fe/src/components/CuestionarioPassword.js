@@ -4,6 +4,7 @@ import ErrorModal from './common/modals/ErrorModal';
 
 
 
+//FIXME CHANGE TO FUNCTION
 class CuestionarioPassword extends React.Component {
 
     constructor(props) {

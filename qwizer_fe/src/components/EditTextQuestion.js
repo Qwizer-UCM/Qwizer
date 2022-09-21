@@ -1,6 +1,7 @@
 import React from 'react'
 
 
+//FIXME CHANGE TO FUNCTION
 export default class EditTextQuestion extends React.Component {
 
     constructor(props) {

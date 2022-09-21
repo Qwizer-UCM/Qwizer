@@ -3,6 +3,7 @@ import $ from 'jquery';
 import ErrorModal from './common/modals/ErrorModal';
 import { API_URL } from '../constants/Constants';
 
+//FIXME CHANGE TO FUNCTION
 class TarjetaCuestionario extends React.Component {
 
     constructor(props) {

@@ -6,6 +6,7 @@ import { API_URL } from '../constants/Constants';
 
 
 
+//FIXME CHANGE TO FUNCTION
 export default class UploadFile extends Component {
 
     constructor(props) {

@@ -4,6 +4,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 import { API_URL } from '../constants/Constants';
 
 
+//FIXME CHANGE TO FUNCTION
 export default class VisualizarNota extends Component {
 
     constructor(props) {

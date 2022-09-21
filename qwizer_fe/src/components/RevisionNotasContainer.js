@@ -11,6 +11,7 @@ const paginationComponentOptions = {
   selectAllRowsItemText: 'Todos',
 };
 
+//FIXME CHANGE TO FUNCTION
 class RevisionNotasContainer extends React.Component {
     
   constructor(props){

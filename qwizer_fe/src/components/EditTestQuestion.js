@@ -1,6 +1,7 @@
 import React from 'react'
 
 
+//FIXME CHANGE TO FUNCTION
 export default class EditTestQuestion extends React.Component {
 
     //Se le pasa el objecto pregunta por props

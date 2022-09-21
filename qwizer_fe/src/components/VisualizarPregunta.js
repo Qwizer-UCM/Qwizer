@@ -5,6 +5,7 @@ import TextQuestion from './TextQuestion'
 import EditTextQuestion from './EditTextQuestion'
 import EditTestQuestion from './EditTestQuestion'
 
+//FIXME CHANGE TO FUNCTION
 export default class VisualizarPregunta extends Component {
 
     constructor(props) {
