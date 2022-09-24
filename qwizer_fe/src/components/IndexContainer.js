@@ -1,25 +1,18 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import TarjetaAsignatura from './TarjetaAsignatura';
 
 
+const IndexContainer  = (props) => {
 
-//FIXME CHANGE TO FUNCTION
-class IndexContainer extends React.Component {
 
-    constructor(props) {
-        super(props);
-    }
+    useEffect(() => {
+        props.getAsignaturas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[])
 
-    componentDidMount(){
-        this.props.getAsignaturas();
-    }
-
-    
-
-    render() {
         
-        const empezarTest = this.props.empezarTest;
-        const getCuestionarios = this.props.getCuestionarios;
+        const empezarTest = props.empezarTest;
+        const getCuestionarios = props.getCuestionarios;
         const conexion = navigator.onLine;
 
         if (!conexion){
@@ -36,10 +29,10 @@ class IndexContainer extends React.Component {
                         </div> 
                     </div>                                        
                 </div>)
-        }else if(empezarTest && this.props.asignaturas){
+        }else if(empezarTest && props.asignaturas){
             return(
                 <div className="index-body">
-                    { this.props.asignaturas.map(function(asignatura,indx){
+                    { props.asignaturas.map(function(asignatura,indx){
                       return (
                         <div key={indx} className='d-flex justify-content-center'>
                             <TarjetaAsignatura asignatura={asignatura.nombre} idAsignatura={asignatura.id} getCuestionarios={getCuestionarios}></TarjetaAsignatura>
@@ -54,7 +47,7 @@ class IndexContainer extends React.Component {
         }else{
             return <h1>Loading...</h1>
         }
-      }
+      
 }
 
 export default IndexContainer;

@@ -1,45 +1,38 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import TarjetaCuestionario from './TarjetaCuestionario';
 
 
 
-//FIXME CHANGE TO FUNCTION
-class AvailableOffline extends React.Component {
+const AvailableOffline = (props) => {
+    const [cuestionarios, setCuestionarios] = useState(undefined)
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            cuestionarios:undefined,
-        }
-    }
-
-    componentDidMount(){
+    useEffect( ()=> {
         
-        var tests = localStorage.getItem("tests");
+        let tests = localStorage.getItem("tests");
         if(tests != null){
-            var cuestionariosList = []
-            var cuestionarios = JSON.parse(tests);
+            let cuestionariosList = []
+            let cuestionarios = JSON.parse(tests);
             for (const cuestionario of cuestionarios) { 
-                var test = JSON.parse(cuestionario)
+                let test = JSON.parse(cuestionario)
                 cuestionariosList.push(test)
             }
-            this.setState({cuestionarios:cuestionariosList})
+            setCuestionarios(cuestionariosList)
         }
         
             
-    }
+    }, [])
 
-    render() {
+    
 
-        const empezarTest = this.props.empezarTest;
+        const empezarTest = props.empezarTest;
         const rol = localStorage.getItem("rol");
         
-        if(empezarTest && this.state.cuestionarios != undefined){
+        if(empezarTest && cuestionarios !== undefined){
             return(
                 <div className="index-body row">
                     
                         <div className='section-title'><h1>Cuestionarios Descargados</h1></div>  
-                        { this.state.cuestionarios.map(function(cuestionario,indx){
+                        { cuestionarios.map(function(cuestionario,indx){
                             return (
                                 <div className='d-flex justify-content-center'>
                                     <TarjetaCuestionario offline={true} cuestionario={cuestionario} idCuestionario={cuestionario.id} empezarTest={empezarTest} rol={rol}></TarjetaCuestionario>
@@ -58,7 +51,7 @@ class AvailableOffline extends React.Component {
                     </div>           
             </div>
         }
-      }
+      
 }
 
 export default AvailableOffline;
