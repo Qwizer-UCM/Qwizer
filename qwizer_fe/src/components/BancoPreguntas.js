@@ -34,7 +34,7 @@ export default class BancoPreguntas extends React.Component {
 
     componentDidMount(){
         this.getAsignaturas();
-        if(this.props.createQuiz != undefined){
+        if(this.props.createQuiz !== undefined){
           this.setState({createQuiz: this.props.createQuiz});
           //implica que  el metodo this.props.addQuestion tambien esta
         }
@@ -47,7 +47,7 @@ export default class BancoPreguntas extends React.Component {
             this.setState({
               listaAsignaturas: data.asignaturas,
             }); 
-            this.state.listaAsignaturas.map(function(asignatura,indx){
+            this.state.listaAsignaturas.for(function(asignatura,indx){
                 window.$("#subject-selector").append(new Option(asignatura.asignatura, asignatura.id));
               });
 
@@ -92,7 +92,7 @@ export default class BancoPreguntas extends React.Component {
         ];
         
         var data = [];
-        this.state.preguntas.map(function(pregunta,indx){
+        this.state.preguntas.forEach(function(pregunta,indx){
             let row = {
             id : pregunta.id,
             objeto : pregunta,
@@ -174,14 +174,14 @@ export default class BancoPreguntas extends React.Component {
         var preguntas = this.state.preguntas.filter(pregunta => listaSeleccionadas.includes(pregunta.id));
         
         var listaPreguntas = []
-        preguntas.map(pregunta =>{
+        preguntas.forEach(pregunta =>{
 
             var question = {}
             question["tipo"] = pregunta.type
             question["pregunta"] = pregunta.question
             question["opciones"] = pregunta.options
 
-            if(pregunta.type == "test"){
+            if(pregunta.type === "test"){
                 question["opciones"] = pregunta.options
             }
 

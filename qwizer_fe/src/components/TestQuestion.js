@@ -17,7 +17,7 @@ class TestQuestion extends React.Component {
 
     componentDidMount(){
 
-        if(this.props.mode == "test"){
+        if(this.props.mode === "test"){
             var answers = localStorage.getItem('answers');
             console.log(answers)
             if (answers !== null){
@@ -25,9 +25,9 @@ class TestQuestion extends React.Component {
                 var opcion = "NULL"
                 var listaRespuestas = json_answers.respuestas
                 
-                listaRespuestas.map( respuesta => {
+                listaRespuestas.forEach( respuesta => {
                     
-                    if(Number(respuesta.id) == this.props.id){
+                    if(Number(respuesta.id) === this.props.id){
                         opcion = respuesta.answr
                     }
                 })
@@ -60,7 +60,7 @@ class TestQuestion extends React.Component {
         const opcionSelec = this.state.selectedOp;
         const handle = this.handleOnClick
         return(
-            <table class="m-4" >
+            <table className="m-4" >
                 <tbody>
                     {this.props.options.map(function(option,indx){
                      return (<tr key={option.id}><td>
@@ -80,7 +80,7 @@ class TestQuestion extends React.Component {
         const questionData = this.props.infoPreg;
             
         return(
-            <div class="m-4 bg-light rounded">
+            <div className="m-4 bg-light rounded">
                 <table >
                     <tbody>
                         {questionData.options.map(function(option,indx){

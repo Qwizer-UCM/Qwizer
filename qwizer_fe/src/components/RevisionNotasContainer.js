@@ -1,4 +1,3 @@
-import { data } from 'jquery';
 import React from 'react'
 import DataTable from 'react-data-table-component';
 import VisualizarNota from './VisualizarNota';
@@ -100,7 +99,7 @@ class RevisionNotasContainer extends React.Component {
             },
           },
           {
-            when: row => row.nota < 5 || row.nota == "No presentado",
+            when: row => row.nota < 5 || row.nota === "No presentado",
             style: {
               backgroundColor: '#963d46',
               color: 'white',
@@ -117,7 +116,7 @@ class RevisionNotasContainer extends React.Component {
     
     var data = [];
     let idCuestionario = this.props.currentCuestionario;
-    this.state.notasCuestionario.map(function(nota,indx){
+    this.state.notasCuestionario.forEach(function(nota,indx){
       let row = {
         numero : indx,
         id : nota.id,

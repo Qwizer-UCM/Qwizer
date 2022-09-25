@@ -1,5 +1,5 @@
 import React from 'react'
-import {getSubjects,getAllSubjects,getSubjectQuestions} from '../utils/manage_subjects.js'
+import {getSubjects,getAllSubjects} from '../utils/manage_subjects.js'
 import {sendCreatedTest} from '../utils/manage_test.js'
 import BancoPreguntas from './BancoPreguntas.js'
 import TestQuestion from './TestQuestion'
@@ -47,21 +47,21 @@ export default class CrearCuestionario extends React.Component {
 
     cuestionarioInfo = () => {
         return <div className="card m-3 p-3">
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="inputGroup-sizing-default">Nombre: &nbsp;</span>
+            <div className="input-group mb-3">
+                <div className="input-group-prepend">
+                    <span className="input-group-text" id="inputGroup-sizing-default">Nombre: &nbsp;</span>
                 </div>
                 <input  className="form-control" name="testName" type="text" onChange={(e) => this.setState({testName:e.target.value})}/>
             </div>
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="inputGroup-sizing-default">Contraseña: &nbsp;</span>
+            <div className="input-group mb-3">
+                <div className="input-group-prepend">
+                    <span className="input-group-text" id="inputGroup-sizing-default">Contraseña: &nbsp;</span>
                 </div>
                 <input  className="form-control" name="testPass" type="text"  onChange={(e) => this.setState({testPass:e.target.value})}/>
             </div>
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="inputGroup-sizing-default">Asignatura: &nbsp;</span>
+            <div className="input-group mb-3">
+                <div className="input-group-prepend">
+                    <span className="input-group-text" id="inputGroup-sizing-default">Asignatura: &nbsp;</span>
                 </div>
                 <select className='form-control' defaultValue='null' onChange={(e) => this.setState({testSubject:Number(e.target.value)})}>
                             {this.state.asignaturasImpartidas.map((subject,indx) => {
@@ -73,31 +73,31 @@ export default class CrearCuestionario extends React.Component {
                             </select>
             </div>
 
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="inputGroup-sizing-default">Secuencial: &nbsp;</span>
+            <div className="input-group mb-3">
+                <div className="input-group-prepend">
+                    <span className="input-group-text" id="inputGroup-sizing-default">Secuencial: &nbsp;</span>
                 </div>
                 <select className='form-control' defaultValue='0' onChange={(e) => this.setState({secuencial:Number(e.target.value)})}>
                                 <option value="0">No</option>
                                 <option value="1">Si</option>
                             </select>
             </div>
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="inputGroup-sizing-default">Duración: (minutos [max 3h]) &nbsp;</span>
+            <div className="input-group mb-3">
+                <div className="input-group-prepend">
+                    <span className="input-group-text" id="inputGroup-sizing-default">Duración: (minutos [max 3h]) &nbsp;</span>
                 </div>
                 <input  className='form-control' type="number" name="testDuration" min="10" max="180" 
                             onChange={(e) => this.setState({testDuration:e.target.value})}/>
             </div>
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="inputGroup-sizing-default">Fecha Apertura: &nbsp;</span>
+            <div className="input-group mb-3">
+                <div className="input-group-prepend">
+                    <span className="input-group-text" id="inputGroup-sizing-default">Fecha Apertura: &nbsp;</span>
                 </div>
                 <input className='form-control' type="datetime-local" name="fechaApertura" onChange={(e) => this.setState({fechaApertura:e.target.value})} />
             </div>
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="inputGroup-sizing-default">Fecha Cierre: &nbsp;</span>
+            <div className="input-group mb-3">
+                <div className="input-group-prepend">
+                    <span className="input-group-text" id="inputGroup-sizing-default">Fecha Cierre: &nbsp;</span>
                 </div>
                 <input className='form-control' type="datetime-local" name="fechaCierre" onChange={(e) => this.setState({fechaCierre:e.target.value})} />
             </div>

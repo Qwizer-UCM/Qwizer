@@ -33,7 +33,7 @@ export default class EditTextQuestion extends React.Component {
 
     render () {
         return(
-            <div class="p-4 m-2 text-center">
+            <div className="p-4 m-2 text-center">
                 <label className='col-4'>Título: &nbsp;</label>
                 <input className="col-8 m-input" name="titulo" type="text" value={this.state.titulo} onChange={(e) => this.setState({titulo:e.target.value})}/>
 
@@ -43,7 +43,7 @@ export default class EditTextQuestion extends React.Component {
                 <label className='col-4 align-top'>Respuesta: &nbsp;</label>
                 <textarea className="col-8 m-input" rows="5" cols="50" name="textValue" onChange={(e) =>  this.setState({textValue: e.target.value})} value={this.state.textValue} />
                     
-                <button class="btn btn-success" onClick={() => this.actualizarPregunta()}> Actualizar </button>
+                <button className="btn btn-success" onClick={() => this.actualizarPregunta()}> Actualizar </button>
             </div>
         );
     }

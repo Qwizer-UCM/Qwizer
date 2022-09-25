@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import $ from 'jquery'
 import TestQuestion from './TestQuestion'
 import TextQuestion from './TextQuestion'
 import EditTextQuestion from './EditTextQuestion'
@@ -20,7 +19,7 @@ export default class VisualizarPregunta extends Component {
     visualizeQuestion = () =>{ //Visualizar la pregunta seleccionada y posibilidad de elimarla/editarla
         
         if(this.props.createQuiz){
-            if(this.props.data.type == "test"){
+            if(this.props.data.type === "test"){
 
                 return  <div>
                         <TestQuestion mode="visualize" infoPreg={this.props.data} id={this.props.data.id}/>
@@ -29,7 +28,7 @@ export default class VisualizarPregunta extends Component {
                         </div>
                     </div> 
     
-            }else if (this.props.data.type == "text"){
+            }else if (this.props.data.type === "text"){
     
                 return  <div>
                         <TextQuestion mode="visualize" infoPreg={this.props.data} />
@@ -39,7 +38,7 @@ export default class VisualizarPregunta extends Component {
                     </div>    
             }
         }else{
-            if(this.props.data.type == "test"){
+            if(this.props.data.type === "test"){
 
                 return  <div>
                         <TestQuestion mode="visualize" infoPreg={this.props.data} id={this.props.data.id}/>
@@ -49,7 +48,7 @@ export default class VisualizarPregunta extends Component {
                         </div>
                     </div> 
     
-            }else if (this.props.data.type == "text"){
+            }else if (this.props.data.type === "text"){
     
                 return  <div>
                         <TextQuestion mode="visualize" infoPreg={this.props.data} />
@@ -70,13 +69,13 @@ export default class VisualizarPregunta extends Component {
 
     editQuestion = () => {
 
-        if(this.props.data.type == "test"){
+        if(this.props.data.type === "test"){
             return  <div>
                     <EditTestQuestion pregunta={this.props.data} updateEditQuestion={this.modifyQuestion}/>
                 </div> 
         }
 
-        if(this.props.data.type == "text"){
+        if(this.props.data.type === "text"){
             return  <div>
                     <EditTextQuestion pregunta={this.props.data} updateEditQuestion={this.modifyQuestion} />
                 </div> 

@@ -24,9 +24,9 @@ class TextQuestion extends React.Component {
                 var rp = "NULL"
                 var listaRespuestas = json_answers.respuestas
                 
-                listaRespuestas.map( respuesta => {
+                listaRespuestas.forEach( respuesta => {
                     
-                    if(respuesta.id == this.props.id){
+                    if(respuesta.id === this.props.id){
                         rp = respuesta.answr
                     }
                 })

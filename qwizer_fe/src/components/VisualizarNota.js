@@ -53,10 +53,10 @@ export default class VisualizarNota extends Component {
         return <div className='pl-3 pt-3'>
 
             {this.state.corregido === true && 
-                <div class="form-group">
-                    <label for="name" class="col-lg-4">Hash generado tras la corrección:</label>
-                    <div class="col-lg-8">
-                    <input type="text" class="form-control" value={this.state.hashSubida} disabled/>
+                <div className="form-group">
+                    <label for="name" className="col-lg-4">Hash generado tras la corrección:</label>
+                    <div className="col-lg-8">
+                    <input type="text" className="form-control" value={this.state.hashSubida} disabled/>
                     </div>
                 </div>
             }
@@ -66,10 +66,10 @@ export default class VisualizarNota extends Component {
             }
 
             {this.state.qrSent === true && 
-                <div class="form-group">
-                    <label for="name" class="col-lg-4">Hash generado mediante el codigo QR:</label>
-                    <div class="col-lg-8">
-                        <input type="text" class="form-control" value={this.state.hashQr} disabled/>
+                <div className="form-group">
+                    <label for="name" className="col-lg-4">Hash generado mediante el codigo QR:</label>
+                    <div className="col-lg-8">
+                        <input type="text" className="form-control" value={this.state.hashQr} disabled/>
                     </div>
                 </div>
             }

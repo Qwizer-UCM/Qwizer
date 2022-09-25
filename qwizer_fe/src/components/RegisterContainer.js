@@ -36,7 +36,7 @@ class RegisterContainer extends React.Component {
       this.setState({
         asignaturas: data.asignaturas,
       });
-      this.state.asignaturas.map(function(asignatura,indx){
+      this.state.asignaturas.forEach(function(asignatura,indx){
         window.$("#subject-selector").append(new Option(asignatura.nombre, asignatura.id));
       }); 
     });
@@ -73,7 +73,7 @@ class RegisterContainer extends React.Component {
     ];
     
     var data = [];
-    this.state.alumnos.map(function(alumno,indx){
+    this.state.alumnos.forEach(function(alumno,indx){
       let row = {
         id : alumno.id,
         nombre : alumno.nombre,
@@ -96,7 +96,7 @@ class RegisterContainer extends React.Component {
     var asignatura = window.$("#subject-selector").val();
     
 
-    if(asignatura == "Selecciona una asignatura" || alumnos == undefined || alumnos.length == 0){
+    if(asignatura === "Selecciona una asignatura" || alumnos === undefined || alumnos.length === 0){
       this.setState({
         message: "Selecciona una asignatura y al menos un alumno"
       })
@@ -130,7 +130,7 @@ class RegisterContainer extends React.Component {
           else{
             var errormsg = "Los siguientes alumnos no se han podido matricular: \n"
             
-            data.errors.map(function(error,indx){
+            data.errors.forEach(function(error,indx){
               
               errormsg += error + "\n";
             });
@@ -155,8 +155,6 @@ class RegisterContainer extends React.Component {
   
 
   render() { 
-    
-    const navigate = this.navigateQuestion;
     return(
             <div className="index-body">
               <div className="card tabla-notas">

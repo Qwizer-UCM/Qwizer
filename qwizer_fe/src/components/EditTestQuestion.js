@@ -18,7 +18,7 @@ export default class EditTestQuestion extends React.Component {
 
     componentDidMount(){
         var ordenOptions ={};
-        this.props.pregunta.options.map((opcion,indx) =>{
+        this.props.pregunta.options.forEach((opcion,indx) =>{
             ordenOptions[indx] = opcion
         })
         
@@ -44,14 +44,14 @@ export default class EditTestQuestion extends React.Component {
 
     updateOptions = (e) =>{
         var idOpcion = Number(e.target.name)
-        var opcion = this.state.options.find(elemento => elemento.id == idOpcion)
+        var opcion = this.state.options.find(elemento => elemento.id === idOpcion)
         opcion["op"] = e.target.value;
 
         var ordenOptions = this.state.dicOptions
 
         var listaOpciones =  []
         for (let k in ordenOptions) {
-            if(ordenOptions[k].id == idOpcion){
+            if(ordenOptions[k].id === idOpcion){
                 ordenOptions[k] = opcion
             }
             listaOpciones.push(ordenOptions[k])
@@ -67,7 +67,7 @@ export default class EditTestQuestion extends React.Component {
     render () {
         
         return(
-            <div class="p-4 m-2 text-center">
+            <div className="p-4 m-2 text-center">
                 <label className='col-4'>Título: &nbsp;</label>
                 <input className="col-8 m-input" name="titulo" type="text" value={this.state.titulo} onChange={(e) => this.setState({titulo:e.target.value})}/>
                 
@@ -88,13 +88,13 @@ export default class EditTestQuestion extends React.Component {
                         <select  className="col-8 m-input" onChange={(e) => this.setState({correct:Number(e.target.value)})}>
                                             {this.state.options.map((opcion,indx) => {
                                                 return (
-                                                    <option key={indx} value={opcion.id} defaultValue={opcion.id==this.state.correct}>{opcion.op}</option>
+                                                    <option key={indx} value={opcion.id} defaultValue={opcion.id===this.state.correct}>{opcion.op}</option>
                                                 );
                                             })}
                                     </select>
                 </div>
 
-                <button class="btn btn-success" onClick={() => this.actualizarPregunta()}> Actualizar </button>
+                <button className="btn btn-success" onClick={() => this.actualizarPregunta()}> Actualizar </button>
             </div>
         );
       

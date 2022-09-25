@@ -1,11 +1,10 @@
-import { Button } from "@mui/material";
 import React from "react";
 import { Link } from "react-router-dom";
 
 const NavBar = (props) => {
   return (
     <nav className="navbar navbar-expand-lg  bg-light">
-      <div class="container-fluid">
+      <div className="container-fluid">
         <Link to={"/"} className="nav-link">
           Qwizer
         </Link>
@@ -29,7 +28,7 @@ const NavBar = (props) => {
             )}
             {localStorage.getItem("rol") === "teacher" && (
               <li className="nav-item dropdown ">
-                <a href="#" className="nav-link dropdown-toggle active" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <a href="##" className="nav-link dropdown-toggle active" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   Crear cuestionarios
                 </a>
                 <ul className="dropdown-menu">
@@ -58,12 +57,11 @@ const NavBar = (props) => {
           </ul>
           <span className="">
             <div className="nav-item dropdown">
-              <a href="##" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <a href="##" className="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 {props.username}
               </a>
               <div className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
-                {/*TODO cambiarlo por ruta logout*/}
-                <button type="button"   className="dropdown-item" onClick={props.logout}>
+                <button type="button" className="dropdown-item" onClick={props.logout}>
                   Cerrar sesión
                 </button>
               </div>

@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import $ from 'jquery'; 
 import ErrorModal from './common/modals/ErrorModal';
 import SuccessModal from './common/modals/SuccessModal';
 import { API_URL } from '../constants/Constants';
@@ -51,7 +50,7 @@ export default class UploadFile extends Component {
                         file: "",
                         message: data.message
                     });
-                    if(data.inserted == "false"){
+                    if(data.inserted === "false"){
                         window.$("#inserted_error").modal('show');
                     } 
                     else{

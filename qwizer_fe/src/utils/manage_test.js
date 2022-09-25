@@ -3,12 +3,11 @@ import { API_URL } from '../constants/Constants';
 
 
 const getTestFromLocalStorage = (testId) => {
-  var tests = localStorage.getItem("tests");
-
-  var cuestionariosList = JSON.parse(tests);
+  let tests = localStorage.getItem("tests");
+  let cuestionariosList = JSON.parse(tests);
   for (const cuestionario of cuestionariosList) { 
-      var test = JSON.parse(cuestionario)
-      if(test.id == testId){
+    let test = JSON.parse(cuestionario)
+    if(test.id === Number(testId)){ //TODO revisar tipos en otras condiciones
           return test;
       }
   }
@@ -33,7 +32,6 @@ export const descifrarTest = (currentTest) => {
 }
   
 export const comprobarPassword = (contra,currentTest) => {
-
   if(contra !== ""){
     var text = getTestFromLocalStorage(currentTest);
     if(CryptoJS.SHA256(contra).toString() === text.password) return true 

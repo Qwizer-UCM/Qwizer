@@ -8,10 +8,10 @@ const QuestionNav = (props) => {
   }
 
   return (
-    <div class="container">
+    <div className="container">
       {props.listaPreguntas.map(function (pregunta, indx) {
         return (
-          <button type="button" class="btn btn-outline-dark" key={indx} onClick={navigateQuestion} value={indx}>{"Pregunta "}{indx + 1}</button>
+          <button type="button" className="btn btn-outline-dark" key={indx} onClick={navigateQuestion} value={indx}>{"Pregunta "}{indx + 1}</button>
         );
       })
 
