@@ -1,46 +1,39 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import QRCode from "react-qr-code";
 
 
 
-//FIXME CHANGE TO FUNCTION
-class QrContainer extends React.Component {
+const QrContainer = (props) => {
+    const [url, setUrl] = useState("")
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            
-        };
-        this.generateUrl = this.generateUrl.bind(this);
-    }
+    //En futuro hay que adaptar la url
+    useEffect(() => {
+        let url = "http://localhost:3000/scanner/" + props.userId + "/" + props.currentTest + "/" + props.generatedHash;
+        setUrl(url);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
+    //Recordemos que este era willMount puede ser que falle
+    /*
     componentWillMount(){
-        this.generateUrl()  
+        generateUrl()  
     }
+    */
+    return (
+        <div className='index-body'>
+            <div className='d-flex justify-content-center mt-3'>
+                <h4>Actualmente te encuentras sin conexión a internet</h4>
+            </div>
+            <div className='d-flex justify-content-center'>
+                <p>Se ha generado un código QR para que se lo muestres al profesor</p>
+            </div>
+            <div className='d-flex justify-content-center mt-4'>
+                <QRCode value={url} />
+            </div>
+        </div>
+    );
 
-    generateUrl = () => { 
-        var url = "http://localhost:3000/scanner/" + this.props.userId + "/" + this.props.currentTest + "/" + this.props.generatedHash;
-        this.setState({
-            qUrl: url
-        });
-    }
 
-    render() {
-            return(
-                <div className='index-body'>
-                    <div className='d-flex justify-content-center mt-3'>
-                        <h4>Actualmente te encuentras sin conexión a internet</h4>
-                    </div>
-                    <div className='d-flex justify-content-center'>
-                        <p>Se ha generado un código QR para que se lo muestres al profesor</p>
-                    </div>
-                    <div className='d-flex justify-content-center mt-4'>
-                        <QRCode value={this.state.qUrl}/>
-                    </div>
-                </div>
-             );
-        
-      }
 }
 
 export default QrContainer;

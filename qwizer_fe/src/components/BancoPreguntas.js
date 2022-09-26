@@ -47,7 +47,7 @@ export default class BancoPreguntas extends React.Component {
             this.setState({
               listaAsignaturas: data.asignaturas,
             }); 
-            this.state.listaAsignaturas.for(function(asignatura,indx){
+            this.state.listaAsignaturas.forEach(function(asignatura,indx){
                 window.$("#subject-selector").append(new Option(asignatura.asignatura, asignatura.id));
               });
 
