@@ -1,65 +1,53 @@
-import React from 'react'
-import ErrorModal from './common/modals/ErrorModal';
-import SuccessModal from './common/modals/SuccessModal';
-import { API_URL } from '../constants/Constants';
+import React from "react";
+import ErrorModal from "./common/modals/ErrorModal";
+import SuccessModal from "./common/modals/SuccessModal";
+import { API_URL } from "../constants/Constants";
+import { useEffect } from "react";
+import { useState } from "react";
+import { useParams } from "react-router-dom";
 
+const InsercionManual = (props) => {
+  const params = useParams();
+  const [message, setmessage] = useState("");
 
-//FIXME CHANGE TO FUNCTION
-class InsercionManual extends React.Component {
+  useEffect(() => {
+    guardarDatos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            
-        };
-        this.guardarDatos = this.guardarDatos.bind(this);
-    }
+  const guardarDatos = () => {
+    let token = localStorage.getItem("token");
+    let url = `${API_URL}/insert-qr`;
 
-    componentWillMount(){
-        this.guardarDatos()  
-    }
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+        Authorization: token,
+      },
+      body: JSON.stringify({idUsuario: props.userId, idCuestionario: params.test, hash: params.hash}),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setmessage(data.message);
+        if (!data.inserted) {
+          window.$("#inserted_error").modal("show");
+        } else {
+          window.$("#inserted_success").modal("show");
+        }
+      })
+      .catch((error) => console.log(error));
+  };
 
-    guardarDatos = () => { 
-        var token = localStorage.getItem('token');
-        var url = `${API_URL}/insert-qr`;
-        const message = new Map([["idUsuario", this.props.userId], ["idCuestionario", this.props.cuestionario], ["hash", this.props.generatedHash]]); 
-        const obj = JSON.stringify(Object.fromEntries(message));
-
-        
-        fetch(url, {
-            method: 'POST',
-            headers:{
-            'Content-type': 'application/json',
-            'Authorization': token
-            },
-            body: obj
-        }).then(response => response.json()).then(data => {
-            this.setState({
-                file: "",
-                message: data.message
-            });
-            if(!data.inserted){
-                window.$("#inserted_error").modal('show');
-            } 
-            else{
-                window.$("#inserted_success").modal('show');
-            } 
-                     
-        }).catch(error => console.log(error));
-    }
-
-    render() {
-            return(
-                <div className='index-body'>
-                    <div className='d-flex justify-content-center mt-4'>
-                        <h4>Escaneado de códigos QR</h4>
-                    </div>
-                    <ErrorModal id={"inserted_error"} message={this.state.message}></ErrorModal>
-                    <SuccessModal id={"inserted_success"} message={this.state.message}></SuccessModal>
-                </div>
-             );
-        
-      }
-}
+  return (
+    <div className="index-body">
+      <div className="d-flex justify-content-center mt-4">
+        <h4>Escaneado de códigos QR</h4>
+      </div>
+      <ErrorModal id={"inserted_error"} message={message}></ErrorModal>
+      <SuccessModal id={"inserted_success"} message={message}></SuccessModal>
+    </div>
+  );
+};
 
 export default InsercionManual;

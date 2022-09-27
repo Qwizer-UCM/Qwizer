@@ -132,7 +132,7 @@ const App = () => {
         <Route path="/register" element={<RegisterContainer getSubjects={getSubjects} getStudents={getStudents} />} />
         <Route path="/scanner/:test/:hash" element={<QrContainer userId={userId} />} />
         {/*No se usa */}
-        <Route path="/insercion-manual" element={<InsercionManual />} />
+        <Route path="/insercion-manual/:test/:hash" element={<InsercionManual userId={userId} />} />
       </Route>
       <Route path="/login" element={!isLogged ? <LoginComponent login={login} /> : <Navigate to={"/"} />} />
       <Route path="*" element={<h1>404</h1>} />

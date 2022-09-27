@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import QRCode from "react-qr-code";
+import { useParams } from 'react-router-dom';
 
 
 
 const QrContainer = (props) => {
+    const params = useParams();
     const [url, setUrl] = useState("")
 
     //En futuro hay que adaptar la url
     useEffect(() => {
-        let url = "http://localhost:3000/scanner/" + props.userId + "/" + props.currentTest + "/" + props.generatedHash;
+        let url = `${window.location.protocol}//${window.location.host}/scanner/${props.userId}/${params.test}/${params.hash}`;
         setUrl(url);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])

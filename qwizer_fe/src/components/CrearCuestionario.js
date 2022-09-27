@@ -248,7 +248,7 @@ export default class CrearCuestionario extends React.Component {
         if(this.state.selectedList.length !== 0){
             return <div className='card m-3 p-3'>
                 {this.state.selectedList.map((pregunta,indx) => {
-                    return <div className='card'>
+                    return <div className='card' key={pregunta.id}>
 
                         {pregunta.type === 'text' && <TextQuestion mode="visualize" infoPreg={pregunta} id={pregunta.id}/>}
                         {pregunta.type === 'test' && <TestQuestion mode="visualize" infoPreg={pregunta} id={pregunta.id}/>}

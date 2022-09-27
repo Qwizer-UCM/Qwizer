@@ -30,7 +30,7 @@
         {
             "label": "python manage.py runserver",
             "type": "shell",
-            "command": "cd qwizer_be && python manage.py runserver",
+            "command": "cd qwizer_be && python manage.py runserver 0.0.0.0:8000",
             "problemMatcher": [],
             "presentation": {
                 "group": "groupA",

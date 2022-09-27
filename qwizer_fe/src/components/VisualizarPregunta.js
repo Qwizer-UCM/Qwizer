@@ -1,93 +1,103 @@
-import React, { Component } from 'react'
-import TestQuestion from './TestQuestion'
-import TextQuestion from './TextQuestion'
-import EditTextQuestion from './EditTextQuestion'
-import EditTestQuestion from './EditTestQuestion'
+import React, { useState } from "react";
+import TestQuestion from "./TestQuestion";
+import TextQuestion from "./TextQuestion";
+import EditTextQuestion from "./EditTextQuestion";
+import EditTestQuestion from "./EditTestQuestion";
 
-//FIXME CHANGE TO FUNCTION
-export default class VisualizarPregunta extends Component {
+export default function VisualizarPregunta(props) {
+  const [editQuestion, seteditQuestion] = useState(false);
 
-    constructor(props) {
-      super(props)
-    
-      this.state = {
-         editQuestion:false,
-      };
+  const visualizeQuestion = () => {
+    //Visualizar la pregunta seleccionada y posibilidad de elimarla/editarla
 
+    if (props.createQuiz) {
+      if (props.data.type === "test") {
+        return (
+          <div>
+            <TestQuestion mode="visualize" infoPreg={props.data} id={props.data.id} />
+            <div className="d-flex justify-content-center">
+              <button className="btn btn-success m-1" onClick={() => props.addQuestion(props.data)}>
+                {" "}
+                Añadir Pregunta{" "}
+              </button>
+            </div>
+          </div>
+        );
+      } else if (props.data.type === "text") {
+        return (
+          <div>
+            <TextQuestion mode="visualize" infoPreg={props.data} />
+            <div className="d-flex justify-content-center">
+              <button className="btn btn-success m-1" onClick={() => props.addQuestion(props.data)}>
+                {" "}
+                Añadir Pregunta{" "}
+              </button>
+            </div>
+          </div>
+        );
+      }
+    } else {
+      if (props.data.type === "test") {
+        return (
+          <div>
+            <TestQuestion mode="visualize" infoPreg={props.data} id={props.data.id} />
+            <div className="d-flex justify-content-center">
+              <button className="btn btn-danger m-1" onClick={() => props.deleteQuestion(props.data.id)}>
+                {" "}
+                Eliminar Pregunta{" "}
+              </button>
+              <button className="btn btn-warning m-1" onClick={() => seteditQuestion(true)}>
+                {" "}
+                Editar Pregunta{" "}
+              </button>
+            </div>
+          </div>
+        );
+      } else if (props.data.type === "text") {
+        return (
+          <div>
+            <TextQuestion mode="visualize" infoPreg={props.data} />
+            <div className="d-flex justify-content-center">
+              <button className="btn btn-danger m-1" onClick={() => props.deleteQuestion(props.data.id)}>
+                {" "}
+                Eliminar Pregunta{" "}
+              </button>
+              <button className="btn btn-warning m-1" onClick={() => seteditQuestion(true)}>
+                {" "}
+                Editar Pregunta{" "}
+              </button>
+            </div>
+          </div>
+        );
+      }
+    }
+  };
+
+  const modifyQuestion = (question) => {
+    props.updateEditedQuestion(question).then(seteditQuestion(false));
+  };
+
+  const editQuizz = () => {
+    if (props.data.type === "test") {
+      return (
+        <div>
+          <EditTestQuestion pregunta={props.data} updateEditQuestion={modifyQuestion} />
+        </div>
+      );
     }
 
-    visualizeQuestion = () =>{ //Visualizar la pregunta seleccionada y posibilidad de elimarla/editarla
-        
-        if(this.props.createQuiz){
-            if(this.props.data.type === "test"){
-
-                return  <div>
-                        <TestQuestion mode="visualize" infoPreg={this.props.data} id={this.props.data.id}/>
-                        <div className='d-flex justify-content-center'>
-                            <button className="btn btn-success m-1"  onClick={() => this.props.addQuestion(this.props.data)}> Añadir Pregunta </button>
-                        </div>
-                    </div> 
-    
-            }else if (this.props.data.type === "text"){
-    
-                return  <div>
-                        <TextQuestion mode="visualize" infoPreg={this.props.data} />
-                        <div className='d-flex justify-content-center'>
-                            <button className="btn btn-success m-1"  onClick={() => this.props.addQuestion(this.props.data)}> Añadir Pregunta </button>
-                        </div>
-                    </div>    
-            }
-        }else{
-            if(this.props.data.type === "test"){
-
-                return  <div>
-                        <TestQuestion mode="visualize" infoPreg={this.props.data} id={this.props.data.id}/>
-                        <div className='d-flex justify-content-center'>
-                            <button className="btn btn-danger m-1"  onClick={() => this.props.deleteQuestion(this.props.data.id)}> Eliminar Pregunta </button>
-                            <button className="btn btn-warning m-1"  onClick={() => this.setState({editQuestion:true})}> Editar Pregunta </button>
-                        </div>
-                    </div> 
-    
-            }else if (this.props.data.type === "text"){
-    
-                return  <div>
-                        <TextQuestion mode="visualize" infoPreg={this.props.data} />
-                        <div className='d-flex justify-content-center'>
-                            <button className="btn btn-danger m-1"  onClick={() => this.props.deleteQuestion(this.props.data.id)}> Eliminar Pregunta </button>
-                            <button className="btn btn-warning m-1"  onClick={() => this.setState({editQuestion:true})}> Editar Pregunta </button>
-                        </div>
-                    </div>    
-            }
-        }
-        
+    if (props.data.type === "text") {
+      return (
+        <div>
+          <EditTextQuestion pregunta={props.data} updateEditQuestion={modifyQuestion} />
+        </div>
+      );
     }
+  };
 
-    modifyQuestion = (question) => {
-        this.props.updateEditedQuestion(question).then(this.setState({editQuestion:false}))
-        
-    }
-
-    editQuestion = () => {
-
-        if(this.props.data.type === "test"){
-            return  <div>
-                    <EditTestQuestion pregunta={this.props.data} updateEditQuestion={this.modifyQuestion}/>
-                </div> 
-        }
-
-        if(this.props.data.type === "text"){
-            return  <div>
-                    <EditTextQuestion pregunta={this.props.data} updateEditQuestion={this.modifyQuestion} />
-                </div> 
-        }
-    }
-    render() {
-        if(!this.state.editQuestion){
-            return this.visualizeQuestion()
-            
-        }else{
-            return this.editQuestion()
-        }
-       
-    }
+  if (!editQuestion) {
+    return visualizeQuestion();
+  } else {
+    return editQuizz();
+  }
 }
