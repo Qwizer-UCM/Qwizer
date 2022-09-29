@@ -1,5 +1,5 @@
-import React from 'react'
-import {getAllSubjects,getSubjectQuestions} from '../utils/manage_subjects.js'
+import React, { useEffect, useState } from 'react'
+import { getAllSubjects, getSubjectQuestions } from '../utils/manage_subjects.js'
 import ErrorModal from './common/modals/ErrorModal.js'
 import SuccessModal from './common/modals/SuccessModal.js'
 import DataTable from 'react-data-table-component'
@@ -8,259 +8,245 @@ import VisualizarPregunta from './VisualizarPregunta.js'
 import { API_URL } from '../constants/Constants.js'
 
 
-//FIXME CHANGE TO FUNCTION
-export default class BancoPreguntas extends React.Component {
+const BancoPreguntas = (props) => {
+  const [selectedAsignatura, setSelectedAsignatura] = useState(undefined)
+  const [listaAsignaturas, setListaAsignaturas] = useState([]) //lista de asignaturas del banco de preguntas
+  const [columns, setColumns] = useState(undefined)
+  const [data, setData] = useState(undefined)
+  const [title, setTitle] = useState(undefined)
+  const [preguntas, setPreguntas] = useState([])
+  const [preguntasSeleccionadas, setPreguntasSeleccionadas] = useState(undefined)
+  const [createQuiz, setCreateQuiz] = useState(false) //variable que le indica al banco de preguntas si se esta creando un cuestionario
+ // const [message, setMessage] = useState("Todo fue bien")
 
-    constructor(props) {
-      super(props)
-    
-      this.state = {
-        selectedAsignatura:undefined,
-        listaAsignaturas:undefined, //lista de asignaturas del banco de preguntas
-        columns: undefined, 
-        data: undefined,
-        title: undefined,
-        preguntasSeleccionadas: undefined,
-        createQuiz: false, //variable que le indica al banco de preguntas si se esta creando un cuestionario
+  useEffect(() => {
+    getAsignaturas();
+    if (props.createQuiz !== undefined) {
+      setCreateQuiz(props.createQuiz);
+      //implica que  el metodo props.addQuestion tambien esta
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    generar_tabla()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAsignatura, preguntas])
+
+  useEffect(() =>{
+    listaAsignaturas.forEach((asignatura, indx) => { //TODO adaptarlo a react
+      window.$("#subject-selector").append(new Option(asignatura.asignatura, asignatura.id));
+    });
+  }, [listaAsignaturas])
+
+
+
+  const getAsignaturas = () => {
+    getAllSubjects().then(data => {
+      setListaAsignaturas(data.asignaturas)
+    })
+  }
+
+  const getPregAsignaturas = (idAsignatura) => {
+    getSubjectQuestions(idAsignatura).then(data => {
+      setSelectedAsignatura(idAsignatura)
+      setPreguntas(data.preguntas)
+      generar_tabla()
+    });
+
+
+  }
+
+  const generar_tabla = () => {
+    let columns = [
+      {
+        name: 'Id',
+        selector: row => row.id,
+        sortable: true,
+        omit: true,
+      },
+      {
+        name: 'objeto',
+        selector: row => row.objeto,
+        omit: true,
+      },
+      {
+        name: 'Título',
+        selector: row => row.title,
+        sortable: true,
+      },
+      {
+        name: 'Pregunta',
+        selector: row => row.question,
+        sortable: true
       }
+    ];
 
-      this.getPregAsignaturas = this.getPregAsignaturas.bind(this);
-      this.handleChange = this.handleChange.bind(this);
-      this.handleSelectChange = this.handleSelectChange.bind(this);
-      this.generar_tabla = this.generar_tabla.bind(this);
-      this.downloadselectedList = this.downloadselectedList.bind(this);
-      this.downloadButton = this.downloadButton.bind(this);
-    }
-
-    componentDidMount(){
-        this.getAsignaturas();
-        if(this.props.createQuiz !== undefined){
-          this.setState({createQuiz: this.props.createQuiz});
-          //implica que  el metodo this.props.addQuestion tambien esta
-        }
-        
-    }
-
-
-    getAsignaturas = () => {
-        getAllSubjects().then(data => {
-            this.setState({
-              listaAsignaturas: data.asignaturas,
-            }); 
-            this.state.listaAsignaturas.forEach(function(asignatura,indx){
-                window.$("#subject-selector").append(new Option(asignatura.asignatura, asignatura.id));
-              });
-
-        })
-    }
-
-    getPregAsignaturas = (idAsignatura) =>{
-        getSubjectQuestions(idAsignatura).then(data => {
-            this.setState({
-                selectedAsignatura:idAsignatura,
-                preguntas: data.preguntas,
-            }); 
-            this.generar_tabla()
-          });
-          
-          
-    }
-
-    generar_tabla = () => {
-        var columns = [
-          {
-            name: 'Id',
-            selector: row => row.id,
-            sortable: true,
-            omit: true,
-          },
-          {
-            name: 'objeto',
-            selector: row => row.objeto,
-            omit: true,
-          },
-          {
-            name: 'Título',
-            selector: row => row.title,
-            sortable: true,
-          },
-          {
-            name: 'Pregunta',
-            selector: row => row.question,
-            sortable: true
-          }
-        ];
-        
-        var data = [];
-        this.state.preguntas.forEach(function(pregunta,indx){
-            let row = {
-            id : pregunta.id,
-            objeto : pregunta,
-            title : pregunta.title,
-            question : pregunta.question
-          }
-          data.push(row);
-        });
-    
-          
-        this.setState({
-          columns: columns,
-          data: data,
-          title: "Preguntas de la asignatura" 
-        });
+    let data = [];
+    preguntas.forEach((pregunta, indx) => {
+      let row = {
+        id: pregunta.id,
+        objeto: pregunta,
+        title: pregunta.title,
+        question: pregunta.question
       }
-    
-  
-    handleChange = ({ selectedRows }) => {
-        this.setState({
-          preguntasSeleccionadas: selectedRows
-        })
-        
-    }
+      data.push(row);
+    });
 
-    handleSelectChange = () => {
-        this.getPregAsignaturas(window.$("#subject-selector").val());
-        
-    }
-    
-   
-    deleteQuestion = (idPregunta) =>{
+    setColumns(columns)
+    setData(data)
+    setTitle("Preguntas de la asignatura")
+  }
 
-      var token = localStorage.getItem('token');
-      var url = `${API_URL}/delete-question`;
 
-      const message = new Map([["idPregunta", idPregunta]]);
-      const obj = JSON.stringify(Object.fromEntries(message));
+  const handleChange = ({ selectedRows }) => {
+    setPreguntasSeleccionadas(selectedRows)
 
-      fetch(url , {
-          method: 'POST',
-          headers:{
-          'Content-type': 'application/json',
-          'Authorization': token
-          },
-          body: obj
-      }).then(data => data.json())
-      .then(e => this.getPregAsignaturas(this.state.selectedAsignatura))
+  }
+
+  const handleSelectChange = () => {
+    getPregAsignaturas(window.$("#subject-selector").val());
+
+  }
+
+
+  const deleteQuestion = (idPregunta) => {
+
+    let token = localStorage.getItem('token');
+    let url = `${API_URL}/delete-question`;
+
+    const message = { idPregunta: idPregunta };
+    const obj = JSON.stringify(message);
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': token
+      },
+      body: obj
+    }).then(data => data.json())
+      .then(e => getPregAsignaturas(selectedAsignatura))
       .catch(e => console.log(e))
 
-    }
-    
-    updateEditedQuestion = (question) => {
+  }
 
-      var token = localStorage.getItem('token');
-      var url = `${API_URL}/update-question`;
+  const updateEditedQuestion = (question) => {
 
-      const message = new Map([["preguntaActualizada", question]]);
-      const preguntaObj = JSON.stringify(Object.fromEntries(message));
+    let token = localStorage.getItem('token');
+    let url = `${API_URL}/update-question`;
 
-      return fetch(url , {
-          method: 'POST',
-          headers:{
-          'Content-type': 'application/json',
-          'Authorization': token
-          },
-          body: preguntaObj
-      })
-      .then( e => this.getPregAsignaturas(this.state.selectedAsignatura))
+    const message = { preguntaActualizada: question };
+    const preguntaObj = JSON.stringify(message);
+
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': token
+      },
+      body: preguntaObj
+    })
+      .then(e => getPregAsignaturas(selectedAsignatura))
       .catch(e => console.log(e))
-    }
+  }
 
-    downloadselectedList = () => { //Funcion para descargar las preguntas seleccionadas en formato yaml
+  const downloadselectedList = () => { //Funcion para descargar las preguntas seleccionadas en formato yaml
 
-        var listaSeleccionadas = this.state.preguntasSeleccionadas.map(seleccionada =>{
-            return seleccionada.id;
-        });
-        
-        var preguntas = this.state.preguntas.filter(pregunta => listaSeleccionadas.includes(pregunta.id));
-        
-        var listaPreguntas = []
-        preguntas.forEach(pregunta =>{
+    let listaSeleccionadas = preguntasSeleccionadas.map(seleccionada => {
+      return seleccionada.id;
+    });
 
-            var question = {}
-            question["tipo"] = pregunta.type
-            question["pregunta"] = pregunta.question
-            question["opciones"] = pregunta.options
+    let preguntasDescarga = preguntas.filter(pregunta => listaSeleccionadas.includes(pregunta.id));
 
-            if(pregunta.type === "test"){
-                question["opciones"] = pregunta.options
-            }
+    let listaPreguntas = []
+    preguntasDescarga.forEach(pregunta => {
 
-            question["op_correcta"] = pregunta.correct_op
+      let question = {}
+      question["tipo"] = pregunta.type
+      question["pregunta"] = pregunta.question
+      question["opciones"] = pregunta.options
 
-            listaPreguntas.push(question)
-        })
-
-        var jsonObj = {"preguntas": listaPreguntas}
-
-        //Convet JSON to Yaml
-
-        var yamlObj = yaml.dump(jsonObj)
-
-        //Crear enlace
-
-        var data = new Blob ([yamlObj],{type :'text/yml'})
-        let elemx = window.document.createElement('a');
-        elemx.href = window.URL.createObjectURL(data);
-        elemx.download = "preguntas.yaml";
-        elemx.style.display = "none";
-        document.body.appendChild(elemx);
-        elemx.click();
-        document.body.removeChild(elemx);
-    }
-
-    downloadButton = () => {
-        return <><button className="btn btn-success"  onClick={this.downloadselectedList}>Descargar</button></> 
-    } 
-
-    ExpandedComponent = ({ data }) =>{
-      if(this.state.createQuiz){
-        return <VisualizarPregunta data={data.objeto}
-                            createQuiz={true}
-                            addQuestion={this.props.addQuestion}>
-                          </VisualizarPregunta>;
-        
-      }else{
-        return <VisualizarPregunta data={data.objeto}
-                            createQuiz={false}
-                            deleteQuestion={this.deleteQuestion}
-                            updateEditedQuestion={this.updateEditedQuestion}>
-                          </VisualizarPregunta>;
+      if (pregunta.type === "test") {
+        question["opciones"] = pregunta.options
       }
-    } 
 
-    render() {
+      question["op_correcta"] = pregunta.correct_op
 
-      
-        
-        return <div className="index-body">
-          <div className="card tabla-notas">
-            <div className='card-content'>
-              <h4 className='d-flex justify-content-center'>Banco de preguntas</h4>
-              <label>Selecciona una asignatura para visualizar sus preguntas</label>
-              <select className="form-select" id="subject-selector" onChange={this.handleSelectChange} aria-label="Default select example">
-                <option hidden defaultValue>Selecciona una asignatura</option>
-              </select>
-              <br/>
-              <DataTable
-                  pointerOnHover
-                  selectableRows 
-                  pagination
-                  theme={"default"}	
-                  title= {this.state.title}
-                  columns={this.state.columns}
-                  data={this.state.data}
-                  onSelectedRowsChange={this.handleChange}
-                  expandableRows
-                  expandableRowsComponent={this.ExpandedComponent}
-                  contextActions={this.downloadButton()}>      
-              </DataTable>
-            </div>
-          </div>
-          <ErrorModal id={"inserted_error"} message={this.state.message}></ErrorModal>
-          <SuccessModal id={"inserted_success"} message={this.state.message}></SuccessModal>
-        </div>
-      
-      
-       
+      listaPreguntas.push(question)
+    })
+
+    let jsonObj = { "preguntas": listaPreguntas }
+
+    //Convert JSON to Yaml
+
+    let yamlObj = yaml.dump(jsonObj)
+
+    //Crear enlace
+
+    let data = new Blob([yamlObj], { type: 'text/yml' })
+    let elemx = window.document.createElement('a');
+    elemx.href = window.URL.createObjectURL(data);
+    elemx.download = "preguntas.yaml";
+    elemx.style.display = "none";
+    document.body.appendChild(elemx);
+    elemx.click();
+    document.body.removeChild(elemx);
+  }
+
+  const downloadButton = () => {
+    return <><button type='button' className="btn btn-success" onClick={downloadselectedList}>Descargar</button></>
+  }
+
+  const ExpandedComponent = ({ data }) => {
+    if (createQuiz) {
+      return <VisualizarPregunta data={data.objeto}
+        createQuiz={true}
+        addQuestion={props.addQuestion}>
+      </VisualizarPregunta>;
+
+    } else {
+      return <VisualizarPregunta data={data.objeto}
+        createQuiz={false}
+        deleteQuestion={deleteQuestion}
+        updateEditedQuestion={updateEditedQuestion}>
+      </VisualizarPregunta>;
     }
+  }
+
+
+
+  return <div className="index-body">
+    <div className="card tabla-notas">
+      <div className='card-content'>
+        <h4 className='d-flex justify-content-center'>Banco de preguntas</h4>
+        <label>Selecciona una asignatura para visualizar sus preguntas</label>
+        <select className="form-select" id="subject-selector" onChange={handleSelectChange} aria-label="Default select example">
+          <option hidden defaultValue>Selecciona una asignatura</option>
+        </select>
+        <br />
+        <DataTable
+          pointerOnHover
+          selectableRows
+          pagination
+          theme={"default"}
+          title={title}
+          columns={columns}
+          data={data}
+          onSelectedRowsChange={handleChange}
+          expandableRows
+          expandableRowsComponent={ExpandedComponent}
+          /* TODO arreglar boton descarga contextActions={downloadButton} */>  
+        </DataTable>
+      </div>
+    </div>
+    {/*<ErrorModal id={"inserted_error"} message={message}></ErrorModal>*/}
+    {/*<SuccessModal id={"inserted_success"} message={message}></SuccessModal>*/}
+  </div>
+  //TODO mensaje de error no entiendo como lo hacían huele a copy paste
+
+
+
 }
+
+export default BancoPreguntas;

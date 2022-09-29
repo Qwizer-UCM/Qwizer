@@ -1,59 +1,53 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import DataTable from 'react-data-table-component';
 import ErrorModal from './common/modals/ErrorModal';
 import SuccessModal from './common/modals/SuccessModal';
 import { API_URL } from '../constants/Constants';
 
 
-//FIXME CHANGE TO FUNCTION
-class RegisterContainer extends React.Component {
-    
-  constructor(props){
-    super(props);
-    this.state = {
-      asignaturas: undefined,
-      alumnos: undefined,
-      columns: undefined,
-      data: undefined,
-      title: undefined,
-      alumnosSeleccionados: undefined,
-      message: undefined
-    };
-    this.getAsignaturas = this.getAsignaturas.bind(this);
-    this.getAlumnos = this.getAlumnos.bind(this);
-    this.generar_tabla = this.generar_tabla.bind(this);
-    this.registrarAlumnos = this.registrarAlumnos.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-  };
 
-  componentWillMount(){
-    this.getAsignaturas();
-    this.getAlumnos();
-  }
+const RegisterContainer = (props) => {
+  const [asignaturas, setAsignaturas] = useState([])
+  const [alumnos, setAlumnos] = useState([])
+  const [columns, setColumns] = useState(undefined)
+  const [data, setData] = useState(undefined)
+  const [title, setTitle] = useState(undefined)
+  const [alumnosSeleccionados, setAlumnosSeleccionados] = useState(undefined)
+  const [message, setMessage] = useState(undefined)
 
-  getAsignaturas = () => { 
-    this.props.getSubjects().then(data => {
-      this.setState({
-        asignaturas: data.asignaturas,
-      });
-      this.state.asignaturas.forEach(function(asignatura,indx){
-        window.$("#subject-selector").append(new Option(asignatura.nombre, asignatura.id));
-      }); 
+  useEffect(() => {
+    getAsignaturas();
+    getAlumnos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    generar_tabla()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alumnos])
+
+  useEffect(() => {
+    asignaturas.forEach((asignatura, indx) => {
+      window.$("#subject-selector").append(new Option(asignatura.nombre, asignatura.id));
     });
-  }
-  
-  getAlumnos = () => { 
-    this.props.getStudents().then(data => {
-      //console.log(data)
-      this.setState({
-        alumnos: data.alumnos,
-      });
-      this.generar_tabla()
+  }, [asignaturas])
+
+
+  const getAsignaturas = () => {
+    props.getSubjects().then(data => {
+      setAsignaturas(data.asignaturas)
     });
   }
 
-  generar_tabla = () => {
-    var columns = [
+  const getAlumnos = () => {
+    props.getStudents().then(data => {
+      console.log(data.alumnos)
+      setAlumnos(data.alumnos)
+    });
+  }
+
+  const generar_tabla = () => {
+    let columns = [
       {
         name: 'Id',
         selector: row => row.id,
@@ -71,73 +65,63 @@ class RegisterContainer extends React.Component {
         sortable: true
       }
     ];
-    
-    var data = [];
-    this.state.alumnos.forEach(function(alumno,indx){
+    let data = []
+    alumnos.forEach((alumno, indx) => {
       let row = {
-        id : alumno.id,
-        nombre : alumno.nombre,
-        apellidos : alumno.apellidos
+        id: alumno.id,
+        nombre: alumno.nombre,
+        apellidos: alumno.apellidos
       }
       data.push(row);
     });
 
-      
-    this.setState({
-      columns: columns,
-      data: data,
-      title: "Alumnos matriculados en el centro" 
-    });
+
+
+    setColumns(columns)
+    setData(data)
+    setTitle("Alumnos matriculados en el centro")
   }
 
-  registrarAlumnos = () => {
-    var alumnos = this.state.alumnosSeleccionados;
-    
-    var asignatura = window.$("#subject-selector").val();
-    
+  const registrarAlumnos = () => {
+    let alumnos = alumnosSeleccionados;
 
-    if(asignatura === "Selecciona una asignatura" || alumnos === undefined || alumnos.length === 0){
-      this.setState({
-        message: "Selecciona una asignatura y al menos un alumno"
-      })
+    let asignatura = window.$("#subject-selector").val();
+
+
+    if (asignatura === "Selecciona una asignatura" || alumnos === undefined || alumnos.length === 0) {
+      setMessage("Selecciona una asignatura y al menos un alumno")
       window.$("#inserted_error").modal("show");
     }
-    else{
-      
-      const alumn_info = new Map([["alumnos", alumnos], ["asignatura", asignatura]]);
-      const jsonObject = JSON.stringify(Object.fromEntries(alumn_info));
-      var url = `${API_URL}/enroll-students`;
-      var token = localStorage.getItem('token');
-      
+    else {
+      const alumn_info = { alumnos: alumnos, asignatura: asignatura };
+      const jsonObject = JSON.stringify(alumn_info);
+      let url = `${API_URL}/enroll-students`;
+      let token = localStorage.getItem('token');
+
 
       fetch(url, {
         method: 'POST',
-        headers:{
-            'Content-type': 'application/json',
-            'Authorization': token
+        headers: {
+          'Content-type': 'application/json',
+          'Authorization': token
         },
         body: jsonObject
-        })
+      })
         .then(response => response.json())
         .then(data => {
-          
-          if(data.insertados){
-            this.setState({
-              message: "Los alumnos han sido matriculados correctamente."
-            })
+
+          if (data.insertados) {
+            setMessage("Los alumnos han sido matriculados correctamente.")
             window.$("#inserted_success").modal("show");
           }
-          else{
-            var errormsg = "Los siguientes alumnos no se han podido matricular: \n"
-            
-            data.errors.forEach(function(error,indx){
-              
+          else {
+            let errormsg = "Los siguientes alumnos no se han podido matricular: \n"  //TODO cambiar el mensaje de los errores
+
+            data.errors.forEach(function (error, indx) {
+
               errormsg += error + "\n";
             });
-                       
-            this.setState({
-              message: errormsg
-            })
+            setMessage(errormsg)
             window.$("#inserted_error").modal("show");
           }
         })
@@ -146,47 +130,42 @@ class RegisterContainer extends React.Component {
 
   }
 
-  handleChange = ({ selectedRows }) => {
-    this.setState({
-      alumnosSeleccionados: selectedRows
-    })
+  const handleChange = ({ selectedRows }) => {
+    setAlumnosSeleccionados(selectedRows)
   }
 
-  
+  return (
+    <div className="index-body">
+      <div className="card tabla-notas">
+        <div className='card-content'>
+          <h4 className='d-flex justify-content-center'>Registro de alumnos en asignaturas</h4>
+          <label>Selecciona la asignatura a la que quieras añadir a los alumnos</label>
+          <select className="form-select" id="subject-selector" aria-label="Default select example">
+            <option hidden defaultValue>Selecciona una asignatura</option>
+          </select>
+          <br />
+          <DataTable
+            pointerOnHover
+            selectableRows
+            pagination
+            theme={"default"}
+            title={title}
+            columns={columns}
+            data={data}
+            onSelectedRowsChange={handleChange}
+          >
+          </DataTable>
+          <div className='d-flex justify-content-center'>
+            <button className='btn btn-primary' onClick={registrarAlumnos}>Registrar alumnos</button>
+          </div>
+        </div>
+      </div>
+      <ErrorModal id={"inserted_error"} message={message}></ErrorModal>
+      <SuccessModal id={"inserted_success"} message={message}></SuccessModal>
+    </div>
+  );
 
-  render() { 
-    return(
-            <div className="index-body">
-              <div className="card tabla-notas">
-                <div className='card-content'>
-                  <h4 className='d-flex justify-content-center'>Registro de alumnos en asignaturas</h4>
-                  <label>Selecciona la asignatura a la que quieras añadir a los alumnos</label>
-                  <select className="form-select" id="subject-selector" aria-label="Default select example">
-                    <option hidden defaultValue>Selecciona una asignatura</option>
-                  </select>
-                  <br/>
-                  <DataTable
-                    pointerOnHover
-                    selectableRows 
-                    pagination
-                    theme={"default"}	
-                    title= {this.state.title}
-                    columns={this.state.columns}
-                    data={this.state.data}
-                    onSelectedRowsChange={this.handleChange}
-                    >
-                  </DataTable>
-                  <div className='d-flex justify-content-center'>
-                    <button className='btn btn-primary' onClick={this.registrarAlumnos}>Registrar alumnos</button>
-                  </div>
-                </div>
-              </div>
-              <ErrorModal id={"inserted_error"} message={this.state.message}></ErrorModal>
-              <SuccessModal id={"inserted_success"} message={this.state.message}></SuccessModal>
-            </div>
-        );
- 
-  }
+
 
 }
 

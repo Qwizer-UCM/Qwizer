@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { useParams } from "react-router-dom";
 import DataTable from 'react-data-table-component';
 import VisualizarNota from './VisualizarNota';
 import { API_URL } from '../constants/Constants';
@@ -10,29 +11,28 @@ const paginationComponentOptions = {
   selectAllRowsItemText: 'Todos',
 };
 
-//FIXME CHANGE TO FUNCTION
-class RevisionNotasContainer extends React.Component {
+const RevisionNotasContainer = (props) => {
+  const [notasCuestionario,setNotasCuestionarios] = useState([])
+  const [columns, setColumns] = useState(undefined)
+  const [data,setData] = useState(undefined)
+  const [title, setTitle] = useState(undefined)
+  const params = useParams();
     
-  constructor(props){
-    super(props);
-    this.state ={
-      notasCuestionario: undefined,
-      columns: undefined,
-      data: undefined
-    }
-    this.getNotas = this.getNotas.bind(this);
-    this.generar_tabla = this.generar_tabla.bind(this);
-  }
+  useEffect(() => {
+    getNotas();  
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  componentDidMount(){
-    this.getNotas();
-  }
+  useEffect(() => {
+    generar_tabla()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notasCuestionario])
 
-  getNotas = () => {   
-    var token = localStorage.getItem('token');
-    const message = new Map([["idCuestionario", this.props.currentCuestionario]]);
+  const getNotas = () => {   
+    let token = localStorage.getItem('token');
+    const message = {idCuestionario: params.id};
     
-    const jsonObject = JSON.stringify(Object.fromEntries(message));
+    const jsonObject = JSON.stringify(message);
     fetch(`${API_URL}/get-quiz-grades`, {
     method: 'POST',
     headers:{
@@ -43,17 +43,14 @@ class RevisionNotasContainer extends React.Component {
     })
     .then(response => response.json())
     .then(data => {
-      this.setState({
-        notasCuestionario: data.notas,
-      });
-      this.generar_tabla();
+      setNotasCuestionarios(data.notas)
     })
     .catch(error => console.log(error));
   }
 
-  generar_tabla = () => {
+  const generar_tabla = () => {
     
-    var columns = [
+    let columns = [
       {
           name: '#',
           selector: row => row.numero,
@@ -108,15 +105,15 @@ class RevisionNotasContainer extends React.Component {
         ]
       },
       {
-        cell:(row) => <button className='btn btn-primary' id={row.id} onClick={() => this.props.revisionTestProfesor(this.props.currentCuestionario, row.id)}>Revisar</button>,
+        cell:(row) => <button className='btn btn-primary' id={row.id} onClick={() => props.revisionTestProfesor(params.id, row.id)}>Revisar</button>,
         ignoreRowClick: true,
         allowOverflow: true,
       },
     ];
     
-    var data = [];
-    let idCuestionario = this.props.currentCuestionario;
-    this.state.notasCuestionario.forEach(function(nota,indx){
+    let data = [];
+    let idCuestionario = params.id;
+    notasCuestionario.forEach((nota,indx) =>{
       let row = {
         numero : indx,
         id : nota.id,
@@ -128,33 +125,29 @@ class RevisionNotasContainer extends React.Component {
       data.push(row);
     });
 
-      
-    this.setState({
-      columns: columns,
-      data: data,
-      title: "Revisión de las notas del cuestionario " + this.props.currentCuestionario
-    });
+    setColumns(columns)
+    setData(data)
+    setTitle("Revisión de las notas del cuestionario " + params.id)
   }
 
-  ExpandedComponent = ({ data }) =>{
+  const ExpandedComponent = ({ data }) =>{
     return <div>
       <VisualizarNota data={data}></VisualizarNota>
     </div>
   } 
-
-  render() { 
-    if(this.state.notasCuestionario && this.state.data){
+ 
+    if(notasCuestionario && data){
       return(
             <div className='index-body'>
               <div className='card tabla-notas'>
                 <DataTable
                   pointerOnHover
                   theme={"default"}	
-                  title= {this.state.title}
-                  columns={this.state.columns}
+                  title= {title}
+                  columns={columns}
                   expandableRows
-                  expandableRowsComponent={this.ExpandedComponent}
-                  data={this.state.data}
+                  expandableRowsComponent={ExpandedComponent}
+                  data={data}
                   pagination paginationComponentOptions={paginationComponentOptions}
                 />
               </div>
@@ -166,7 +159,7 @@ class RevisionNotasContainer extends React.Component {
         }
 
  
-  }
+  
 
 }
 

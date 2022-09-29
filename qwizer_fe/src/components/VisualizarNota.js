@@ -13,14 +13,15 @@ export default function VisualizarNota(props) {
 
   useEffect(() => {
     getHashes();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getHashes = () => {
     let token = localStorage.getItem("token");
 
     const message = new Map([
-      ["idCuestionario", this.props.data.idCuestionario],
-      ["idUsuario", this.props.data.id],
+      ["idCuestionario", props.data.idCuestionario],
+      ["idUsuario", props.data.id],
     ]);
 
     const jsonObject = JSON.stringify(Object.fromEntries(message));
