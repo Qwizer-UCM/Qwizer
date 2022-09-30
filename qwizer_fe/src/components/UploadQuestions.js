@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import ErrorModal from './common/modals/ErrorModal';
 import SuccessModal from './common/modals/SuccessModal';
-import { getSubjects } from '../utils/manage_subjects.js'
+import Subjects from '../services/Subjects.js'
 import { API_URL } from '../constants/Constants';
+import Questions from '../services/Questions';
 
 
 const UploadQuestions = (props) => {
@@ -12,7 +13,7 @@ const UploadQuestions = (props) => {
     const [idAsignatura, setIdAsignatura] = useState("")
 
     useEffect(() => {
-        getSubjects().then(data => {
+        Subjects.getFromStudentOrTeacher().then(({data}) => {
             setAsignaturas(data.asignaturas);
         })
     }, [])
@@ -22,32 +23,19 @@ const UploadQuestions = (props) => {
             let reader = new FileReader();
             reader.readAsText(file, 'utf-8');
             reader.onload = (e) => {
-                const fichero_yaml = {fichero: e.target.result, idA: idAsignatura};
-                const jsonObject = JSON.stringify(fichero_yaml);
-                let token = localStorage.getItem('token');
+                Questions.upload(e.target.result, idAsignatura)
+                .then(({data}) => {
+                    setFile("")
+                    setMessage(data.message)
+                    if (data.inserted === "false") {
+                        window.$("#inserted_error").modal('show');
+                    }
+                    else {
+                        window.$("#inserted_success").modal('show');
+                    }
 
-                fetch(`${API_URL}/upload-questions`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-type': 'application/json',
-                        'Authorization': token
-                    },
-                    body: jsonObject
                 })
-                    .then(response => response.json())
-                    .then(data => {
-
-                        setFile("")
-                        setMessage(data.message)
-                        if (data.inserted === "false") {
-                            window.$("#inserted_error").modal('show');
-                        }
-                        else {
-                            window.$("#inserted_success").modal('show');
-                        }
-
-                    })
-                    .catch(error => console.log(error));
+                .catch(error => console.log(error));
             }
         }
     }

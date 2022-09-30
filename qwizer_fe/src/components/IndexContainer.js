@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import TarjetaAsignatura from "./TarjetaAsignatura";
-import { getSubjects } from "../utils/manage_subjects";
+import Subjects from "../services/Subjects";
 import { useState } from "react";
 
 const IndexContainer = (props) => {
@@ -11,7 +11,7 @@ const IndexContainer = (props) => {
   }, []);
 
   const getAsignaturas = () => {
-    getSubjects().then((data) => {
+    Subjects.getFromStudentOrTeacher().then(({data}) => {
       setAsignaturas(data.asignaturas);
     });
   };

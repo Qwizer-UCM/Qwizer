@@ -74,6 +74,7 @@ export default function VisualizarPregunta(props) {
   };
 
   const modifyQuestion = (question) => {
+    //TODO Revisar esto es un poco raro. Resuelve la promesa en el padre y luego la vuelve a usar aqui
     props.updateEditedQuestion(question).then(seteditQuestion(false));
   };
 

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ErrorModal from "./common/modals/ErrorModal";
 import SuccessModal from "./common/modals/SuccessModal";
 import { API_URL } from "../constants/Constants";
+import Tests from "../services/Tests";
 
 const UploadFile = () => {
   const [file, setFile] = useState("");
@@ -12,20 +13,10 @@ const UploadFile = () => {
       let reader = new FileReader();
       reader.readAsText(file, "utf-8");
       reader.onload = (e) => {
-        const fichero_yaml = { fichero_yaml: e.target.result };
-        const jsonObject = JSON.stringify(fichero_yaml);
-        let token = localStorage.getItem("token");
+        const fichero_yaml = e.target.result;
 
-        fetch(`${API_URL}/upload`, {
-          method: "POST",
-          headers: {
-            "Content-type": "application/json",
-            Authorization: token,
-          },
-          body: jsonObject,
-        })
-          .then((response) => response.json())
-          .then((data) => {
+        Tests.upload(fichero_yaml)
+          .then(({ data }) => {
             setFile("");
             setMessage(data.message);
             if (data.inserted === "false") {

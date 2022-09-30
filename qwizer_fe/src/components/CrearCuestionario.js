@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import {Navigate, useNavigate }from "react-router-dom";
-import { getSubjects, getAllSubjects } from '../utils/manage_subjects.js'
-import { sendCreatedTest } from '../utils/manage_test.js'
+import { useNavigate }from "react-router-dom";
 import BancoPreguntas from './BancoPreguntas.js'
 import TestQuestion from './TestQuestion'
 import TextQuestion from './TextQuestion'
+import Subjects from '../services/Subjects';
+import Tests from '../services/Tests';
 
 
 const CrearCuestionario = (props) => {
@@ -31,13 +31,13 @@ const CrearCuestionario = (props) => {
 
 
     const getImparteAsignaturas = () => {
-        getSubjects().then(data => {
+        Subjects.getFromStudentOrTeacher().then(({data}) => {
             setAsignaturasImpartidas(data.asignaturas)
         })
     }
 
     const getAsignaturas = () => {
-        getAllSubjects().then(data => {
+        Subjects.getAll().then(({data}) => {
             setListaAsignaturas(data.asignaturas)
         })
     }
@@ -227,10 +227,10 @@ const CrearCuestionario = (props) => {
             incorrect = true;
         }
 
-        if (!incorrect) {//si se han rellenado todos los campos bien, entonces se envia
-            sendCreatedTest(cuestionario).then(data => {
-            }).then(data => {
-                navigate("/") //TODO como cambiar redireccionar
+        if(!incorrect){//si se han rellenado todos los campos bien, entonces se envia
+            //TODO OTRA VEZ no se comprueba respuesta de la API
+            Tests.createQuiz(cuestionario).then(() => {
+                navigate("/")
                 alert("Cuestionario creado correctamente")
             })
         }

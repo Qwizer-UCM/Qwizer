@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { API_URL } from "../constants/Constants";
+import Subjects from "../services/Subjects";
 
 const TarjetaAsignatura = (props) => {
   const [state, setState] = useState({
@@ -10,18 +11,8 @@ const TarjetaAsignatura = (props) => {
   });
 
   useEffect(() => {
-    let token = localStorage.getItem("token");
-    const jsonObject = JSON.stringify({ idAsignatura: props.idAsignatura });
-    fetch(`${API_URL}/get-subject-info`, {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-        Authorization: token,
-      },
-      body: jsonObject,
-    })
-      .then((response) => response.json())
-      .then((data) => {
+    Subjects.get(props.idAsignatura)
+      .then(({data}) => {
         setState({
           nCuestionarios: data.nCuestionarios,
           nPendientes: data.nPendientes,

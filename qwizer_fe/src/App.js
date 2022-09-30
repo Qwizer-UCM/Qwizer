@@ -17,9 +17,8 @@ import RegisterContainer from "./components/RegisterContainer";
 import QrContainer from "./components/QrContainer";
 import InsercionManual from "./components/InsercionManual";
 
-import { getCorrectedTest } from "./utils/manage_test.js";
-import { logIn, logOut, getStudents } from "./utils/manage_user.js";
-import { getSubjects } from "./utils/manage_subjects";
+import Tests from "./services/Tests.js";
+import Users from "./services/Users.js";
 import CrearCuestionario from "./components/CrearCuestionario";
 import RevisionNotasContainer from "./components/RevisionNotasContainer";
 
@@ -45,30 +44,42 @@ const App = () => {
     if (token !== null && usern !== null) {
       setIsLogged(true);
       setUsername(usern);
+    } else {
+      setIsLogged(false);
     }
+
   }, []);
 
   //// Funciones Login, Logout y manejo de la sesion del usuario >>>>>>>>>>>>>>>>>>>
 
   const login = (username, password) => {
-    logIn(username, password).then((response) => {
-      if (response[0] === " ") {
+    Users.login(username,password).then(({data})=> {
+      if(data.respuesta === "invalid login"){
         window.alert("¡Contraseña incorrecta!");
-      } else {
+      }else{
+        localStorage.setItem('token',data.token);
+        localStorage.setItem('username',username);
+        localStorage.setItem('rol', data.rol);
+        localStorage.setItem('userId', data.id);
+
         setUsername(username);
+        setRol(data.rol);
+        setUserId(data.id);
         setIsLogged(true);
-        setRol(response[0]);
-        setUserId(response[1]);
         navigate("/");
-      }
+    }
     });
   };
 
   const logout = () => {
-    logOut();
-    setIsLogged(false);
-    localStorage.clear();
-    navigate("/login");
+    Users.logout().then(({data}) => {
+      //TODO Mejor devolver otra cosa desde la api
+      if(data === "Logged out"){
+        setIsLogged(false);
+        localStorage.clear();
+        navigate("/login");
+      }
+    });
   };
 
   //  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -76,9 +87,9 @@ const App = () => {
   //// Funciones para desbloquear, empezar, enviarTest, revision el test >>>>>>>>>>>>>>>>>>>
 
   const revisionTest = (idCuestionario) => {
-    getCorrectedTest(idCuestionario, "")
-      .then((data) => {
-        var jsonData = JSON.parse(data.corrected_test);
+    Tests.getCorrectedTest(idCuestionario, "")
+      .then(({data}) => {
+        let jsonData = JSON.parse(data.corrected_test);
         setTestCorregido(jsonData);
         navigate("/revision");
       })
@@ -88,9 +99,9 @@ const App = () => {
   };
 
   const revisionTestProfesor = (idCuestionario, idAlumno) => {
-    getCorrectedTest(idCuestionario, idAlumno)
-      .then((data) => {
-        var jsonData = JSON.parse(data.corrected_test);
+    Tests.getCorrectedTest(idCuestionario, idAlumno)
+      .then(({data}) => {
+        let jsonData = JSON.parse(data.corrected_test);
         setTestCorregido(jsonData);
         navigate("/revision");
       })
@@ -105,7 +116,6 @@ const App = () => {
   };
 
   const protectedRoutes = () => {
-    if (isLogged === undefined) return null;
     return isLogged ? (
       <>
         <NavBar username={username} rol={rol} logout={logout} />
@@ -115,6 +125,8 @@ const App = () => {
       <Navigate to="/login" replace />
     );
   };
+
+  if (isLogged === undefined) return null;    
 
   return (
     <Routes>
@@ -129,7 +141,7 @@ const App = () => {
         <Route path="/upload-questions" element={<UploadQuestions />} />
         <Route path="/banco-preguntas" element={<BancoPreguntas />} />
         <Route path="/revisionNotas/:id" element={<RevisionNotasContainer currentCuestionario={cuestionarioViendoNotas} revisionTestProfesor={revisionTestProfesor} />} />
-        <Route path="/register" element={<RegisterContainer getSubjects={getSubjects} getStudents={getStudents} />} />
+        <Route path="/register" element={<RegisterContainer />} />
         <Route path="/scanner/:test/:hash" element={<QrContainer userId={userId} />} />
         {/*No se usa */}
         <Route path="/insercion-manual/:test/:hash" element={<InsercionManual userId={userId} />} />

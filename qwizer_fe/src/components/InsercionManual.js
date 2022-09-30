@@ -5,6 +5,7 @@ import { API_URL } from "../constants/Constants";
 import { useEffect } from "react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import Otro from "../services/NoSeDondeMeterloTodavia";
 
 const InsercionManual = (props) => {
   const params = useParams();
@@ -16,19 +17,8 @@ const InsercionManual = (props) => {
   }, []);
 
   const guardarDatos = () => {
-    let token = localStorage.getItem("token");
-    let url = `${API_URL}/insert-qr`;
-
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-        Authorization: token,
-      },
-      body: JSON.stringify({idUsuario: props.userId, idCuestionario: params.test, hash: params.hash}),
-    })
-      .then((response) => response.json())
-      .then((data) => {
+    Otro.insertQR(props.userId,params.test,params.hash)
+      .then(({data}) => {
         setmessage(data.message);
         if (!data.inserted) {
           window.$("#inserted_error").modal("show");

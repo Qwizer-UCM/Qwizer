@@ -8,7 +8,6 @@ const TestQuestion = (props) => {
     if (props.mode === "test") {
       // TODO revisar por estar en didMount cuando no deberia estar ahi
       let answers = localStorage.getItem("answers");
-      console.log(answers);
       if (answers !== null) {
         let json_answers = JSON.parse(answers);
         let opcion = "NULL";

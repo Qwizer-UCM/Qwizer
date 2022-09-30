@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { getAllSubjects, getSubjectQuestions } from '../utils/manage_subjects.js'
 import ErrorModal from './common/modals/ErrorModal.js'
 import SuccessModal from './common/modals/SuccessModal.js'
 import DataTable from 'react-data-table-component'
 import yaml from 'js-yaml'
 import VisualizarPregunta from './VisualizarPregunta.js'
-import { API_URL } from '../constants/Constants.js'
-
+import Questions from '../services/Questions.js'
+import Subjects from '../services/Subjects';
 
 const BancoPreguntas = (props) => {
   const [selectedAsignatura, setSelectedAsignatura] = useState(undefined)
@@ -42,16 +41,15 @@ const BancoPreguntas = (props) => {
 
 
   const getAsignaturas = () => {
-    getAllSubjects().then(data => {
+    Subjects.getAll().then(({data}) => {
       setListaAsignaturas(data.asignaturas)
     })
   }
 
   const getPregAsignaturas = (idAsignatura) => {
-    getSubjectQuestions(idAsignatura).then(data => {
+    Subjects.getQuestions(idAsignatura).then(({data}) => {
       setSelectedAsignatura(idAsignatura)
       setPreguntas(data.preguntas)
-      generar_tabla()
     });
 
 
@@ -109,46 +107,16 @@ const BancoPreguntas = (props) => {
 
   }
 
-
   const deleteQuestion = (idPregunta) => {
-
-    let token = localStorage.getItem('token');
-    let url = `${API_URL}/delete-question`;
-
-    const message = { idPregunta: idPregunta };
-    const obj = JSON.stringify(message);
-
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-        'Authorization': token
-      },
-      body: obj
-    }).then(data => data.json())
-      .then(e => getPregAsignaturas(selectedAsignatura))
-      .catch(e => console.log(e))
-
+    Questions.delete(idPregunta)
+    .then(() => getPregAsignaturas(selectedAsignatura))
+    .catch(e => console.log(e))
   }
 
   const updateEditedQuestion = (question) => {
-
-    let token = localStorage.getItem('token');
-    let url = `${API_URL}/update-question`;
-
-    const message = { preguntaActualizada: question };
-    const preguntaObj = JSON.stringify(message);
-
-    return fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-        'Authorization': token
-      },
-      body: preguntaObj
-    })
-      .then(e => getPregAsignaturas(selectedAsignatura))
-      .catch(e => console.log(e))
+    return Questions.update(question)
+    .then(() => getPregAsignaturas(selectedAsignatura))
+    .catch(e => console.log(e))
   }
 
   const downloadselectedList = () => { //Funcion para descargar las preguntas seleccionadas en formato yaml
@@ -202,13 +170,13 @@ const BancoPreguntas = (props) => {
     if (createQuiz) {
       return <VisualizarPregunta data={data.objeto}
         createQuiz={true}
-        addQuestion={props.addQuestion}>
+        addQuestion={props.addQuestion}>  {/*TODO Como es posible que esto funcionara antes si nunca ha existido esa función */}
       </VisualizarPregunta>;
 
     } else {
       return <VisualizarPregunta data={data.objeto}
         createQuiz={false}
-        deleteQuestion={deleteQuestion}
+        deleteQuestion={deleteQuestion} 
         updateEditedQuestion={updateEditedQuestion}>
       </VisualizarPregunta>;
     }
@@ -236,7 +204,7 @@ const BancoPreguntas = (props) => {
           onSelectedRowsChange={handleChange}
           expandableRows
           expandableRowsComponent={ExpandedComponent}
-          /* TODO arreglar boton descarga contextActions={downloadButton} */>  
+          contextActions={downloadButton()}>  
         </DataTable>
       </div>
     </div>

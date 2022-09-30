@@ -5,8 +5,47 @@ import TextQuestion from "./TextQuestion.js";
 import QuestionNav from "./QuestionNav.js";
 import Countdown from "react-countdown";
 import ErrorModal from "./common/modals/ErrorModal";
-import { comprobarPassword, descifrarTest, sendTest } from "../utils/manage_test.js";
+import Tests from "../services/Tests.js";
 import { useNavigate, useParams } from "react-router-dom";
+import CryptoJS from "crypto-js";
+
+const getTestFromLocalStorage = (testId) => {
+  let tests = localStorage.getItem("tests");
+  let cuestionariosList = JSON.parse(tests);
+  for (const cuestionario of cuestionariosList) {
+    let test = JSON.parse(cuestionario);
+    if (test.id === Number(testId)) {
+      //TODO revisar tipos en otras condiciones ===
+      return test;
+    }
+  }
+};
+
+const descifrarTest = (currentTest) => {
+  let input = getTestFromLocalStorage(currentTest);
+
+  let cifradas = input.encrypted_message;
+  let key = CryptoJS.enc.Hex.parse(input.password);
+  let iv = CryptoJS.enc.Hex.parse(input.iv);
+  let cipher = CryptoJS.lib.CipherParams.create({
+    ciphertext: CryptoJS.enc.Base64.parse(cifradas),
+  });
+
+  let result = CryptoJS.AES.decrypt(cipher, key, { iv: iv, mode: CryptoJS.mode.CFB });
+  let text = result.toString(CryptoJS.enc.Utf8);
+  text = JSON.parse(text);
+
+  return text.questions;
+};
+
+const comprobarPassword = (contra, currentTest) => {
+  if (contra !== "") {
+    let text = getTestFromLocalStorage(currentTest);
+    if (CryptoJS.SHA256(contra).toString() === text.password) return true;
+  }
+  window.$("#password_error").modal("show");
+  return false;
+};
 
 const CuestionarioPassword = (props) => {
   const message = "Contraseña incorrecta";
@@ -98,7 +137,7 @@ const QuestionContainer = (props) => {
   };
 
   const renderButtons = () => {
-    if (indPregunta === 0 && numPreguntas===0) {
+    if (indPregunta === 0 && numPreguntas === 0) {
       return (
         <div className="p-2 col text-center">
           <button type="button" className="btn btn-warning" onClick={endTest}>
@@ -106,7 +145,7 @@ const QuestionContainer = (props) => {
           </button>
         </div>
       );
-    }  else if (indPregunta === 0){
+    } else if (indPregunta === 0) {
       return (
         <div className="p-2 col text-center">
           <button type="button" className="btn btn-success" onClick={updateIndNext}>
@@ -170,7 +209,12 @@ const QuestionContainer = (props) => {
   };
 
   const endTest = () => {
-    let [sent, hash] = sendTest();
+    let respuestas = localStorage.getItem('answers');
+    let hash = CryptoJS.SHA256(respuestas).toString();
+    let sent = navigator.onLine;
+    //TODO por qué no se espera respuesta de esta peticion??
+    Tests.sendTest(respuestas,hash)
+
     if (sent) {
       navigate("/", { replace: true });
     } else {
@@ -187,7 +231,7 @@ const QuestionContainer = (props) => {
 
   const unlockTest = () => {
     if (comprobarPassword(contra, params.id)) {
-      var list = descifrarTest(params.id);
+      let list = descifrarTest(params.id);
       initAnswerList(list);
       setQuestionList(list);
       setIsAllowed(true);
@@ -201,12 +245,12 @@ const QuestionContainer = (props) => {
   };
 
   const addAnswer = (answer) => {
-    var newlist = answerList;
+    let newlist = answerList;
     newlist.set(answer.id, { type: answer.respuesta.type, answr: answer.respuesta.answer });
 
-    var listaRespuestas = [];
-    for (var [key, value] of newlist.entries()) {
-      var pregunta = {};
+    let listaRespuestas = [];
+    for (let [key, value] of newlist.entries()) {
+      let pregunta = {};
       pregunta.id = key;
       pregunta.type = value.type;
       if (pregunta.type === "test") {
@@ -218,7 +262,7 @@ const QuestionContainer = (props) => {
       listaRespuestas.push(pregunta);
     }
 
-    var respuestas = { idCuestionario: params.id, respuestas: listaRespuestas };
+    let respuestas = { idCuestionario: params.id, respuestas: listaRespuestas };
     localStorage.setItem("answers", JSON.stringify(respuestas));
 
     setAnswerList(newlist);

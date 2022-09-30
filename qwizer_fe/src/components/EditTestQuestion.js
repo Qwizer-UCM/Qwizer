@@ -27,7 +27,7 @@ export default function EditTestQuestion(props) {
         return (
           <div key={opcion.id} className="row m-1">
             <label className="col-4">{indx + 1 + ".- Opción :"} &nbsp;</label>
-            <input className="col-8 m-input" name={opcion.id} type="text" value={opcion.op} onChange={(e) => setoptions((options) => options.map((item) => (item.id === options.id ? { ...item, op: e.target.value } : item)))} />
+            <input className="col-8 m-input" name={opcion.id} type="text" value={opcion.op} onChange={(e) => setoptions((options) => options.map((item) => (item.id === opcion.id ? { ...item, op: e.target.value } : item)))} />
           </div>
         );
       })}

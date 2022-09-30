@@ -4,6 +4,7 @@ import ErrorModal from "./common/modals/ErrorModal";
 import { API_URL } from "../constants/Constants";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Tests from "../services/Tests";
 
 const TarjetaCuestionario = (props) => {
   const navigate = useNavigate();
@@ -72,43 +73,16 @@ const TarjetaCuestionario = (props) => {
   /////////////////////////////////////////////////////////////
 
   const getTest = (idCuestionario) => {
-    let url = `${API_URL}/test`;
-    let token = localStorage.getItem("token");
-
-    const data = new Map([["idCuestionario", idCuestionario]]);
-    const obj = JSON.stringify(Object.fromEntries(data));
-    fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: token,
-        "Content-type": "application/json",
-      },
-      body: obj,
-    })
-      .then(function (response) {
-        return response.json();
-      })
-      .then((data) => {
-        setdownloaded(true);
-        const jsonObject = JSON.stringify(data);
-        addTestToLocalStorage(jsonObject);
-      });
+    Tests.get(idCuestionario).then(({ data }) => {
+      setdownloaded(true);
+      const jsonObject = JSON.stringify(data);
+      addTestToLocalStorage(jsonObject);
+    });
   };
 
   const get_info = () => {
-    let token = localStorage.getItem("token");
-    const message = new Map([["idCuestionario", props.idCuestionario]]);
-    const jsonObject = JSON.stringify(Object.fromEntries(message));
-    fetch(`${API_URL}/get-quiz-info`, {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-        Authorization: token,
-      },
-      body: jsonObject,
-    })
-      .then((response) => response.json())
-      .then((data) => {
+    Tests.getInfo(props.idCuestionario)
+      .then(({ data }) => {
         let corregido = data.corregido === 0 ? false : true;
         setduracion(data.duracion);
         setcalificacion(data.nota);
@@ -236,7 +210,7 @@ const TarjetaCuestionario = (props) => {
   };
 
   //TODO distincion OFFLINE ONLINE?
-  return (props.offline ? mostrar_offline() : mostrar_online())
+  return props.offline ? mostrar_offline() : mostrar_online();
 };
 
 export default TarjetaCuestionario;

@@ -1,9 +1,9 @@
 import React from "react";
 import CheckIcon from "@mui/icons-material/Check";
 import ErrorIcon from "@mui/icons-material/Error";
-import { API_URL } from "../constants/Constants";
 import { useEffect } from "react";
 import { useState } from "react";
+import Otro from "../services/NoSeDondeMeterloTodavia";
 
 export default function VisualizarNota(props) {
   const [corregido, setcorregido] = useState();
@@ -13,33 +13,17 @@ export default function VisualizarNota(props) {
 
   useEffect(() => {
     getHashes();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getHashes = () => {
-    let token = localStorage.getItem("token");
-
-    const message = new Map([
-      ["idCuestionario", props.data.idCuestionario],
-      ["idUsuario", props.data.id],
-    ]);
-
-    const jsonObject = JSON.stringify(Object.fromEntries(message));
-    fetch(`${API_URL}/get-hashes`, {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-        Authorization: token,
-      },
-      body: jsonObject,
-    })
-      .then((response) => response.json())
-      .then((data) => {
+    Otro.getHashes(props.data.idCuestionario, props.data.id)
+      .then(({ data }) => {
         setcorregido(data.corrected);
         sethashSubida(data.hashSubida);
         setqrSent(data.qrSent);
         sethashQr(data.hashQr);
-        this.generar_tabla(); //TODO Y ESTO???
+        //this.generar_tabla(); //TODO Y ESTO???
       })
       .catch((error) => console.log(error));
   };

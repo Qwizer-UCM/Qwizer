@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { getSubjectTests } from "../utils/manage_subjects";
+import Subjects from "../services/Subjects";
 import TarjetaCuestionario from "./TarjetaCuestionario";
 import { useState } from "react";
 import { useEffect } from "react";
@@ -19,7 +19,7 @@ const CuestionariosContainer = (props) => {
 
   useEffect(() => {
     //TODO Pensar como conseguir el nombre de la asignatura
-    getSubjectTests(params.id).then((data) => {
+    Subjects.getTests(params.id).then(({data}) => {
       setIdCuestionarios(data.idCuestionarios);
       setCuestionarios(data.cuestionarios);
     });
@@ -31,7 +31,6 @@ const CuestionariosContainer = (props) => {
         <h1>{asignatura}</h1>
       </div>
       {cuestionarios.map((cuestionario, indx) => {
-        console.log(cuestionario)
         return (
           <div key={idCuestionarios[indx]} className="d-flex justify-content-center">
             <TarjetaCuestionario offline={false} cuestionario={cuestionario} idCuestionario={idCuestionarios[indx]} revisionTest={revisarTest} rol={rol} revisarNotasTest={revisarNotasTest} revisionTestProfesor={revisionTestProfesor} />
