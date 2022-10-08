@@ -1,0 +1,29 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "==4.1"
+django-cors-headers = "==3.13.0"
+django-createuser = "==0.1.0"
+djangorestframework = "==3.13.1"
+pycryptodome = "==3.15.0"
+pyyaml = "==6.0"
+mysqlclient = "==2.1.1"
+django-extensions = "*"
+djoser = "*"
+drf-yasg = "*"
+
+[dev-packages]
+pyparsing = "*"
+pydot = "*"
+pygraphviz = "*"
+werkzeug = "*"
+pylint = "*"
+pylint-django = "*"
+ipython = "*"
+notebook = "*"
+
+[requires]
+python_version = "3.10"
