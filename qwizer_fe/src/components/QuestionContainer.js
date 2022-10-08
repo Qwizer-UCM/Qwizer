@@ -209,11 +209,14 @@ const QuestionContainer = (props) => {
   };
 
   const endTest = () => {
-    let respuestas = localStorage.getItem('answers');
+    let respuestas = localStorage.getItem("answers");
     let hash = CryptoJS.SHA256(respuestas).toString();
     let sent = navigator.onLine;
     //TODO por qué no se espera respuesta de esta peticion??
-    Tests.sendTest(respuestas,hash)
+    console.log(respuestas)
+    Tests.sendTest(respuestas, hash)
+      .then(() => console.log("END"))
+      .catch((e) => console.error(e));
 
     if (sent) {
       navigate("/", { replace: true });

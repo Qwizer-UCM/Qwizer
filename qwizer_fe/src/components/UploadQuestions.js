@@ -23,6 +23,7 @@ const UploadQuestions = (props) => {
             let reader = new FileReader();
             reader.readAsText(file, 'utf-8');
             reader.onload = (e) => {
+                console.log(e.target.result)
                 Questions.upload(e.target.result, idAsignatura)
                 .then(({data}) => {
                     setFile("")
