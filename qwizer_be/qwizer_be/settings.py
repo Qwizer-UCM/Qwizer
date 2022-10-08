@@ -24,29 +24,39 @@ SECRET_KEY = 'django-insecure-4tcxc87hu-!2aydvv34&2+n7ou!byqsq3tr*y%wwzh%y!c8yur
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+SHELL_PLUS_IMPORTS = [
+    'from api.serializer import *'
+]
 
 ALLOWED_HOSTS = []
 
 
 # Application definition
 
-INSTALLED_APPS = [
+BASE_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles'
+]
 
-    #Lo nuevo que he añadido
-
-    'corsheaders', #ELIMINARLOS ANTES DE LA ENTREGA FINAL PORQUE ES UNA VULNERABILIDAD
-    'rest_framework',
-    'rest_framework.authtoken',
+LOCAL_APPS = [
     'api',
     'django_createuser'
-
 ]
+
+THIRD_PARTY_APPS = [
+    'corsheaders', #TODO Por qué??? ELIMINARLOS ANTES DE LA ENTREGA FINAL PORQUE ES UNA VULNERABILIDAD
+    'rest_framework',
+    'rest_framework.authtoken',
+    'django_extensions',
+    'djoser',
+    'drf_yasg',
+]
+
+INSTALLED_APPS = BASE_APPS + LOCAL_APPS + THIRD_PARTY_APPS
 
 
 
@@ -96,6 +106,9 @@ WSGI_APPLICATION = 'qwizer_be.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+
+#TODO Se deberia crear un .env para esto y no subir al repositorio credenciales (incluir tambien la secret_key)
+# https://djangocentral.com/environment-variables-in-django/
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -147,7 +160,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework.authentication.TokenAuthentication']
+    'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework.authentication.TokenAuthentication'],
 }
 
 

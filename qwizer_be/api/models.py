@@ -130,25 +130,16 @@ def create_auth_token(sender, instance=None,created=False, **kwargs):
         Token.objects.create(user=instance)
 
 #----------------------         ----------------------------       ------------------------#  
-
-class Cuestionarios(models.Model):
-    titulo = models.CharField(blank=True, max_length=100, verbose_name='titulo')
-    idProfesor = models.ForeignKey(User, on_delete=models.CASCADE)
-    idAsignatura = models.ForeignKey('Asignaturas', on_delete=models.CASCADE)
-    duracion = models.IntegerField(default=10, verbose_name='duracion')
-    #0 no es secuencial, 1 es secuencial
-    secuencial =  models.IntegerField(default=1, verbose_name='secuencial')
-    password = models.CharField(blank=True, max_length=300, verbose_name='password')
-    fecha_apertura = models.DateTimeField(blank=False, verbose_name='fecha_apertura')
-    fecha_cierre = models.DateTimeField(blank=False,  verbose_name='fecha_cierre')
+class OpcionesTest(models.Model):
+    idPregunta = models.ForeignKey('Preguntas',related_name="opciones_test",on_delete=models.CASCADE)
+    opcion = models.CharField(blank=True, max_length=254, verbose_name='opcion')
 
     def __str__(self):
-        return self.titulo
-
+        return self.opcion
+    
     class Meta:
-        ordering = ['titulo']
-        db_table = "cuestionarios"
-        unique_together = ('idAsignatura', 'titulo')                   #No puede haber dos cuestionarios con el mismo nombre para una asignatura
+        db_table = "opciones_test"
+        #unique_together = ['opcion', 'idPregunta']
 
 class Preguntas(models.Model):
     tipoPregunta = models.CharField(blank=True, max_length=100, verbose_name='tipoPregunta')
@@ -164,8 +155,28 @@ class Preguntas(models.Model):
         db_table = "preguntas"
         unique_together = ['pregunta', 'tipoPregunta', 'idAsignatura']                  #No pueden haber preguntas iguales para una asignatura
 
+class Cuestionarios(models.Model):
+    titulo = models.CharField(blank=True, max_length=100, verbose_name='titulo')
+    idProfesor = models.ForeignKey(User, on_delete=models.CASCADE)
+    idAsignatura = models.ForeignKey('Asignaturas', on_delete=models.CASCADE)
+    duracion = models.IntegerField(default=10, verbose_name='duracion')
+    #0 no es secuencial, 1 es secuencial
+    secuencial =  models.IntegerField(default=1, verbose_name='secuencial')
+    password = models.CharField(blank=True, max_length=300, verbose_name='password')
+    fecha_apertura = models.DateTimeField(blank=False, verbose_name='fecha_apertura')
+    fecha_cierre = models.DateTimeField(blank=False,  verbose_name='fecha_cierre')
+    preguntas = models.ManyToManyField(Preguntas, through='PerteneceACuestionario')
+
+    def __str__(self):
+        return self.titulo
+
+    class Meta:
+        ordering = ['titulo']
+        db_table = "cuestionarios"
+        unique_together = ('idAsignatura', 'titulo')                   #No puede haber dos cuestionarios con el mismo nombre para una asignatura
+
 class PerteneceACuestionario(models.Model):
-    idPregunta = models.ForeignKey('Preguntas', on_delete=models.CASCADE)
+    idPregunta = models.ForeignKey('Preguntas', related_name="preguntas",on_delete=models.CASCADE)
     idCuestionario = models.ForeignKey('Cuestionarios', on_delete=models.CASCADE)
     nQuestion = models.IntegerField(verbose_name='nPregunta')
     puntosAcierto = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name='puntosAcierto')
@@ -179,18 +190,6 @@ class PerteneceACuestionario(models.Model):
     class Meta:
         ordering = ['idPregunta']
         db_table = "pertenece_cuestionario"
-
-class OpcionesTest(models.Model):
-    idPregunta = models.ForeignKey('Preguntas', on_delete=models.CASCADE)
-    opcion = models.CharField(blank=True, max_length=254, verbose_name='opcion')
-
-    def __str__(self):
-        return self.opcion
-    
-    class Meta:
-        db_table = "opciones_test"
-        #unique_together = ['opcion', 'idPregunta']
-
 
 class RespuestasTexto(models.Model):
     idPregunta = models.ForeignKey('Preguntas', on_delete=models.CASCADE)
@@ -261,8 +260,14 @@ class EnvioOffline(models.Model):
         db_table = "Envio_offline"
         unique_together = ('idCuestionario', 'idAlumno') 
 
+#TODO existen modelos abstractos revisar docs
+# https://docs.djangoproject.com/en/dev/topics/db/models/#multi-table-inheritance
+# Y este paquete parece que facilita las cosas
+# https://django-polymorphic.readthedocs.io/en/latest/
+# Aún haciendolo asi no lo veo muy claro para luego en las vistas no hacer distincion entre las instancias
+
 class RespuestasEnviadasTest(models.Model):
-    idCuestionario = models.ForeignKey('Cuestionarios', on_delete=models.CASCADE)
+    idCuestionario = models.ForeignKey('Cuestionarios', related_name="respuestas_enviadas_test",on_delete=models.CASCADE)
     idAlumno = models.ForeignKey(User, on_delete=models.CASCADE)      
     idPregunta = models.ForeignKey('Preguntas', on_delete=models.CASCADE)                   #No debería ser on delete cascade
     idRespuesta = models.ForeignKey('OpcionesTest', on_delete=models.CASCADE)
@@ -272,7 +277,7 @@ class RespuestasEnviadasTest(models.Model):
         db_table = "respuestas_enviadas_test"
 
 class RespuestasEnviadasText(models.Model):
-    idCuestionario = models.ForeignKey('Cuestionarios', on_delete=models.CASCADE)
+    idCuestionario = models.ForeignKey('Cuestionarios', related_name="respuestas_enviadas_text",on_delete=models.CASCADE)
     idAlumno = models.ForeignKey(User, on_delete=models.CASCADE)
     idPregunta = models.ForeignKey('Preguntas', on_delete=models.CASCADE)
     Respuesta = models.CharField(blank=True, max_length=254, verbose_name='respuesta')
