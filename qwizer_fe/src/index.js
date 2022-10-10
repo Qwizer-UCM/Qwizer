@@ -1,5 +1,6 @@
 import React from "react";
-import ReactDOM from "react-dom";
+// TODO REACT 17 borrar si funciona // import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
@@ -14,14 +15,23 @@ import "./css/login.css";
 import "./css/index.css";
 import { BrowserRouter } from "react-router-dom";
 
-ReactDOM.render(
+createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <App />
     </BrowserRouter>
-  </React.StrictMode>,
-  document.getElementById("root")
+  </React.StrictMode>
 );
+
+// TODO REACT 17 borrar si funciona //
+// ReactDOM.render(
+//   <React.StrictMode>
+//     <BrowserRouter>
+//       <App />
+//     </BrowserRouter>
+//   </React.StrictMode>,
+//   document.getElementById("root")
+// );
 
 serviceWorkerRegistration.register();
 
