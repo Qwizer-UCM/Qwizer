@@ -14,16 +14,14 @@ mysqlclient = "==2.1.1"
 django-extensions = "*"
 djoser = "*"
 drf-yasg = "*"
-
-[dev-packages]
-pyparsing = "*"
-pydot = "*"
-pygraphviz = "*"
+pip = "*"
+install = "*"
+django-environ = "*"
+psycopg2-binary = "*"
 werkzeug = "*"
 pylint = "*"
 pylint-django = "*"
 ipython = "*"
-notebook = "*"
 
 [requires]
 python_version = "3.10"
