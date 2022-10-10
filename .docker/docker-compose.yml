@@ -1,0 +1,51 @@
+version: '3.9'
+services:
+  db_2:
+    container_name: db_2
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=qwizer_be
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: pg_isready -d $$POSTGRES_DB
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  db:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'qwizer-db'
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_TCP_PORT: 3307
+    ports:
+      - '3307:3307'
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  back:
+    build: ../qwizer_be/
+    depends_on:
+      db_2:
+        condition: service_healthy
+    ports:
+      - '8000:8000'
+    volumes:
+      - ../qwizer_be/:/app
+
+  front:
+    build: ../qwizer_fe
+    depends_on:
+      - back
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../qwizer_fe/src:/app/src
+      - ../qwizer_fe/public:/app/public
