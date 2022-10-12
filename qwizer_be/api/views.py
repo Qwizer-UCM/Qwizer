@@ -894,14 +894,14 @@ def get_quiz_grades(request):
 
     alumnos = User.objects.raw(
         "SELECT u.id, u.first_name, u.last_name, n.nota AS nota "
-        + "FROM api_user AS u JOIN notas AS n ON u.id = n.idAlumno_id WHERE n.idCuestionario_id = %s AND n.idAlumno_id = %s UNION "
+        + "FROM api_user AS u JOIN notas AS n ON u.id = n.\"idAlumno_id\" WHERE n.\"idCuestionario_id\" = %s AND n.\"idAlumno_id\" = %s UNION "
         + "SELECT u.id, u.first_name, u.last_name, n.nota as nota FROM "
         + "api_user AS u "
         + "JOIN es_alumno AS alumn "
-        + "ON u.id = alumn.idAlumno_id "
-        + "left JOIN (SELECT * from notas WHERE idCuestionario_id = %s) AS n ON "
-        + "u.id = n.idAlumno_id "
-        + "WHERE alumn.idAsignatura_id = %s ",
+        + "ON u.id = alumn.\"idAlumno_id\" "
+        + "left JOIN (SELECT * from notas WHERE \"idCuestionario_id\" = %s) AS n ON "
+        + "u.id = n.\"idAlumno_id\" "
+        + "WHERE alumn.\"idAsignatura_id\" = %s ",
         [
             str(request.data["idCuestionario"]),
             request.user.id,

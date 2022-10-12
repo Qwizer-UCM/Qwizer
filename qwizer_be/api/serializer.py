@@ -1,6 +1,7 @@
+from attr import fields
 from rest_framework import serializers
 from .utils.cifrado import encrypt_tests
-from .models import Cuestionarios, OpcionesTest, Preguntas
+from .models import Cuestionarios, OpcionesTest, Preguntas, RespuestasEnviadasTest, RespuestasEnviadasText
 
 #TODO mejor indicar los campos concretos en vez de __all__
 
@@ -39,3 +40,31 @@ class EncryptedTestsSerializer(serializers.ModelSerializer):
         )
         res.pop("preguntas")
         return res
+
+
+class RespuestasEnviadasTestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RespuestasEnviadasTest
+        fields = "__all__"
+class RespuestasEnviadasTextSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RespuestasEnviadasText
+        fields = "__all__"
+
+class RespuestasSerializer(serializers.Serializer):
+    def to_internal_value(self, data):
+        data["idAlumno"] = self.context["user"].id
+        data["idCuestionario"] = self.context["idCuestionario"]
+        data["idPregunta"] = data.pop("id")
+
+        test_type = data.pop("type")
+        print(test_type)
+        if test_type == "test":
+            data["idRespuesta"] = data.pop("answr")
+            return RespuestasEnviadasTestSerializer().to_internal_value(data)
+        elif test_type == "text":
+            data["Respuesta"] = data.pop("answr")
+            return RespuestasEnviadasTextSerializer().to_internal_value(data)
+
+    def to_representation(self, instance):
+        return instance

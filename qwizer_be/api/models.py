@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models.base import Model
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager, PermissionsMixin)
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -266,22 +265,47 @@ class EnvioOffline(models.Model):
 # https://django-polymorphic.readthedocs.io/en/latest/
 # Aún haciendolo asi no lo veo muy claro para luego en las vistas no hacer distincion entre las instancias
 
-class RespuestasEnviadasTest(models.Model):
-    idCuestionario = models.ForeignKey('Cuestionarios', related_name="respuestas_enviadas_test",on_delete=models.CASCADE)
-    idAlumno = models.ForeignKey(User, on_delete=models.CASCADE)      
-    idPregunta = models.ForeignKey('Preguntas', on_delete=models.CASCADE)                   #No debería ser on delete cascade
+class RespuestasEnviadas(models.Model):
+    class Meta:
+        abstract = True
+        ordering = ['idPregunta']
+    #TODO Cambiar atributos, no son id's son referencias a la propia tabla
+    idCuestionario = models.ForeignKey('Cuestionarios', on_delete=models.CASCADE)
+    idAlumno = models.ForeignKey(User, on_delete=models.CASCADE) #TODO puede ser profesor tambien, vaya nombres :/     
+    idPregunta = models.ForeignKey('Preguntas', on_delete=models.CASCADE)     
+    
+    @classmethod
+    def calcular_nota(cls,respuesta,id_cuestionario):
+        #TODO alguna manera mejor de calcular nota?
+        pregunta_info = PerteneceACuestionario.objects.get(
+            idPregunta_id=respuesta["id"], idCuestionario_id=id_cuestionario
+        )
+        opcion_usuario,opcion_correcta = None, None
+
+        if respuesta["type"] == "test":
+            opcion_usuario = int(respuesta["answr"])
+            opcion_correcta = RespuestasTest.objects.get(
+                idPregunta=respuesta["id"]
+            ).idOpcion.id
+        elif respuesta["type"] == "text":
+            opcion_usuario = respuesta["answr"].lower().replace(" ", "")
+            opcion_correcta = RespuestasTexto.objects.get(
+                idPregunta=respuesta["id"]
+            ).respuesta.lower().replace(" ", "")
+
+        if opcion_usuario == opcion_correcta:
+            return pregunta_info.puntosAcierto
+        else:
+            return pregunta_info.puntosFallo
+
+class RespuestasEnviadasTest(RespuestasEnviadas):               #No debería ser on delete cascade
     idRespuesta = models.ForeignKey('OpcionesTest', on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ['idPregunta']
         db_table = "respuestas_enviadas_test"
 
-class RespuestasEnviadasText(models.Model):
-    idCuestionario = models.ForeignKey('Cuestionarios', related_name="respuestas_enviadas_text",on_delete=models.CASCADE)
-    idAlumno = models.ForeignKey(User, on_delete=models.CASCADE)
-    idPregunta = models.ForeignKey('Preguntas', on_delete=models.CASCADE)
+class RespuestasEnviadasText(RespuestasEnviadas):
     Respuesta = models.CharField(blank=True, max_length=254, verbose_name='respuesta')
 
     class Meta:
-        ordering = ['idPregunta']
         db_table = "respuestas_enviadas_text"
