@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { API_URL } from "../constants/Constants";
 import Subjects from "../services/Subjects";
 
 const TarjetaAsignatura = (props) => {

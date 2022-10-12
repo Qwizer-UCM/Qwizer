@@ -102,9 +102,7 @@ const CrearCuestionario = (props) => {
     }
 
     const addSelectedQuestion = (pregunta) => {
-
-        let listaPregSelec = selectedList //lista de preguntas seleccionadas para el cuestionario
-
+        let listaPregSelec = [...selectedList] //TODO No mutar estado, usar copias
         if (!listaPregSelec.includes(pregunta)) {
             listaPregSelec.push(pregunta)
             let diccionarioPregSelec = selectedListInfo
@@ -115,7 +113,7 @@ const CrearCuestionario = (props) => {
     }
 
     const modificarPuntuacion = (id, tipo, punt) => {
-
+        //TODO Borrar el estado de diccionario, se puede meter directamente al array
         let diccionarioPregSelec = selectedListInfo;
         let punt_info = diccionarioPregSelec[id]
 
@@ -132,7 +130,7 @@ const CrearCuestionario = (props) => {
 
 
     const deleteSelectedQuestion = (pregunta) => {
-        let lista = selectedList
+        let lista = [...selectedList]   //TODO No mutar el estado, usar copias
         lista.splice(lista.indexOf(pregunta), 1)
         let diccionario = selectedListInfo
         delete diccionario[pregunta.id] 
@@ -141,7 +139,8 @@ const CrearCuestionario = (props) => {
     }
 
     const enviarCuestionarioCreado = () => {
-
+        //TODO horrible, rehacer y usar required en la etiqueta en vez de estos apaños en javascript
+        // De paso nos quitamos la mitad de los estados :)
         let cuestionario = {};
         let incorrect = false;
 

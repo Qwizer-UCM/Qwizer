@@ -76,7 +76,7 @@ const CuestionarioPassword = (props) => {
     </div>
   );
 };
-
+//FIXME mover revisionTest y revisionTestProfesor de App.js a este componente
 const QuestionContainer = (props) => {
   const navigate = useNavigate();
   const params = useParams();
@@ -273,9 +273,9 @@ const QuestionContainer = (props) => {
 
   const renderQtype = questionType;
 
-  if (!isAllowed) return <CuestionarioPassword unlockTest={unlockTest} getPass={getPass} />;
+  if (!props.revision && !isAllowed) return <CuestionarioPassword unlockTest={unlockTest} getPass={getPass} />;
 
-  if (props.revision === false) {
+  if (!props.revision && questionList.length !== 0) {
     const pregunta = questionList[indPregunta];
     return (
       <div className="index-body container-fluid" id="questions">

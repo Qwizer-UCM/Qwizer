@@ -1,7 +1,6 @@
-import React, { useEffect } from "react";
+import { useEffect, useState} from "react";
 import TarjetaAsignatura from "./TarjetaAsignatura";
 import Subjects from "../services/Subjects";
-import { useState } from "react";
 
 const IndexContainer = (props) => {
   const [asignaturas, setAsignaturas] = useState([]);  //Guarda id y nombre de las asignaturas

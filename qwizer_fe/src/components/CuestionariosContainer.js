@@ -1,9 +1,7 @@
-import React from "react";
 import { useParams } from "react-router-dom";
 import Subjects from "../services/Subjects";
 import TarjetaCuestionario from "./TarjetaCuestionario";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect} from "react";
 
 const CuestionariosContainer = (props) => {
   const params = useParams();
