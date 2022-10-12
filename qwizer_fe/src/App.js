@@ -23,8 +23,12 @@ import CrearCuestionario from "./components/CrearCuestionario";
 import RevisionNotasContainer from "./components/RevisionNotasContainer";
 
 import AvailableOffline from "./components/AvailableOffline";
+import ProtectedRoutes from "./hoc/ProtectedRoutes";
+import NotFound404 from "./components/common/NotFound404";
+import useDocumentTitle from "./hooks/useDocumentTitle";
 
 const App = () => {
+  useDocumentTitle() //TODO se puede usar en cada componente pasandole un titulo para cada pagina
   const navigate = useNavigate();
 
   const [isLogged, setIsLogged] = useState(); //Guarda si se ha hecho login
@@ -47,34 +51,33 @@ const App = () => {
     } else {
       setIsLogged(false);
     }
-
   }, []);
 
   //// Funciones Login, Logout y manejo de la sesion del usuario >>>>>>>>>>>>>>>>>>>
 
   const login = (username, password) => {
-    Users.login(username,password).then(({data})=> {
-      if(data.respuesta === "invalid login"){
+    Users.login(username, password).then(({ data }) => {
+      if (data.respuesta === "invalid login") {
         window.alert("¡Contraseña incorrecta!");
-      }else{
-        localStorage.setItem('token',data.token);
-        localStorage.setItem('username',username);
-        localStorage.setItem('rol', data.rol);
-        localStorage.setItem('userId', data.id);
+      } else {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("username", username);
+        localStorage.setItem("rol", data.rol);
+        localStorage.setItem("userId", data.id);
 
         setUsername(username);
         setRol(data.rol);
         setUserId(data.id);
         setIsLogged(true);
         navigate("/");
-    }
+      }
     });
   };
 
   const logout = () => {
-    Users.logout().then(({data}) => {
+    Users.logout().then(({ data }) => {
       //TODO Mejor devolver otra cosa desde la api
-      if(data === "Logged out"){
+      if (data === "Logged out") {
         setIsLogged(false);
         localStorage.clear();
         navigate("/login");
@@ -85,10 +88,10 @@ const App = () => {
   //  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
   //// Funciones para desbloquear, empezar, enviarTest, revision el test >>>>>>>>>>>>>>>>>>>
-
+  //FIXME estas funciones tienen que ser movidas para que funcione /revision
   const revisionTest = (idCuestionario) => {
     Tests.getCorrectedTest(idCuestionario, "")
-      .then(({data}) => {
+      .then(({ data }) => {
         let jsonData = JSON.parse(data.corrected_test);
         setTestCorregido(jsonData);
         navigate("/revision");
@@ -100,7 +103,7 @@ const App = () => {
 
   const revisionTestProfesor = (idCuestionario, idAlumno) => {
     Tests.getCorrectedTest(idCuestionario, idAlumno)
-      .then(({data}) => {
+      .then(({ data }) => {
         let jsonData = JSON.parse(data.corrected_test);
         setTestCorregido(jsonData);
         navigate("/revision");
@@ -115,39 +118,38 @@ const App = () => {
     navigate("/revisionNotas");
   };
 
-  const protectedRoutes = () => {
-    return isLogged ? (
-      <>
-        <NavBar username={username} rol={rol} logout={logout} />
-        <Outlet />
-      </>
-    ) : (
-      <Navigate to="/login" replace />
-    );
-  };
-
-  if (isLogged === undefined) return null;    
+  if (isLogged === undefined) return null;
 
   return (
     <Routes>
-      <Route element={protectedRoutes()}>
+      <Route
+        element={
+          <ProtectedRoutes isAllowed={true}>
+            <NavBar username={username} rol={rol} logout={logout} />
+          </ProtectedRoutes>
+        }
+      >
         <Route path="/" element={<IndexContainer />} />
         <Route path="/cuestionarios/:id" element={<CuestionariosContainer revisionTest={revisionTest} revisionTestProfesor={revisionTestProfesor} rol={rol} revisarNotasTest={revisarNotasTest} />} />
         <Route path="/offline" element={<AvailableOffline />} />
         <Route path="/test/:id" element={<QuestionContainer revision={false} />} />
         <Route path="/revision/:id" element={<QuestionContainer revision={true} correctedTest={testCorregido} />} />
-        <Route path="/crear-cuestionario" element={<CrearCuestionario />} />
-        <Route path="/upload-questionary" element={<UploadFile />} />
-        <Route path="/upload-questions" element={<UploadQuestions />} />
-        <Route path="/banco-preguntas" element={<BancoPreguntas />} />
-        <Route path="/revisionNotas/:id" element={<RevisionNotasContainer currentCuestionario={cuestionarioViendoNotas} revisionTestProfesor={revisionTestProfesor} />} />
-        <Route path="/register" element={<RegisterContainer />} />
+        {/* FIXME importante arreglar el back devuelve las notas sin comprobar el rol */}
+        <Route element={<ProtectedRoutes isAllowed={rol.includes("teacher")} redirectPath={"/404"} />}>
+          <Route path="/banco-preguntas" element={<BancoPreguntas />} />
+          <Route path="/upload-questionary" element={<UploadFile />} />
+          <Route path="/upload-questions" element={<UploadQuestions />} />
+          <Route path="/crear-cuestionario" element={<CrearCuestionario />} />
+          <Route path="/revisionNotas/:id" element={<RevisionNotasContainer currentCuestionario={cuestionarioViendoNotas} revisionTestProfesor={revisionTestProfesor} />} />
+          <Route path="/register" element={<RegisterContainer />} />
+        </Route>
         <Route path="/scanner/:test/:hash" element={<QrContainer userId={userId} />} />
         {/*No se usa */}
         <Route path="/insercion-manual/:test/:hash" element={<InsercionManual userId={userId} />} />
       </Route>
       <Route path="/login" element={!isLogged ? <LoginComponent login={login} /> : <Navigate to={"/"} />} />
-      <Route path="*" element={<h1>404</h1>} />
+      <Route path="/404" element={<NotFound404 />} />
+      <Route path="*" element={<Navigate to={"/404"} />} />
     </Routes>
   );
 };
