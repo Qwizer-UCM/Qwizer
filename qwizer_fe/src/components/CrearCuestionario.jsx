@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate }from "react-router-dom";
-import BancoPreguntas from './BancoPreguntas.js'
+import BancoPreguntas from './BancoPreguntas.jsx'
 import TestQuestion from './TestQuestion'
 import TextQuestion from './TextQuestion'
 import Subjects from '../services/Subjects';

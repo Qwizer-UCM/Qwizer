@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
-import ErrorModal from './common/modals/ErrorModal.js'
-import SuccessModal from './common/modals/SuccessModal.js'
+import ErrorModal from './common/modals/ErrorModal'
+import SuccessModal from './common/modals/SuccessModal'
 import DataTable from 'react-data-table-component'
 import yaml from 'js-yaml'
-import VisualizarPregunta from './VisualizarPregunta.js'
+import VisualizarPregunta from './VisualizarPregunta'
 import Questions from '../services/Questions.js'
 import Subjects from '../services/Subjects';
 

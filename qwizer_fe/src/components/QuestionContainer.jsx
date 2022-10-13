@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 
-import TestQuestion from "./TestQuestion.js";
-import TextQuestion from "./TextQuestion.js";
-import QuestionNav from "./QuestionNav.js";
+import TestQuestion from "./TestQuestion";
+import TextQuestion from "./TextQuestion";
+import QuestionNav from "./QuestionNav";
 import Countdown from "react-countdown";
 import ErrorModal from "./common/modals/ErrorModal";
 import Tests from "../services/Tests.js";

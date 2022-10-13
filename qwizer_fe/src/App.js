@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
 
 import IndexContainer from "./components/IndexContainer";
-import QuestionContainer from "./components/QuestionContainer.js";
+import QuestionContainer from "./components/QuestionContainer";
 
 import LoginComponent from "./components/LoginComponent";
 import NavBar from "./components/common/NavBar";
