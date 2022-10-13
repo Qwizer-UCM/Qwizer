@@ -32,56 +32,38 @@ const App = () => {
   const navigate = useNavigate();
 
   const [isLogged, setIsLogged] = useState(); //Guarda si se ha hecho login
-  const [username, setUsername] = useState("");
-  const [rol, setRol] = useState("");
+  const [user, setUser] = useState({username: "", role:"", id: ""});
   const [cuestionarioViendoNotas, setCuestionarioViendoNotas] = useState(); //Guarda el id del cuestionario cuando un profesor revisa las notas de ese cuestionario
-
-  const [userId, setUserId] = useState();
-
   const [testCorregido, setTestCorregido] = useState();
 
   useEffect(() => {
-    let token = localStorage.getItem("token");
-    let usern = localStorage.getItem("username");
-
-    // TODO no se comprueba que el token sea válido 😐 y tampoco se refresca.
-    if (token !== null && usern !== null) {
+    Users.me().then(({data}) => {
       setIsLogged(true);
-      setUsername(usern);
-    } else {
+      setUser({username: data.email, role: data.role, id:data.id})
+    }).catch(({response}) => {
+      console.error(response.data.detail)
+      localStorage.clear() //TODO Seria correcto borrar localstorage?
       setIsLogged(false);
-    }
+    })
   }, []);
 
   //// Funciones Login, Logout y manejo de la sesion del usuario >>>>>>>>>>>>>>>>>>>
 
   const login = (username, password) => {
     Users.login(username, password).then(({ data }) => {
-      if (data.respuesta === "invalid login") {
-        window.alert("¡Contraseña incorrecta!");
-      } else {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("username", username);
-        localStorage.setItem("rol", data.rol);
-        localStorage.setItem("userId", data.id);
-
-        setUsername(username);
-        setRol(data.rol);
-        setUserId(data.id);
-        setIsLogged(true);
-        navigate("/");
-      }
+      localStorage.setItem("token",`Token ${data.auth_token}`)
+      setIsLogged(true);     
+    }).catch(({response}) => {
+      console.error(response.data.non_field_errors[0])
     });
   };
 
   const logout = () => {
-    Users.logout().then(({ data }) => {
-      //TODO Mejor devolver otra cosa desde la api
-      if (data === "Logged out") {
-        setIsLogged(false);
-        localStorage.clear();
-        navigate("/login");
-      }
+    Users.logout().then(() => {
+      localStorage.clear();
+      setIsLogged(false);
+    }).catch(({response}) => {
+      console.error(response.data.detail)
     });
   };
 
@@ -124,18 +106,18 @@ const App = () => {
     <Routes>
       <Route
         element={
-          <ProtectedRoutes isAllowed={true}>
-            <NavBar username={username} rol={rol} logout={logout} />
+          <ProtectedRoutes isAllowed={isLogged}>
+            <NavBar username={user.username} rol={user.role} logout={logout} />
           </ProtectedRoutes>
         }
       >
         <Route path="/" element={<IndexContainer />} />
-        <Route path="/cuestionarios/:id" element={<CuestionariosContainer revisionTest={revisionTest} revisionTestProfesor={revisionTestProfesor} rol={rol} revisarNotasTest={revisarNotasTest} />} />
+        <Route path="/cuestionarios/:id" element={<CuestionariosContainer rol={user.role} revisionTest={revisionTest} revisionTestProfesor={revisionTestProfesor} revisarNotasTest={revisarNotasTest} />} />
         <Route path="/offline" element={<AvailableOffline />} />
         <Route path="/test/:id" element={<QuestionContainer revision={false} />} />
         <Route path="/revision/:id" element={<QuestionContainer revision={true} correctedTest={testCorregido} />} />
         {/* FIXME importante arreglar el back devuelve las notas sin comprobar el rol */}
-        <Route element={<ProtectedRoutes isAllowed={rol.includes("teacher")} redirectPath={"/404"} />}>
+        <Route element={<ProtectedRoutes isAllowed={user.role.includes("teacher")} redirectPath={"/404"} />}>
           <Route path="/banco-preguntas" element={<BancoPreguntas />} />
           <Route path="/upload-questionary" element={<UploadFile />} />
           <Route path="/upload-questions" element={<UploadQuestions />} />
@@ -143,9 +125,9 @@ const App = () => {
           <Route path="/revisionNotas/:id" element={<RevisionNotasContainer currentCuestionario={cuestionarioViendoNotas} revisionTestProfesor={revisionTestProfesor} />} />
           <Route path="/register" element={<RegisterContainer />} />
         </Route>
-        <Route path="/scanner/:test/:hash" element={<QrContainer userId={userId} />} />
+        <Route path="/scanner/:test/:hash" element={<QrContainer userId={user.userId} />} />
         {/*No se usa */}
-        <Route path="/insercion-manual/:test/:hash" element={<InsercionManual userId={userId} />} />
+        <Route path="/insercion-manual/:test/:hash" element={<InsercionManual userId={user.userId} />} />
       </Route>
       <Route path="/login" element={!isLogged ? <LoginComponent login={login} /> : <Navigate to={"/"} />} />
       <Route path="/404" element={<NotFound404 />} />
