@@ -23,7 +23,7 @@ const TextQuestion = (props) => {
         }
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = (event) => {
@@ -58,12 +58,16 @@ const TextQuestion = (props) => {
   const visualizeMode = () => {
     return (
       <div className="d-flex flex-column justify-content-center visualize-container">
-        <div className="row m-1">
-          <label className="col-4">Título: &nbsp;</label>
+        <div className="row m-1 justify-content-center">
+          <label className="col-2">Título: &nbsp;</label>
           <input className="col-8 m-input" type="text" value={props.infoPreg.title} disabled></input>
-          <label className="col-4">Pregunta: &nbsp;</label>
+        </div>
+        <div className="row m-1 justify-content-center">
+          <label className="col-2">Pregunta: &nbsp;</label>
           <input className="col-8 m-input" type="text" value={props.infoPreg.question} disabled></input>
-          <label className="col-4">Respuesta: &nbsp;</label>
+        </div>
+        <div className="row m-1 justify-content-center">
+          <label className="col-2">Respuesta: &nbsp;</label>
           <input className="col-8 m-input" type="text" value={props.infoPreg.correct_op} disabled></input>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import ErrorModal from './common/modals/ErrorModal.js'
 import SuccessModal from './common/modals/SuccessModal.js'
 import DataTable from 'react-data-table-component'
@@ -7,16 +7,40 @@ import VisualizarPregunta from './VisualizarPregunta.js'
 import Questions from '../services/Questions.js'
 import Subjects from '../services/Subjects';
 
+
+const columns = [
+  {
+    name: 'Id',
+    selector: row => row.id,
+    sortable: true,
+    omit: true,
+  },
+  {
+    name: 'objeto',
+    selector: row => row.objeto,
+    omit: true,
+  },
+  {
+    name: 'Título',
+    selector: row => row.title,
+    sortable: true,
+  },
+  {
+    name: 'Pregunta',
+    selector: row => row.question,
+    sortable: true
+  }
+];
+
 const BancoPreguntas = (props) => {
-  const [selectedAsignatura, setSelectedAsignatura] = useState(undefined)
   const [listaAsignaturas, setListaAsignaturas] = useState([]) //lista de asignaturas del banco de preguntas
-  const [columns, setColumns] = useState(undefined)
   const [data, setData] = useState(undefined)
-  const [title, setTitle] = useState(undefined)
   const [preguntas, setPreguntas] = useState([])
   const [preguntasSeleccionadas, setPreguntasSeleccionadas] = useState(undefined)
   const [createQuiz, setCreateQuiz] = useState(false) //variable que le indica al banco de preguntas si se esta creando un cuestionario
  // const [message, setMessage] = useState("Todo fue bien")
+  const title = "Preguntas de la asignatura"
+  const selectedAsignatura = useRef();
 
   useEffect(() => {
     getAsignaturas();
@@ -27,18 +51,6 @@ const BancoPreguntas = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  useEffect(() => {
-    generar_tabla()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAsignatura, preguntas])
-
-  useEffect(() =>{
-    listaAsignaturas.forEach((asignatura, indx) => { //TODO adaptarlo a react
-      window.$("#subject-selector").append(new Option(asignatura.asignatura, asignatura.id));
-    });
-  }, [listaAsignaturas])
-
-
 
   const getAsignaturas = () => {
     Subjects.getAll().then(({data}) => {
@@ -48,54 +60,23 @@ const BancoPreguntas = (props) => {
 
   const getPregAsignaturas = (idAsignatura) => {
     Subjects.getQuestions(idAsignatura).then(({data}) => {
-      setSelectedAsignatura(idAsignatura)
       setPreguntas(data.preguntas)
+      let preguntas = [];
+      data.preguntas.forEach((pregunta, indx) => {
+        let row = {
+          id: pregunta.id,
+          objeto: pregunta,
+          title: pregunta.title,
+          question: pregunta.question
+        }
+        preguntas.push(row);
+      });
+  
+      setData(preguntas)
     });
 
 
   }
-
-  const generar_tabla = () => {
-    let columns = [
-      {
-        name: 'Id',
-        selector: row => row.id,
-        sortable: true,
-        omit: true,
-      },
-      {
-        name: 'objeto',
-        selector: row => row.objeto,
-        omit: true,
-      },
-      {
-        name: 'Título',
-        selector: row => row.title,
-        sortable: true,
-      },
-      {
-        name: 'Pregunta',
-        selector: row => row.question,
-        sortable: true
-      }
-    ];
-
-    let data = [];
-    preguntas.forEach((pregunta, indx) => {
-      let row = {
-        id: pregunta.id,
-        objeto: pregunta,
-        title: pregunta.title,
-        question: pregunta.question
-      }
-      data.push(row);
-    });
-
-    setColumns(columns)
-    setData(data)
-    setTitle("Preguntas de la asignatura")
-  }
-
 
   const handleChange = ({ selectedRows }) => {
     setPreguntasSeleccionadas(selectedRows)
@@ -103,19 +84,19 @@ const BancoPreguntas = (props) => {
   }
 
   const handleSelectChange = () => {
-    getPregAsignaturas(window.$("#subject-selector").val());
+    getPregAsignaturas(selectedAsignatura.current.options[selectedAsignatura.current.selectedIndex].value);
 
   }
 
   const deleteQuestion = (idPregunta) => {
     Questions.delete(idPregunta)
-    .then(() => getPregAsignaturas(selectedAsignatura))
+    .then(() => getPregAsignaturas(selectedAsignatura.current.options[selectedAsignatura.current.selectedIndex].value))
     .catch(e => console.log(e))
   }
 
   const updateEditedQuestion = (question) => {
     return Questions.update(question)
-    .then(() => getPregAsignaturas(selectedAsignatura))
+    .then(() => getPregAsignaturas(selectedAsignatura.current.options[selectedAsignatura.current.selectedIndex].value))
     .catch(e => console.log(e))
   }
 
@@ -167,13 +148,13 @@ const BancoPreguntas = (props) => {
   }
 
   const ExpandedComponent = ({ data }) => {
-    if (createQuiz) {
+    if (createQuiz) { //Componente cuando esta en CrearCuestionario.js
       return <VisualizarPregunta data={data.objeto}
         createQuiz={true}
         addQuestion={props.addQuestion}>  {/*TODO Como es posible que esto funcionara antes si nunca ha existido esa función */}
       </VisualizarPregunta>;
 
-    } else {
+    } else {  //Componente cuando esta en Banco de Preguntas solo
       return <VisualizarPregunta data={data.objeto}
         createQuiz={false}
         deleteQuestion={deleteQuestion} 
@@ -189,8 +170,14 @@ const BancoPreguntas = (props) => {
       <div className='card-content'>
         <h4 className='d-flex justify-content-center'>Banco de preguntas</h4>
         <label>Selecciona una asignatura para visualizar sus preguntas</label>
-        <select className="form-select" id="subject-selector" onChange={handleSelectChange} aria-label="Default select example">
+        <select ref={selectedAsignatura} className="form-select" id="subject-selector" onChange={handleSelectChange} aria-label="Default select example" >
           <option hidden defaultValue>Selecciona una asignatura</option>
+          <option hidden defaultValue>
+              Selecciona una asignatura
+            </option>
+            {listaAsignaturas.map((asignatura, idx) => (
+              <option key={asignatura.id} value={asignatura.id}>{asignatura.asignatura}</option>
+            ))}
         </select>
         <br />
         <DataTable

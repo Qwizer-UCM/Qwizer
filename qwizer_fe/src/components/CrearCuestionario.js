@@ -63,10 +63,10 @@ const CrearCuestionario = (props) => {
                 <select className='form-control' defaultValue='null' onChange={(e) => setTestSubject(Number(e.target.value))}>
                     {asignaturasImpartidas.map((subject, indx) => {  //TODO comprobar la key
                         return (
-                            <option key={indx} value={subject.id}>{subject.nombre}</option>
+                            <option key={subject.id} value={subject.id}>{subject.nombre}</option>
                         );
                     })}
-                    <option key='null' value='null'> Selecciona una Asignatura </option>
+                    <option key='null' hidden value='null'> Selecciona una Asignatura </option>
                 </select>
             </div>
 
@@ -144,6 +144,8 @@ const CrearCuestionario = (props) => {
         let cuestionario = {};
         let incorrect = false;
 
+        //TODO en el caso que fallen mas de dos pondría un error general
+
         if (testName) {
             cuestionario["testName"] = testName
         } else {
@@ -208,7 +210,6 @@ const CrearCuestionario = (props) => {
             incorrect = true;
         }
 
-
         if (selectedList.length !== 0) {
 
             let listaPreguntas = []
@@ -238,7 +239,7 @@ const CrearCuestionario = (props) => {
 
     }
 
-
+    //TODO pueden meterse preguntas de otras asignaturas
     const createSelectedQuestions = () => {
 
         const modfPunt = modificarPuntuacion

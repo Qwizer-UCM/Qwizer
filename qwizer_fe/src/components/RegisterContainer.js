@@ -30,7 +30,7 @@ const RegisterContainer = (props) => {
   const [data, setData] = useState(undefined);
   const [alumnosSeleccionados, setAlumnosSeleccionados] = useState(undefined);
   const [message, setMessage] = useState(undefined);
-  const selectedStudent = useRef();
+  const selectedSubject = useRef();  
 
   useEffect(() => {
     getAsignaturas();
@@ -65,7 +65,7 @@ const RegisterContainer = (props) => {
     let alumnos = alumnosSeleccionados;
 
 
-    let asignatura = selectedStudent.current.options[selectedStudent.current.selectedIndex].value;
+    let asignatura = selectedSubject.current.options[selectedSubject.current.selectedIndex].value;
 
     if (asignatura === "Selecciona una asignatura" || alumnos === undefined || alumnos.length === 0) {
       setMessage("Selecciona una asignatura y al menos un alumno");
@@ -102,7 +102,7 @@ const RegisterContainer = (props) => {
         <div className="card-content">
           <h4 className="d-flex justify-content-center">Registro de alumnos en asignaturas</h4>
           <label>Selecciona la asignatura a la que quieras añadir a los alumnos</label>
-          <select className="form-select" id="subject-selector" aria-label="Default select example" ref={selectedStudent}>
+          <select className="form-select" id="subject-selector" aria-label="Default select example" ref={selectedSubject}>
             <option hidden defaultValue>
               Selecciona una asignatura
             </option>

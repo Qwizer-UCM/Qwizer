@@ -23,7 +23,6 @@ const getTestFromLocalStorage = (testId) => {
 
 const descifrarTest = (currentTest) => {
   let input = getTestFromLocalStorage(currentTest);
-
   let cifradas = input.encrypted_message;
   let key = CryptoJS.enc.Hex.parse(input.password);
   let iv = CryptoJS.enc.Hex.parse(input.iv);
@@ -34,7 +33,6 @@ const descifrarTest = (currentTest) => {
   let result = CryptoJS.AES.decrypt(cipher, key, { iv: iv, mode: CryptoJS.mode.CFB });
   let text = result.toString(CryptoJS.enc.Utf8);
   text = JSON.parse(text);
-
   return text.questions;
 };
 
@@ -87,7 +85,7 @@ const QuestionContainer = (props) => {
   const [questionList, setQuestionList] = useState([]);
   const [answerList, setAnswerList] = useState({}); //TODO revisar metodos que los usan, se vuelven a usar mapas :(
   const [isAllowed, setIsAllowed] = useState(false); //Indica si se ha desbloqueado el test
-
+  const duration = getTestFromLocalStorage(params.id).duracion //TODO arreglo momentaneo
   const updateTime = () => {
     let initTime = Number(localStorage.getItem("initTime"));
     initTime = new Date(initTime);
@@ -98,7 +96,7 @@ const QuestionContainer = (props) => {
     let tiempoActual = actualTime.getHours() * 3600 + actualTime.getMinutes() * 60 + actualTime.getSeconds();
     let passedSeconds = tiempoActual - tiempoInicial;
 
-    let leftSeconds = props.duration * 60 - passedSeconds;
+    let leftSeconds = duration * 60 - passedSeconds;
 
     if (leftSeconds <= 0) {
       leftSeconds = 0;
@@ -110,18 +108,18 @@ const QuestionContainer = (props) => {
   };
 
   useEffect(() => {
-    if (props.questionList) {
+    if (questionList) {
       //si esta definido, porque si hace revision no lo esta
-      setNumPreguntas(props.questionList.length);
+      setNumPreguntas(questionList.length);
     }
-  }, [props.questionList]);
+  }, [questionList]);
 
   const questionType = (pregunta) => {
     if (pregunta != null) {
       if (pregunta.type === "test") {
-        return <TestQuestion mode={props.revision ? "revision" : "test"} infoPreg={pregunta} key={pregunta.id} idCuestionario={props.idCuestionario} question={pregunta.question} options={pregunta.options} id={pregunta.id} type={pregunta.type} addAnswerd={addAnswer} />;
+        return <TestQuestion mode={props.revision ? "revision" : "test"} infoPreg={pregunta} key={pregunta.id} idCuestionario={params.id} question={pregunta.question} options={pregunta.options} id={pregunta.id} type={pregunta.type} addAnswerd={addAnswer} />;
       } // else type = 'text'
-      return <TextQuestion mode={props.revision ? "revision" : "test"} infoPreg={pregunta} key={pregunta.id} idCuestionario={props.idCuestionario} question={pregunta.question} id={pregunta.id} type={pregunta.type} addAnswerd={addAnswer} />;
+      return <TextQuestion mode={props.revision ? "revision" : "test"} infoPreg={pregunta} key={pregunta.id} idCuestionario={params.id} question={pregunta.question} id={pregunta.id} type={pregunta.type} addAnswerd={addAnswer} />;
     }
   };
 
@@ -192,7 +190,7 @@ const QuestionContainer = (props) => {
       return <h1>Test Enviado</h1>;
     } else {
       // Render a countdown
-      let totalSeconds = props.duration * 60; //segundos
+      let totalSeconds = duration * 60; //segundos
       let leftSeconds = hours * 3600 + minutes * 60 + seconds;
       let porcentaje = 100 - parseInt((leftSeconds / totalSeconds) * 100);
       return (

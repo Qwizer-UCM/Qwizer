@@ -19,7 +19,7 @@ import React, { useState } from 'react'
         </div>
         <p></p>
         <div className="buttons">
-          <button className="btn btn-primary login-button" type="submit" onClick={() => props.login(currentUser.user, currentUser.pass)}>login</button>
+          <button className="btn btn-primary login-button" type="submit" onClick={() => props.login(currentUser.user, currentUser.pass)}>Login</button>
           <p></p>
           <a href='""'>¿Has olvidado la contraseña?</a>
         </div>

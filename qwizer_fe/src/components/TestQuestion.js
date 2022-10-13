@@ -98,21 +98,21 @@ const TestQuestion = (props) => {
 
     return (
       <div className="d-flex flex-column justify-content-center visualize-container">
-        <div className="row m-1">
-          <label className="col-4">Título: &nbsp;</label>
+        <div className="row m-1 justify-content-center">
+          <label className="col-2">Título: &nbsp;</label>
           <input className="col-8 m-input" type="text" value={questionData.title} disabled></input>
         </div>
 
-        <div className="row m-1">
-          <label className="col-4">Pregunta: &nbsp;</label>
+        <div className="row m-1 justify-content-center">
+          <label className="col-2">Pregunta: &nbsp;</label>
           <input className="col-8 m-input" type="text" value={questionData.question} disabled></input>
         </div>
 
         {questionData.options.map(function (option, indx) {
           return (
             <div key={option.id}>
-              <div className="row m-1">
-                <div className="col-4">
+              <div className="row m-1 justify-content-center">
+                <div className="col-2">
                   <input type="radio" id={option.id} name={"opciones" + preguntaId} value={option.id} checked={questionData.correct_op === option.id} disabled></input>
                   <label htmlFor={option.id}>{indx + 1}.- Opción: &nbsp;</label>
                 </div>

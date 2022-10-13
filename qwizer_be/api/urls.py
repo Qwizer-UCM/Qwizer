@@ -5,7 +5,9 @@ from . import views
 
 router = routers.DefaultRouter()
 
-router.register('tests',TestsViewSet,'tests')
+router.register('tests',views.TestsViewSet,'tests')
+#router.register('subjects',views.SubjectsViewSet,'subjects')
+
 
 urlpatterns = router.urls
 urlpatterns += [

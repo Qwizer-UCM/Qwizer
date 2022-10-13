@@ -139,7 +139,40 @@ def registro(request):
 
 """
 # get_subjects
+'''
+class SubjectsViewSet(mixins.RetrieveModelMixin,viewsets.GenericViewSet):
+    queryset = Asignaturas.objects.all()
+    permission_classes = []
 
+    def retrieve(self, request, *args, **kwargs):
+        listaAsignaturas = []
+        identif = request.user.id
+        role = str(request.user.role)
+        print(role)
+
+        if role == "student" or role == "teacher":
+
+            if role == "student":
+                listaIdAsignaturas = EsAlumno.objects.filter(idAlumno=identif).order_by(
+                    "idAsignatura"
+                )
+            elif role == "teacher":
+                listaIdAsignaturas = Imparte.objects.filter(idProfesor=identif).order_by(
+                    "idAsignatura"
+                )
+
+            for asignartura in listaIdAsignaturas:
+                asignaturaJSON = {}
+                asignaturaJSON["id"] = asignartura.idAsignatura.id
+                asignaturaJSON["nombre"] = asignartura.idAsignatura.asignatura
+                listaAsignaturas.append(asignaturaJSON)
+
+        else:
+            return Response("El admin no tiene ninguna asignatura")
+
+        print(listaAsignaturas)
+        return Response({"asignaturas": listaAsignaturas})
+'''
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -243,6 +276,7 @@ def get_quiz_info(request):
     fechaApertura = cuestionario.fecha_apertura
     fechaCierre = cuestionario.fecha_cierre
     notaCuestionario = 0
+
     try:
         # -----
         # Corregir Un alumno solo puede tener una nota para un cuestionario, solo puede hacer un cuestionrio una vez
@@ -508,7 +542,6 @@ def get_subject_questions(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_quiz(request):
-
     if str(request.user.role) == "student":
         content = {
             "inserted": "false",
@@ -518,7 +551,7 @@ def create_quiz(request):
 
     profesor = request.user
 
-    cuestionarioData = request.data
+    cuestionarioData = request.data["cuestionario"] #TODO habra manera que axios respete los objetos?
 
     title = cuestionarioData["testName"]
     passw = cuestionarioData["testPass"]

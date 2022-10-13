@@ -1,4 +1,4 @@
-import { useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import TarjetaAsignatura from "./TarjetaAsignatura";
 import Subjects from "../services/Subjects";
 
@@ -10,7 +10,7 @@ const IndexContainer = (props) => {
   }, []);
 
   const getAsignaturas = () => {
-    Subjects.getFromStudentOrTeacher().then(({data}) => {
+    Subjects.getFromStudentOrTeacher().then(({ data }) => {
       setAsignaturas(data.asignaturas);
     });
   };
@@ -49,7 +49,14 @@ const IndexContainer = (props) => {
       </div>
     );
   } else {
-    return <h1>Loading...</h1>;
+    return (
+      <div className="d-flex justify-content align-items-center">
+        <div className="spinner-grow" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+    );
   }
 };
 

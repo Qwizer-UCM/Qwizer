@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import $ from "jquery";
 import ErrorModal from "./common/modals/ErrorModal";
-import { API_URL } from "../constants/Constants";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Tests from "../services/Tests";

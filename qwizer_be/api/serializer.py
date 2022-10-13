@@ -1,4 +1,3 @@
-from attr import fields
 from rest_framework import serializers
 from .utils.cifrado import encrypt_tests
 from .models import Cuestionarios, OpcionesTest, Preguntas, RespuestasEnviadasTest, RespuestasEnviadasText
