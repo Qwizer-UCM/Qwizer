@@ -37,15 +37,20 @@ const App = () => {
   const [testCorregido, setTestCorregido] = useState();
 
   useEffect(() => {
-    Users.me().then(({data}) => {
-      setIsLogged(true);
-      setUser({username: data.email, role: data.role, id:data.id})
-    }).catch(({response}) => {
-      console.error(response.data.detail)
-      localStorage.clear() //TODO Seria correcto borrar localstorage?
+    if(localStorage.getItem("token"))
+      Users.me().then(({data}) => {
+        setIsLogged(true);
+        setUser({username: data.email, role: data.role, id:data.id})
+      }).catch(({response}) => {
+        if(response.data?.detail){
+          console.error(response.data?.detail)
+          localStorage.clear() //TODO Seria correcto borrar localstorage?
+        }
+        setIsLogged(false);
+      })
+    else
       setIsLogged(false);
-    })
-  }, []);
+  }, [isLogged]);
 
   //// Funciones Login, Logout y manejo de la sesion del usuario >>>>>>>>>>>>>>>>>>>
 
@@ -54,7 +59,8 @@ const App = () => {
       localStorage.setItem("token",`Token ${data.auth_token}`)
       setIsLogged(true);     
     }).catch(({response}) => {
-      console.error(response.data.non_field_errors[0])
+      if(response.data?.non_field_errors[0])
+        console.error(response.data?.non_field_errors[0])
     });
   };
 
@@ -62,6 +68,7 @@ const App = () => {
     Users.logout().then(() => {
       localStorage.clear();
       setIsLogged(false);
+      setUser({username: "", role:"", id: ""});
     }).catch(({response}) => {
       console.error(response.data.detail)
     });
@@ -107,7 +114,7 @@ const App = () => {
       <Route
         element={
           <ProtectedRoutes isAllowed={isLogged}>
-            <NavBar username={user.username} rol={user.role} logout={logout} />
+            <NavBar username={user.username} role={user.role} logout={logout} />
           </ProtectedRoutes>
         }
       >

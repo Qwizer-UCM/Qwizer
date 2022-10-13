@@ -19,14 +19,14 @@ const NavBar = (props) => {
                 Inicio <span className="sr-only"></span>
               </Link>
             </li>
-            {localStorage.getItem("rol") === "teacher" && (
+            {props.role === "teacher" && (
               <li className="nav-item">
                 <Link to={"/register"} className="nav-link active">
                   Añadir alumno<span className="sr-only"></span>
                 </Link>
               </li>
             )}
-            {localStorage.getItem("rol") === "teacher" && (
+            {props.role === "teacher" && (
               <li className="nav-item dropdown ">
                 <a href="##" className="nav-link dropdown-toggle active" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   Crear cuestionarios
