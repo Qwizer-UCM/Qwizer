@@ -9,7 +9,6 @@ import { precacheAndRoute} from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import {NetworkOnly } from 'workbox-strategies';
 import {BackgroundSyncPlugin} from 'workbox-background-sync';
-import { API_URL } from './constants/Constants';
 
 /*
   Some developers want to be able to publish a new service worker and have it control 
@@ -22,11 +21,11 @@ clientsClaim();
   Precachear los ficheros estaticos, es decir los que estaran en la capeta build, que es la que
   se usa para desplegar el proyecto en produccion(index.html,.css,.js...) para el funcionamiento de la app
 */
-precacheAndRoute(self.__WB_MANIFEST); //cachea cuando el service worker se esta instalando
+/* eslint no-underscore-dangle: 0 */
+precacheAndRoute(self.__WB_MANIFEST); // cachea cuando el service worker se esta instalando
 
 precacheAndRoute([
-  {url: '/service-worker.js', revision: null},
-  {url:'/manifest.json', revision:null}
+  {url: '/sw.js', revision: null},
 ]);
 
 
@@ -48,7 +47,7 @@ Si no hay conexion cuando el usuario va ha enviar el test,
 cachear esa peticion y cuando haya conexion enviarla.
 */
 
-const sentTestUrl = `${API_URL}/response`;
+const sentTestUrl = `http::/127.0.0.1/`;
 
 const bgSyncPlugin = new BackgroundSyncPlugin('test-post-requests', {
   maxRetentionTime: 24 * 60, // Reintentar por un maximo de 24h
