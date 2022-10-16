@@ -1,45 +1,23 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Subjects from "../services/Subjects";
 
-const TarjetaAsignatura = (props) => {
-  const [state, setState] = useState({
-    nCuestionarios: 0,
-    nPendientes: 0,
-    nCorregidos: 0,
-  });
-
-  useEffect(() => {
-    Subjects.get(props.idAsignatura)
-      .then(({data}) => {
-        setState({
-          nCuestionarios: data.nCuestionarios,
-          nPendientes: data.nPendientes,
-          nCorregidos: data.nCorregidos,
-        });
-      })
-      .catch((error) => console.log(error));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  return (
-    <div className="card asignatura-section " name={props.asignatura} id={props.idAsignatura}>
+const TarjetaAsignatura = ({asignatura,idAsignatura,cuestionarios}) => (
+    <div className="card asignatura-section " name={asignatura} id={idAsignatura}>
       <div className="header bg-blue-grey">
-        <h2>{props.asignatura}</h2>
+        <h2>{asignatura}</h2>
       </div>
       <div className="asignatura-inner-body row">
         <div className="col-9">
-          <p>Numero de test: {state.nCuestionarios}</p>
-          <p>Numero de tests corregidos: {state.nCorregidos}</p>
-          <p>Numero de tests pendientes: {state.nPendientes}</p>
+          <p>Numero de test: {cuestionarios.nCuestionarios}</p>
+          <p>Numero de tests corregidos: {cuestionarios.nCorregidos}</p>
+          <p>Numero de tests pendientes: {cuestionarios.nPendientes}</p>
         </div>
         <div className="col-3 button-section">
-          <Link className="btn btn-primary login-button" to={`/cuestionarios/${props.idAsignatura}`}>
+          <Link className="btn btn-primary login-button" to={`/cuestionarios/${idAsignatura}`}>
             Ver más
           </Link>
         </div>
       </div>
     </div>
   );
-};
 
 export default TarjetaAsignatura;

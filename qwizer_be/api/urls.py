@@ -37,7 +37,6 @@ urlpatterns += [
     path("get-all-subjects", views.get_all_subjects, name="get-all-subjects"),
     path("get-subject-questions",views.get_subject_questions, name="get-subject-questions"),
     path("enroll-students", views.enroll_students, name="enroll-students"),
-    path("get-subject-info", views.get_subject_info, name="get-subject-info"),
 
     # Tests
     path("response", views.response, name="response"),

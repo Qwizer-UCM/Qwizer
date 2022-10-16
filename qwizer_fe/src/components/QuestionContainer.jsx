@@ -1,51 +1,35 @@
-import React, { useEffect, useState } from "react";
-
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import Countdown from "react-countdown";
+import CryptoJS from "crypto-js";
 import TestQuestion from "./TestQuestion";
 import TextQuestion from "./TextQuestion";
 import QuestionNav from "./QuestionNav";
-import Countdown from "react-countdown";
 import ErrorModal from "./common/modals/ErrorModal";
-import Tests from "../services/Tests.js";
-import { useNavigate, useParams } from "react-router-dom";
-import CryptoJS from "crypto-js";
+import Tests from "../services/Tests";
 
 const getTestFromLocalStorage = (testId) => {
-  let tests = localStorage.getItem("tests");
-  let cuestionariosList = JSON.parse(tests);
-  for (const cuestionario of cuestionariosList) {
-    let test = JSON.parse(cuestionario);
-    if (test.id === Number(testId)) {
-      //TODO revisar tipos en otras condiciones ===
-      return test;
-    }
-  }
+  const tests = localStorage.getItem("tests");  // TODO pensar en usar indexDB en vez de localstorage
+  const found = tests ? JSON.parse(tests).find(test => JSON.parse(test).id === testId) : false;
+  return found ? JSON.parse(found) : null;
 };
 
 const descifrarTest = (currentTest) => {
-  let input = getTestFromLocalStorage(currentTest);
-  let cifradas = input.encrypted_message;
-  let key = CryptoJS.enc.Hex.parse(input.password);
-  let iv = CryptoJS.enc.Hex.parse(input.iv);
-  let cipher = CryptoJS.lib.CipherParams.create({
-    ciphertext: CryptoJS.enc.Base64.parse(cifradas),
+  const input = getTestFromLocalStorage(currentTest);
+  const cipher = CryptoJS.lib.CipherParams.create({
+    ciphertext: CryptoJS.enc.Base64.parse(input.encrypted_message),
   });
+  const key = CryptoJS.enc.Hex.parse(input.password);
+  const iv = CryptoJS.enc.Hex.parse(input.iv);
 
-  let result = CryptoJS.AES.decrypt(cipher, key, { iv: iv, mode: CryptoJS.mode.CFB });
-  let text = result.toString(CryptoJS.enc.Utf8);
-  text = JSON.parse(text);
-  return text.questions;
+  const result = CryptoJS.AES.decrypt(cipher, key, { iv, mode: CryptoJS.mode.CFB });
+  
+  return JSON.parse(result.toString(CryptoJS.enc.Utf8)).questions;
 };
 
-const comprobarPassword = (contra, currentTest) => {
-  if (contra !== "") {
-    let text = getTestFromLocalStorage(currentTest);
-    if (CryptoJS.SHA256(contra).toString() === text.password) return true;
-  }
-  window.$("#password_error").modal("show");
-  return false;
-};
+const comprobarPassword = (contra, currentTest) => contra !== "" && CryptoJS.SHA256(contra).toString() === getTestFromLocalStorage(currentTest).password;
 
-const CuestionarioPassword = (props) => {
+const CuestionarioPassword = ({getPass,unlockTest}) => {
   const message = "Contraseña incorrecta";
 
   return (
@@ -58,43 +42,72 @@ const CuestionarioPassword = (props) => {
 
           <div className="p-4 row">
             <div className="col text-center">
-              <input type="text" className="center form-control" onChange={props.getPass}></input>
+              <input type="text" className="center form-control" onChange={getPass} />
             </div>
           </div>
           <div className="p-4 row">
             <div className="col text-center">
-              <button type="button" className="btn btn-success" onClick={props.unlockTest}>
+              <button type="button" className="btn btn-success" onClick={unlockTest}>
                 Empezar Test
               </button>
             </div>
           </div>
         </div>
       </div>
-      <ErrorModal id={"password_error"} message={message}></ErrorModal>
+      <ErrorModal id="password_error" message={message} />
     </div>
   );
 };
-//FIXME mover revisionTest y revisionTestProfesor de App.js a este componente
-const QuestionContainer = (props) => {
+
+const addTestToLocalStorage = (jsonObject) => {
+  const tests = localStorage.getItem("tests");
+  const test = tests ? JSON.stringify([...JSON.parse(tests),jsonObject]) : JSON.stringify([jsonObject]);
+  localStorage.setItem("tests", test);
+};
+
+// FIXME mover revisionTest y revisionTestProfesor de App.js a este componente
+const QuestionContainer = ({revision}) => {
   const navigate = useNavigate();
   const params = useParams();
 
   const [contra, setContra] = useState("");
   const [indPregunta, setindPregunta] = useState(0);
-  const [numPreguntas, setNumPreguntas] = useState(0);
   const [questionList, setQuestionList] = useState([]);
-  const [answerList, setAnswerList] = useState({}); //TODO revisar metodos que los usan, se vuelven a usar mapas :(
-  const [isAllowed, setIsAllowed] = useState(false); //Indica si se ha desbloqueado el test
-  const duration = getTestFromLocalStorage(params.id).duracion //TODO arreglo momentaneo
+  const [answerList, setAnswerList] = useState({}); // TODO revisar metodos que los usan, se vuelven a usar mapas :(
+  const [isAllowed, setIsAllowed] = useState(false); // Indica si se ha desbloqueado el test
+  const [descargado, setDescargado] = useState(false);
+  const [testCorregido, setTestCorregido] = useState();
+  const duration = getTestFromLocalStorage(params.id)?.duracion // TODO arreglo momentaneo
+
+  useEffect(() => {
+    if(revision){
+      Tests.getCorrectedTest(params.id, params.idAlumno ?? "")
+      .then(({ data }) => {
+        const jsonData = JSON.parse(data.corrected_test);
+        setTestCorregido(jsonData);
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
+    } else if(!getTestFromLocalStorage(params.id)){
+        Tests.get(params.id).then(({ data }) => {
+          addTestToLocalStorage(JSON.stringify(data));
+          setDescargado(true);
+        });
+      }else{
+        setDescargado(true);
+      }
+  }, [params.id, params.idAlumno, revision]);
+
   const updateTime = () => {
     let initTime = Number(localStorage.getItem("initTime"));
     initTime = new Date(initTime);
     let actualTime = Date.now();
     actualTime = new Date(actualTime);
 
-    let tiempoInicial = initTime.getHours() * 3600 + initTime.getMinutes() * 60 + initTime.getSeconds();
-    let tiempoActual = actualTime.getHours() * 3600 + actualTime.getMinutes() * 60 + actualTime.getSeconds();
-    let passedSeconds = tiempoActual - tiempoInicial;
+    const tiempoInicial = initTime.getHours() * 3600 + initTime.getMinutes() * 60 + initTime.getSeconds();
+    const tiempoActual = actualTime.getHours() * 3600 + actualTime.getMinutes() * 60 + actualTime.getSeconds();
+    const passedSeconds = tiempoActual - tiempoInicial;
 
     let leftSeconds = duration * 60 - passedSeconds;
 
@@ -102,29 +115,23 @@ const QuestionContainer = (props) => {
       leftSeconds = 0;
     }
 
-    //comprobar si se ha pasado de fecha ???
+    // comprobar si se ha pasado de fecha ???
 
     return leftSeconds;
   };
 
-  useEffect(() => {
-    if (questionList) {
-      //si esta definido, porque si hace revision no lo esta
-      setNumPreguntas(questionList.length);
-    }
-  }, [questionList]);
-
   const questionType = (pregunta) => {
     if (pregunta != null) {
       if (pregunta.type === "test") {
-        return <TestQuestion mode={props.revision ? "revision" : "test"} infoPreg={pregunta} key={pregunta.id} idCuestionario={params.id} question={pregunta.question} options={pregunta.options} id={pregunta.id} type={pregunta.type} addAnswerd={addAnswer} />;
+        return <TestQuestion mode={revision ? "revision" : "test"} infoPreg={pregunta} key={pregunta.id} idCuestionario={params.id} question={pregunta.question} options={pregunta.options} id={pregunta.id} type={pregunta.type} addAnswerd={addAnswer} />;
       } // else type = 'text'
-      return <TextQuestion mode={props.revision ? "revision" : "test"} infoPreg={pregunta} key={pregunta.id} idCuestionario={params.id} question={pregunta.question} id={pregunta.id} type={pregunta.type} addAnswerd={addAnswer} />;
+      return <TextQuestion mode={revision ? "revision" : "test"} infoPreg={pregunta} key={pregunta.id} idCuestionario={params.id} question={pregunta.question} id={pregunta.id} type={pregunta.type} addAnswerd={addAnswer} />;
     }
+    return null;
   };
 
   const updateIndNext = () => {
-    if (indPregunta + 1 <= numPreguntas - 1) {
+    if (indPregunta + 1 <= questionList.length - 1) {
       setindPregunta((prev) => prev + 1);
     }
   };
@@ -135,7 +142,7 @@ const QuestionContainer = (props) => {
   };
 
   const renderButtons = () => {
-    if (indPregunta === 0 && numPreguntas === 0) {
+    if (indPregunta === 0 && questionList.length === 0) {
       return (
         <div className="p-2 col text-center">
           <button type="button" className="btn btn-warning" onClick={endTest}>
@@ -143,7 +150,8 @@ const QuestionContainer = (props) => {
           </button>
         </div>
       );
-    } else if (indPregunta === 0) {
+    } 
+    if (indPregunta === 0) {
       return (
         <div className="p-2 col text-center">
           <button type="button" className="btn btn-success" onClick={updateIndNext}>
@@ -151,7 +159,8 @@ const QuestionContainer = (props) => {
           </button>
         </div>
       );
-    } else if (indPregunta > 0 && indPregunta < numPreguntas - 1) {
+    } 
+    if (indPregunta > 0 && indPregunta < questionList.length - 1) {
       return (
         <div className="p-2 col text-center">
           <button type="button" className="btn btn-success" onClick={updateIndBack}>
@@ -162,19 +171,20 @@ const QuestionContainer = (props) => {
           </button>
         </div>
       );
-    } else {
-      //indPregunta == numPreguntas-1
-      return (
-        <div className="p-2 col text-center">
-          <button type="button" className="btn btn-success" onClick={updateIndBack}>
-            Atras
-          </button>
-          <button type="button" className="btn btn-warning" onClick={endTest}>
-            Terminar y Enviar
-          </button>
-        </div>
-      );
-    }
+    } 
+
+    // indPregunta == numPreguntas-1
+    return (
+      <div className="p-2 col text-center">
+        <button type="button" className="btn btn-success" onClick={updateIndBack}>
+          Atras
+        </button>
+        <button type="button" className="btn btn-warning" onClick={endTest}>
+          Terminar y Enviar
+        </button>
+      </div>
+    );
+    
   };
 
   const navHandler = (val) => {
@@ -188,29 +198,29 @@ const QuestionContainer = (props) => {
       localStorage.removeItem("initTime");
       localStorage.removeItem("answers");
       return <h1>Test Enviado</h1>;
-    } else {
-      // Render a countdown
-      let totalSeconds = duration * 60; //segundos
-      let leftSeconds = hours * 3600 + minutes * 60 + seconds;
-      let porcentaje = 100 - parseInt((leftSeconds / totalSeconds) * 100);
-      return (
-        <div>
-          <p className="text-center">
-            {hours}h:{minutes}min:{seconds}s
-          </p>
-          <div className="progress">
-            <div className="progress-bar progress-bar-striped" role="progressbar" style={{ width: porcentaje + "%" }} aria-valuenow={porcentaje} aria-valuemin="0" aria-valuemax="100"></div>
-          </div>
+    } 
+    // Render a countdown
+    const totalSeconds = duration * 60; // segundos
+    const leftSeconds = hours * 3600 + minutes * 60 + seconds;
+    const porcentaje = 100 - parseInt((leftSeconds / totalSeconds) * 100, 10);
+    return (
+      <div>
+        <p className="text-center">
+          {hours}h:{minutes}min:{seconds}s
+        </p>
+        <div className="progress">
+          <div className="progress-bar progress-bar-striped" role="progressbar" style={{ width: `${porcentaje}%` }} aria-valuenow={porcentaje} aria-valuemin="0" aria-valuemax="100" />
         </div>
-      );
-    }
+      </div>
+    );
+    
   };
 
   const endTest = () => {
-    let respuestas = localStorage.getItem("answers");
-    let hash = CryptoJS.SHA256(respuestas).toString();
-    let sent = navigator.onLine;
-    //TODO por qué no se espera respuesta de esta peticion??
+    const respuestas = localStorage.getItem("answers");
+    const hash = CryptoJS.SHA256(respuestas).toString();
+    const sent = navigator.onLine;
+    // TODO por qué no se espera respuesta de esta peticion??
     console.log(respuestas)
     Tests.sendTest(respuestas, hash)
       .then(() => console.log("END"))
@@ -219,51 +229,47 @@ const QuestionContainer = (props) => {
     if (sent) {
       navigate("/", { replace: true });
     } else {
-      //TODO scanner?userId=${props.userId}&test=${params.id}&hash=${hash} más explicativo pero toca cambiar en back comprobaciones
       navigate(`/scanner/${params.id}/${hash}`, { replace: true });
     }
   };
 
-  const initAnswerList = (questionList) => {
-    let list = new Map();
-    questionList.forEach((pregunta) => list.set(pregunta.id, { type: pregunta.type, answr: "NULL" }));
+  const initAnswerList = (questions) => {
+    const list = new Map();
+    questions.forEach((pregunta) => list.set(pregunta.id, { type: pregunta.type, answr: "NULL" }));
     setAnswerList(list);
   };
 
   const unlockTest = () => {
     if (comprobarPassword(contra, params.id)) {
-      let list = descifrarTest(params.id);
+      const list = descifrarTest(params.id);
       initAnswerList(list);
       setQuestionList(list);
       setIsAllowed(true);
-      localStorage.setItem("initTime", Date.now()); //guardamos la hora a la que empieza el examen
+      localStorage.setItem("initTime", Date.now()); // guardamos la hora a la que empieza el examen
+    } else {
+      window.$("#password_error").modal("show");
     }
   };
 
   const getPass = (e) => {
-    //Funcion para conseguir la contraseña del test introducida por el usuario
+    // Funcion para conseguir la contraseña del test introducida por el usuario
     setContra(e.target.value);
   };
 
   const addAnswer = (answer) => {
-    let newlist = answerList;
+    const newlist = answerList;
     newlist.set(answer.id, { type: answer.respuesta.type, answr: answer.respuesta.answer });
 
-    let listaRespuestas = [];
-    for (let [key, value] of newlist.entries()) {
-      let pregunta = {};
+    const listaRespuestas = [];
+    for (const [key, value] of newlist.entries()) {
+      const pregunta = {};
       pregunta.id = key;
       pregunta.type = value.type;
-      if (pregunta.type === "test") {
-        pregunta.answr = Number(value.answr);
-      } else {
-        pregunta.answr = value.answr;
-      }
-
+      pregunta.answr = pregunta.type === "test" ? Number(value.answr) : value.answr;
       listaRespuestas.push(pregunta);
     }
 
-    let respuestas = { idCuestionario: params.id, respuestas: listaRespuestas };
+    const respuestas = { idCuestionario: params.id, respuestas: listaRespuestas };
     localStorage.setItem("answers", JSON.stringify(respuestas));
 
     setAnswerList(newlist);
@@ -271,9 +277,11 @@ const QuestionContainer = (props) => {
 
   const renderQtype = questionType;
 
-  if (!props.revision && !isAllowed) return <CuestionarioPassword unlockTest={unlockTest} getPass={getPass} />;
+  if(!revision && !descargado) return null;
 
-  if (!props.revision && questionList.length !== 0) {
+  if (!revision && !isAllowed) return <CuestionarioPassword unlockTest={unlockTest} getPass={getPass} />;
+
+  if (!revision && questionList.length !== 0) {
     const pregunta = questionList[indPregunta];
     return (
       <div className="index-body container-fluid" id="questions">
@@ -291,7 +299,7 @@ const QuestionContainer = (props) => {
                 <h2 className="p-2 m-2 card">
                   {" "}
                   {indPregunta + 1}
-                  {".-" + pregunta.question}
+                  {`.-${pregunta.question}`}
                 </h2>
                 {renderQtype(pregunta)}
               </div>
@@ -308,42 +316,43 @@ const QuestionContainer = (props) => {
         </div>
       </div>
     );
-  } else if (props.revision === true && props.correctedTest) {
-    const correctedTestInfo = props.correctedTest;
+  } 
+  if (revision === true && testCorregido) {
     return (
       <div className="index-body container-fluid" id="questions">
         <div className="p-4 row-1">
           <div className="col card">
-            <h1 className="text-center">{correctedTestInfo.titulo}</h1>
+            <h1 className="text-center">{testCorregido.titulo}</h1>
           </div>
           <div className="col card">
-            <h1 className="text-center">Calificación: {correctedTestInfo.nota}</h1>
+            <h1 className="text-center">Calificación: {testCorregido.nota}</h1>
           </div>
         </div>
 
         <div className="p-4 row">
           <div className="p-2 col-9" id="question">
             <div className="card">
-              <div key={correctedTestInfo.questions[indPregunta].id}>
+              <div key={testCorregido.questions[indPregunta].id}>
                 <h2 className="p-2 m-2 card">
                   {" "}
                   {indPregunta + 1}
-                  {".-" + correctedTestInfo.questions[indPregunta].question}
+                  {`.-${testCorregido.questions[indPregunta].question}`}
                 </h2>
-                {renderQtype(correctedTestInfo.questions[indPregunta])}
+                {renderQtype(testCorregido.questions[indPregunta])}
               </div>
             </div>
           </div>
 
           <div className="p-2 col-3" id="question-nav">
-            <QuestionNav navigationHandler={navHandler} listaPreguntas={correctedTestInfo.questions} />
+            <QuestionNav navigationHandler={navHandler} listaPreguntas={testCorregido.questions} />
           </div>
         </div>
       </div>
     );
-  } else {
-    return <h1>Loading...</h1>;
-  }
+  } 
+  
+  return <h1>Loading...</h1>;
+  
 };
 
 export default QuestionContainer;

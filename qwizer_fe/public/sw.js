@@ -47,7 +47,7 @@ Si no hay conexion cuando el usuario va ha enviar el test,
 cachear esa peticion y cuando haya conexion enviarla.
 */
 
-const sentTestUrl = `http::/127.0.0.1/`;
+const sentTestUrl = `${import.meta.env.REACT_APP_API_URL}`;
 
 const bgSyncPlugin = new BackgroundSyncPlugin('test-post-requests', {
   maxRetentionTime: 24 * 60, // Reintentar por un maximo de 24h

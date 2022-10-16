@@ -1,31 +1,21 @@
-# Dockerfile
-
-# The first instruction is what image we want to base our container on
-# We Use an official Python runtime as a parent image
 FROM python:3.10.7
 
+RUN apk add git
+RUN pip install pipenv
 # Important or django will get stuck :)
 ENV PYTHONUNBUFFERED=1
-
 WORKDIR /app
 
-RUN pip install pipenv
+COPY ./qwizer_be ./qwizer_be
 
-# Allows docker to cache installed dependencies between builds
-# https://docs.docker.com/build/building/cache/
-COPY Pipfile Pipfile.lock ./
+# Comentar si se quiere usar codigo local
+# COPY ./.git ./.git
+# RUN git checkout -f 5402ac1d31eba657c7c71f58e9c954d4cff736e8
 
-# Docker is already a self contained app maybe its better to use requirements
-# instead of using pipenv inside a container
-
-# RUN pip install pipenv  \
-#     && pipenv requirements > requirements.txt \
-#     && pip install -r requirements.txt
+COPY ./qwizer_be/Pipfile ./qwizer_be/Pipfile.lock ./qwizer_be/
 RUN pipenv install --dev
 
-# Mounts the application code to the image
-COPY . ./
+COPY ./qwizer_be/.env ./qwizer_be/.env
 
-# runs the production server
 ENTRYPOINT ["pipenv","run", "python", "manage.py"]
 CMD ["runserver", "0.0.0.0:8000"]

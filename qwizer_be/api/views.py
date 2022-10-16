@@ -1,48 +1,37 @@
+import binascii
+import hashlib
+import json
+from datetime import datetime
 from pprint import pprint
-from rest_framework import mixins, viewsets
 
-from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.response import Response
-
+import yaml
+from api.utils.cifrado import _pad_string
 from Crypto.Cipher import AES  # Usado para cifrar el test
 from Crypto.Random import get_random_bytes
-import hashlib
+from django.contrib.auth import authenticate, login, logout
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from rest_framework import mixins, viewsets
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from .models import (Asignaturas, Cuestionarios, EnvioOffline, EsAlumno,
+                     Imparte, Notas, OpcionesTest, PerteneceACuestionario,
+                     Preguntas, RespuestasEnviadasTest, RespuestasEnviadasText,
+                     RespuestasTest, RespuestasTexto, User)
+from .serializer import EncryptedTestsSerializer
 
 # Para pasar quiz a string
 
-import binascii
-from api.utils.cifrado import _pad_string
 
-import json
 
 # -------------------------
 
-from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate, login, logout
-
-from .serializer import EncryptedTestsSerializer
-from .models import (
-    Cuestionarios,
-    PerteneceACuestionario,
-    User,
-    Asignaturas,
-    EsAlumno,
-    Imparte,
-    Preguntas,
-    OpcionesTest,
-    Notas,
-    EnvioOffline,
-    RespuestasTest,
-    RespuestasTexto,
-    RespuestasEnviadasTest,
-    RespuestasEnviadasText,
-)
 
 
-from rest_framework.permissions import IsAuthenticated
-from datetime import datetime
 
-import yaml
+
 
 # Create your views here.
 
@@ -177,34 +166,41 @@ class SubjectsViewSet(mixins.RetrieveModelMixin,viewsets.GenericViewSet):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_subjects(request):
-    listaAsignaturas = []
+    lista_asignaturas = []
     identif = request.user.id
     role = str(request.user.role)
     print(role)
 
     if role == "student" or role == "teacher":
-
         if role == "student":
-            listaIdAsignaturas = EsAlumno.objects.filter(idAlumno=identif).order_by(
+            lista_id_asignaturas = EsAlumno.objects.filter(idAlumno=identif).order_by(
                 "idAsignatura"
             )
         elif role == "teacher":
-            listaIdAsignaturas = Imparte.objects.filter(idProfesor=identif).order_by(
+            lista_id_asignaturas = Imparte.objects.filter(idProfesor=identif).order_by(
                 "idAsignatura"
             )
 
-        for asignartura in listaIdAsignaturas:
-            asignaturaJSON = {}
-            asignaturaJSON["id"] = asignartura.idAsignatura.id
-            asignaturaJSON["nombre"] = asignartura.idAsignatura.asignatura
-            listaAsignaturas.append(asignaturaJSON)
+        for asignatura in lista_id_asignaturas:
+            asignatura_json = {}
+            asignatura_json["id"] = asignatura.idAsignatura.id
+            asignatura_json["nombre"] = asignatura.idAsignatura.asignatura
+
+            cuestionarios = Cuestionarios.objects.filter(
+                idAsignatura=asignatura.idAsignatura.id
+            )
+            n_cuestionarios = cuestionarios.count()
+            n_corregidos = Notas.objects.filter(idAlumno=identif,idCuestionario__in=cuestionarios).count()
+            n_pendientes = n_cuestionarios - n_corregidos
+            asignatura_json["cuestionarios"] = {"nCuestionarios": n_cuestionarios, "nCorregidos": n_corregidos, "nPendientes": n_pendientes}
+
+            lista_asignaturas.append(asignatura_json)
 
     else:
         return Response("El admin no tiene ninguna asignatura")
 
-    print(listaAsignaturas)
-    return Response({"asignaturas": listaAsignaturas})
-
+    print(lista_asignaturas)
+    return Response({"asignaturas": lista_asignaturas})
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -228,44 +224,19 @@ def get_all_subjects(
 def get_quizzes(request):
 
     print(request)
-    listaCuestionarios = []
+    lista_cuestionarios = []
     asignatura = Asignaturas.objects.get(id=request.data["idAsignatura"])
 
     cuestionarios = Cuestionarios.objects.filter(
         idAsignatura=request.data["idAsignatura"]
     ).order_by("-fecha_cierre")
-    idCuestionarios = []
+    id_cuestionarios = []
     for cuestionario in cuestionarios:
-        listaCuestionarios.append(cuestionario.titulo)
-        idCuestionarios.append(cuestionario.id)
+        lista_cuestionarios.append(cuestionario.titulo)
+        id_cuestionarios.append(cuestionario.id)
     return Response(
-        {"cuestionarios": listaCuestionarios, "idCuestionarios": idCuestionarios}
+        {"cuestionarios": lista_cuestionarios, "idCuestionarios": id_cuestionarios,"nombre":asignatura.asignatura}
     )
-
-
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def get_subject_info(request):
-    current_user = request.user
-    cuestionarios = Cuestionarios.objects.filter(
-        idAsignatura=request.data["idAsignatura"]
-    )
-
-    c = 0
-    n = 0
-    for cuestionario in cuestionarios:
-        c += 1
-        try:
-            notas = Notas.objects.get(
-                idAlumno=current_user.id, idCuestionario=cuestionario.id
-            )
-        except:
-            print("No he encontrado nota")
-            continue
-        print("He encontrado una nota")
-        n += 1
-    p = c - n
-    return Response({"nCuestionarios": c, "nCorregidos": n, "nPendientes": p})
 
 
 @api_view(["POST"])
@@ -410,7 +381,7 @@ def test(request):
 @permission_classes([IsAuthenticated])
 def testCorrected(request):
 
-    if request.user.role == "student":
+    if request.user.role == "student" or request.data["idAlumno"] == "":
         alumno = request.user
     else:
         alumno = User.objects.get(id=request.data["idAlumno"])

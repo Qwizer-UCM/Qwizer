@@ -8,7 +8,6 @@ const Subjects = {
   getAll: () => client.post('get-all-subjects'),
   getQuestions: (idAsignatura) => client.post('get-subject-questions',{idAsignatura}),
   enrollStudents: (alumnos,asignatura) => client.post('enroll-students',{alumnos,asignatura}),
-  get: (idAsignatura) => client.post('get-subject-info',{idAsignatura})
 }
 
 export default Subjects;
