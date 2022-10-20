@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Users from '../services/Users';
 
 
@@ -56,15 +56,12 @@ const useAuth = () => {
       });
   };
 
-  const state = {
+  return {
       user,
       isLogged,
       login,
       logout,
     };
-
-
-  return state;
 };
 
 export default useAuth;

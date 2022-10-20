@@ -24,7 +24,7 @@
             "presentation": {
                 "group": "groupA",
                 "reveal": "always",
-                "close": true,
+                "close": true
             }
         },
         {
@@ -37,6 +37,16 @@
                 "reveal": "always",
                 "close": true
             }
+        },
+        {
+            "type": "npm",
+            "script": "lint",
+            "path": "qwizer_fe",
+            "problemMatcher": [
+                "$eslint-stylish"
+            ],
+            "label": "npm: lint - qwizer_fe",
+            "detail": "eslint . --ext .js,jsx"
         }
     ]
 }

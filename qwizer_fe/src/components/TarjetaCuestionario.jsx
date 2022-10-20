@@ -25,7 +25,6 @@ const TarjetaCuestionario = ({offline,cuestionario,idCuestionario,role}) => {
     testIsDownloaded();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   const testIsDownloaded = () => {
     const tests = localStorage.getItem("tests");  // TODO pensar en usar indexDB en vez de localstorage
     const found = tests && JSON.parse(tests).find(test => JSON.parse(test).id === idCuestionario);
@@ -42,6 +41,7 @@ const TarjetaCuestionario = ({offline,cuestionario,idCuestionario,role}) => {
           fecha_cierre: test.fecha_cierre,
         });
       }
+      setLoading(false)
     }
     
   };

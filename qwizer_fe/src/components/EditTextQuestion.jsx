@@ -1,16 +1,16 @@
-import React, { useState } from "react";
+import { useState } from 'react';
 
-export default function EditTextQuestion(props) {
-  const [titulo, settitulo] = useState(props.pregunta.title);
-  const [nombre, setnombre] = useState(props.pregunta.question);
-  const [textValue, settextValue] = useState(props.pregunta.correct_op);
+export default function EditTextQuestion({ pregunta, updateEditQuestion }) {
+  const [titulo, settitulo] = useState(pregunta.title);
+  const [nombre, setnombre] = useState(pregunta.question);
+  const [textValue, settextValue] = useState(pregunta.correct_op);
 
   const actualizarPregunta = () => {
-    let question = props.pregunta;
-    question["title"] = titulo;
-    question["question"] = nombre;
-    question["correct_op"] = textValue;
-    props.updateEditQuestion(question);
+    const question = pregunta;
+    question.title = titulo;
+    question.question = nombre;
+    question.correct_op = textValue;
+    updateEditQuestion(question);
   };
 
   return (
@@ -24,7 +24,7 @@ export default function EditTextQuestion(props) {
       <label className="col-4 align-top">Respuesta: &nbsp;</label>
       <textarea className="col-8 m-input" rows="5" cols="50" name="textValue" onChange={(e) => settextValue(e.target.value)} value={textValue} />
 
-      <button className="btn btn-success" onClick={actualizarPregunta}>
+      <button type="button" className="btn btn-success" onClick={actualizarPregunta}>
         Actualizar
       </button>
     </div>

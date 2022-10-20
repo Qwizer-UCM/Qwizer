@@ -37,7 +37,8 @@
           ],
         "no-use-before-define": "off",
         "react/prop-types":"off",
-        "no-restricted-syntax" :"off"
-
+        "no-restricted-syntax" :"off",
+        "no-param-reassign": "off",
+        "jsx-a11y/label-has-associated-control":"off"
     }
 }

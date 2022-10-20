@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Countdown from "react-countdown";
 import CryptoJS from "crypto-js";
 import TestQuestion from "./TestQuestion";
@@ -262,11 +262,11 @@ const QuestionContainer = ({revision}) => {
 
     const listaRespuestas = [];
     for (const [key, value] of newlist.entries()) {
-      const pregunta = {};
-      pregunta.id = key;
-      pregunta.type = value.type;
-      pregunta.answr = pregunta.type === "test" ? Number(value.answr) : value.answr;
-      listaRespuestas.push(pregunta);
+      listaRespuestas.push({
+        id: key,
+        type: value.type,
+        answr: value.type === "test" ? Number(value.answr) : value.answr
+      });
     }
 
     const respuestas = { idCuestionario: params.id, respuestas: listaRespuestas };

@@ -1,11 +1,9 @@
-import React from "react";
 import CheckIcon from "@mui/icons-material/Check";
 import ErrorIcon from "@mui/icons-material/Error";
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Otro from "../services/NoSeDondeMeterloTodavia";
 
-export default function VisualizarNota(props) {
+export default function VisualizarNota({data:cuestionario}) {
   const [corregido, setcorregido] = useState();
   const [hashSubida, sethashSubida] = useState();
   const [qrSent, setqrSent] = useState();
@@ -17,13 +15,13 @@ export default function VisualizarNota(props) {
   }, []);
 
   const getHashes = () => {
-    Otro.getHashes(props.data.idCuestionario, props.data.id)
+    Otro.getHashes(cuestionario.idCuestionario, cuestionario.id)
       .then(({ data }) => {
         setcorregido(data.corrected);
         sethashSubida(data.hashSubida);
         setqrSent(data.qrSent);
         sethashQr(data.hashQr);
-        //this.generar_tabla(); //TODO Y ESTO???
+        // this.generar_tabla(); //TODO Y ESTO???
       })
       .catch((error) => console.log(error));
   };
@@ -32,7 +30,7 @@ export default function VisualizarNota(props) {
     <div className="pl-3 pt-3">
       {corregido === true && (
         <div className="form-group">
-          <label for="name" className="col-lg-4">
+          <label htmlFor="name" className="col-lg-4">
             Hash generado tras la corrección:
           </label>
           <div className="col-lg-8">
@@ -45,7 +43,7 @@ export default function VisualizarNota(props) {
 
       {qrSent === true && (
         <div className="form-group">
-          <label for="name" className="col-lg-4">
+          <label htmlFor="name" className="col-lg-4">
             Hash generado mediante el codigo QR:
           </label>
           <div className="col-lg-8">

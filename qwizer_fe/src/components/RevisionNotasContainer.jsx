@@ -88,7 +88,7 @@ const columns = [
   }
 ];
 
-const RevisionNotasContainer = (props) => {
+const RevisionNotasContainer = () => {
   const params = useParams();
   const [notasCuestionario, setNotasCuestionarios] = useState([]);
   const [dataNotas, setData] = useState(undefined);

@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from "react";
+import { Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import IndexContainer from "./components/IndexContainer";
@@ -27,7 +27,7 @@ import useAuth from "./hooks/useAuth";
 
 const App = () => {
   const {  user, isLogged, login, logout} = useAuth();
-  useDocumentTitle() //TODO se puede usar en cada componente pasandole un titulo para cada pagina
+  useDocumentTitle() // TODO se puede usar en cada componente pasandole un titulo para cada pagina
 
   if (isLogged === undefined) return null;
 
@@ -43,7 +43,7 @@ const App = () => {
         >
           <Route path="/" element={<IndexContainer />} />
           <Route path="/cuestionarios/:id" element={<CuestionariosContainer role={user.role} />} />
-          <Route path="/offline" element={<AvailableOffline />} />
+          <Route path="/offline" element={<AvailableOffline role={user.role}/>} />
           <Route path="/test/:id" element={<QuestionContainer revision={false} />} />
           <Route path="/revision/:id" element={<QuestionContainer revision />} />
           {/* FIXME importante arreglar el back devuelve las notas sin comprobar el rol */}
@@ -57,7 +57,7 @@ const App = () => {
             <Route path="/register" element={<RegisterContainer />} />
           </Route>
           <Route path="/scanner/:test/:hash" element={<QrContainer userId={user.userId} />} />
-          {/*No se usa */}
+          {/* No se usa */}
           <Route path="/insercion-manual/:test/:hash" element={<InsercionManual userId={user.userId} />} />
         </Route>
         <Route path="/login" element={!isLogged ? <LoginComponent login={login} /> : <Navigate to="/" />} />

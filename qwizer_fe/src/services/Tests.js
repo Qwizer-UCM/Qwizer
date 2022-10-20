@@ -1,7 +1,7 @@
 import client from '../client';
 
 const Tests = {
-  //TODO revisar funcion abajo
+  // TODO revisar funcion abajo
   sendTest: (respuestas,hash) => client.post('response',{respuestas,hash}),
   getCorrectedTest: (idCuestionario,idAlumno) => client.post('test-corrected',{idCuestionario,idAlumno}),
   createQuiz: (cuestionario) => client.post('create-quiz',{cuestionario}),
@@ -9,7 +9,7 @@ const Tests = {
   // TODO diferencia entre test y get-quiz-info?? TarjetaCuestionario.js
   get: (idCuestionario) => client.post('test',{idCuestionario}),
   getInfo: (idCuestionario) => client.post('get-quiz-info',{idCuestionario}),
-  upload: (fichero_yaml) => client.post('upload',{fichero_yaml})
+  upload: (ficheroYAML) => client.post('upload',{fichero_yaml: ficheroYAML})
 }
 
 export default Tests;

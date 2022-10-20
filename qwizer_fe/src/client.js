@@ -11,12 +11,11 @@ const client = axios.create({
 // Request interceptors for API calls
 client.interceptors.request.use(
   (config) => {
-    config.headers["Authorization"] = localStorage.getItem("token");
+    // eslint-disable-next-line no-param-reassign
+    config.headers.Authorization = localStorage.getItem("token");
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 export default client;

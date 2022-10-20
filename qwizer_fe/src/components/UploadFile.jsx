@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import ErrorModal from "./common/modals/ErrorModal";
 import SuccessModal from "./common/modals/SuccessModal";
-import { API_URL } from "../constants/Constants";
 import Tests from "../services/Tests";
 
 const UploadFile = () => {
@@ -10,12 +9,12 @@ const UploadFile = () => {
 
   const uploadFile = () => {
     if (file.name !== "") {
-      let reader = new FileReader();
+      const reader = new FileReader();
       reader.readAsText(file, "utf-8");
       reader.onload = (e) => {
-        const fichero_yaml = e.target.result;
+        const ficheroYAML = e.target.result;
 
-        Tests.upload(fichero_yaml)
+        Tests.upload(ficheroYAML)
           .then(({ data }) => {
             setFile("");
             setMessage(data.message);
@@ -57,8 +56,8 @@ const UploadFile = () => {
           </div>
         </div>
       </div>
-      <ErrorModal id={"inserted_error"} message={message}></ErrorModal>
-      <SuccessModal id={"inserted_success"} message={message}></SuccessModal>
+      <ErrorModal id="inserted_error" message={message} />
+      <SuccessModal id="inserted_success" message={message} />
     </div>
   );
 };

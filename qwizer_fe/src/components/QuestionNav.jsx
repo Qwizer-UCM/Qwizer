@@ -1,27 +1,18 @@
-import React from 'react'
-
-const QuestionNav = (props) => {
-
-
+const QuestionNav = ({navigationHandler,listaPreguntas}) => {
   const navigateQuestion = (e) => {
-    props.navigationHandler(parseInt(e.target.value));
-  }
+    navigationHandler(parseInt(e.target.value, 10));
+  };
 
   return (
     <div className="container">
-      {props.listaPreguntas.map(function (pregunta, indx) {
-        return (
-          <button type="button" className="btn btn-outline-dark" key={indx} onClick={navigateQuestion} value={indx}>{"Pregunta "}{indx + 1}</button>
-        );
-      })
-
-      }
-
+      {listaPreguntas.map((pregunta, indx) => (
+          <button type="button" className="btn btn-outline-dark" key={pregunta.id} onClick={navigateQuestion} value={indx}>
+            {'Pregunta '}
+            {indx + 1}
+          </button>
+        ))}
     </div>
   );
-
-
-
-}
+};
 
 export default QuestionNav;

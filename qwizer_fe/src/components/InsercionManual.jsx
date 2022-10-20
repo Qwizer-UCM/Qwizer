@@ -1,13 +1,10 @@
-import React from "react";
-import ErrorModal from "./common/modals/ErrorModal";
-import SuccessModal from "./common/modals/SuccessModal";
-import { API_URL } from "../constants/Constants";
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import SuccessModal from "./common/modals/SuccessModal";
+import ErrorModal from "./common/modals/ErrorModal";
 import Otro from "../services/NoSeDondeMeterloTodavia";
 
-const InsercionManual = (props) => {
+const InsercionManual = ({userId}) => {
   const params = useParams();
   const [message, setmessage] = useState("");
 
@@ -17,7 +14,7 @@ const InsercionManual = (props) => {
   }, []);
 
   const guardarDatos = () => {
-    Otro.insertQR(props.userId,params.test,params.hash)
+    Otro.insertQR(userId,params.test,params.hash)
       .then(({data}) => {
         setmessage(data.message);
         if (!data.inserted) {
@@ -34,8 +31,8 @@ const InsercionManual = (props) => {
       <div className="d-flex justify-content-center mt-4">
         <h4>Escaneado de códigos QR</h4>
       </div>
-      <ErrorModal id={"inserted_error"} message={message}></ErrorModal>
-      <SuccessModal id={"inserted_success"} message={message}></SuccessModal>
+      <ErrorModal id="inserted_error" message={message} />
+      <SuccessModal id="inserted_success" message={message} />
     </div>
   );
 };

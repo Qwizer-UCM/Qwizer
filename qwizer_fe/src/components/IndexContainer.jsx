@@ -3,7 +3,7 @@ import TarjetaAsignatura from "./TarjetaAsignatura";
 import Subjects from "../services/Subjects";
 
 const IndexContainer = () => {
-  const [asignaturas, setAsignaturas] = useState([]);  //Guarda id y nombre de las asignaturas
+  const [asignaturas, setAsignaturas] = useState([]);  // Guarda id y nombre de las asignaturas
 
   useEffect(() => {
     getAsignaturas();
