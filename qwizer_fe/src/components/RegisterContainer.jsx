@@ -38,13 +38,13 @@ const RegisterContainer = () => {
   }, []);
 
   const getAsignaturas = () => {
-    Subjects.getFromStudentOrTeacher().then(({ res }) => {
+    Subjects.getFromStudentOrTeacher().then(({ data:res }) => {
       setAsignaturas(res.asignaturas);
     });
   };
 
   const getAlumnos = () => {
-    Users.getStudents().then(({ res }) => {
+    Users.getStudents().then(({ data:res }) => {
       setData(res.alumnos.map((a) => ({ id: a.id, nombre: a.nombre, apellidos: a.apellidos })));
     });
   };
@@ -57,7 +57,7 @@ const RegisterContainer = () => {
       window.$('#inserted_error').modal('show');
     } else {
       Subjects.enrollStudents(alumnosSeleccionados, asignatura)
-        .then(({ res }) => {
+        .then(({ data:res }) => {
           if (data.insertados) {
             setMessage('Los alumnos han sido matriculados correctamente.');
             window.$('#inserted_success').modal('show');
