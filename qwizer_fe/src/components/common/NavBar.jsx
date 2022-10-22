@@ -6,7 +6,6 @@ const NavBar = ({role, username, logout}) => (
         <Link to="/" className="nav-link">
           Qwizer
         </Link>
-
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
           <span className="navbar-toggler-icon" />
         </button>

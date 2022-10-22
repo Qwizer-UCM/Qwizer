@@ -3,9 +3,10 @@ import { useState } from 'react';
 const LoginComponent = ({ login }) => {
   const [currentUser, setUser] = useState({ user: '', pass: '' });
 
+
   return (
     <div className="main-container login-body">
-      <form onSubmit={(e) => e.preventDefault()}>
+      <form className='login' onSubmit={(e) => e.preventDefault()}>
         <div className="form-inputs">
           <h2 className="title">Qwizer</h2>
           <p />

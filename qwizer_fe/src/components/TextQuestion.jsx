@@ -39,16 +39,16 @@ const TextQuestion = ({ mode, id, type, infoPreg, addAnswerd }) => {
   const visualizeMode = () => (
     <div className="d-flex flex-column justify-content-center visualize-container">
       <div className="row m-1 justify-content-center">
-        <label className="col-2">Título: &nbsp;</label>
-        <input className="col-8 m-input" type="text" value={infoPreg.title} disabled />
+        <label className="col-md-2 col-sm-auto">Título: &nbsp;</label>
+        <input className="col-md-8 col-sm-auto m-input" type="text" value={infoPreg.title} disabled />
       </div>
       <div className="row m-1 justify-content-center">
-        <label className="col-2">Pregunta: &nbsp;</label>
-        <input className="col-8 m-input" type="text" value={infoPreg.question} disabled />
+        <label className="col-md-2 col-sm-auto">Pregunta: &nbsp;</label>
+        <input className="col-md-8 col-sm-auto m-input" type="text" value={infoPreg.question} disabled />
       </div>
       <div className="row m-1 justify-content-center">
-        <label className="col-2">Respuesta: &nbsp;</label>
-        <input className="col-8 m-input" type="text" value={infoPreg.correct_op} disabled />
+        <label className="col-md-2 col-sm-auto">Respuesta: &nbsp;</label>
+        <input className="col-md-8 col-sm-auto m-input" type="text" value={infoPreg.correct_op} disabled />
       </div>
     </div>
   );

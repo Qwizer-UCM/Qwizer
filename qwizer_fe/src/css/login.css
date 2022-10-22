@@ -48,7 +48,7 @@
     width: 100%;
 }
 
-form{
+form.login{
     padding: 6rem;
     background: rgba(255,255,255, 0.2);
     border:none;

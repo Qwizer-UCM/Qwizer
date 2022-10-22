@@ -94,17 +94,17 @@ const TarjetaCuestionario = ({offline,cuestionario,idCuestionario,role}) => {
 
   return ( !loading &&
       <div className="card asignatura-section " name={!offline ? cuestionario : cuestionario.title} id={idCuestionario}>
-        <div id={`cuestionario_${idCuestionario}`} className="header bg-blue-grey">
+        <div id={`cuestionario_${idCuestionario}`} className="card-header header bg-blue-grey">
           <h2>{!offline ? cuestionario : cuestionario.title}</h2>
           {!offline && corregido && <h5>Calificación: {calificacion}</h5>}
         </div>
-        <div className="asignatura-inner-body row">
-          <div className="col-9">
+        <div className="card-body asignatura-inner-body row">
+          <div className="col-md-9 col-sm-auto">
             <p>Duración: {duracion} minutos</p>
             <p>Fecha de apertura: {fechas.fecha_apertura_formateada}</p>
             <p>Fecha de cierre: {fechas.fecha_cierre_formateada}</p>
           </div>
-          <div className="col-3 button-section">
+          <div className="col-md-3 col-sm-auto button-section">
             {downloaded && !corregido && !bloqueado && role === "student" && (
               <button type="button" className="btn btn-primary login-button" onClick={() => navigate(`/test/${idCuestionario}`)}>
                 Realizar

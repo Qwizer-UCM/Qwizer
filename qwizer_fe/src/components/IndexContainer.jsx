@@ -22,7 +22,7 @@ const IndexContainer = () => {
       <div className="index-body">
         <div className="pt-5 ml-1 mr-1">
           <div className="d-flex justify-content-center">
-            <span align="center" className="material-icons xxl-icon justify-content-center">
+            <span className="material-icons xxl-icon justify-content-center">
               {" "}
               wifi_off{" "}
             </span>
@@ -41,14 +41,14 @@ const IndexContainer = () => {
     return (
       <div className="index-body">
         {asignaturas.map((asignatura) => (
-            <div key={asignatura.id} className="d-flex justify-content-center">
+            <div key={asignatura.id} className="d-flex justify-content-center mt-1">
               <TarjetaAsignatura asignatura={asignatura.nombre} idAsignatura={asignatura.id} cuestionarios={asignatura.cuestionarios} />
             </div>
           ))}
       </div>
     );
   } 
-    return (
+    return ( // TODO hace falta esto ya?
       <div className="d-flex justify-content align-items-center">
         <div className="spinner-grow" role="status">
           <span className="visually-hidden">Loading...</span>

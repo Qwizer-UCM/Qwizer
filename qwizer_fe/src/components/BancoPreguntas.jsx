@@ -120,7 +120,7 @@ const BancoPreguntas = ({createQuiz, addQuestion}) => {
     <div className="card tabla-notas">
       <div className='card-content'>
         <h4 className='d-flex justify-content-center'>Banco de preguntas</h4>
-        <label htmlFor='subject-selector'>Selecciona una asignatura para visualizar sus preguntas
+        <label htmlFor='subject-selector'>Selecciona una asignatura para visualizar sus preguntas</label>
           <select ref={selectedAsignatura} className="form-select" id="subject-selector" onChange={handleSelectChange} aria-label="Default select example" >
             <option hidden defaultValue>Selecciona una asignatura</option>
             <option hidden defaultValue>
@@ -130,7 +130,6 @@ const BancoPreguntas = ({createQuiz, addQuestion}) => {
                 <option key={asignatura.id} value={asignatura.id}>{asignatura.asignatura}</option>
               ))}
           </select>
-        </label>
         <br />
         <DataTable
           pointerOnHover

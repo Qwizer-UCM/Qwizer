@@ -31,11 +31,11 @@ const UploadFile = () => {
 
   return (
     <div className="upload-body">
-      <div className="card upload-section ">
-        <div className="header bg-blue-grey">
+      <div className="card upload-section">
+        <div className="card-header header bg-blue-grey">
           <h2>Sube tu cuestionario en formato : YAML</h2>
         </div>
-        <div className="upload-inner-body">
+        <div className=" card-body upload-inner-body">
           <h4>
             <label htmlFor="myfile">Selecciona un archivo:</label>
           </h4>

@@ -53,17 +53,16 @@ const UploadQuestions = () => {
     </div>
   );
 
+
   return (
     asignaturasImpartidas && (
       <div className="upload-body">
         <div className="card upload-section ">
-          <div className="header bg-blue-grey">
+          <div className="card-header header bg-blue-grey">
             <h2>Sube tus preguntas en formato : YAML</h2>
           </div>
-          <div className="upload-inner-body">
-            <h4>
-              <label htmlFor="myfile">Selecciona un archivo:</label>
-            </h4>
+          <div className='card-body upload-inner-body'>
+            <h4>Selecciona un archivo:</h4>
             <div className="input-group">
               <div className="custom-file">
                 <input type="file" className="custom-file-input" aria-describedby="inputGroupFileAddon01" onChange={(e) => setFile(e.target.files[0])} id="myfile" name="myfile" />

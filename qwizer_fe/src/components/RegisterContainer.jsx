@@ -98,7 +98,15 @@ const RegisterContainer = () => {
             ))}
           </select>
           <br />
-          <DataTable pointerOnHover selectableRows pagination theme="default" title="Alumnos matriculados en el centro" columns={columns} data={data} onSelectedRowsChange={handleChange} />
+          <DataTable pointerOnHover
+            selectableRows
+            pagination
+            theme="default"
+            title="Alumnos matriculados en el centro"
+            columns={columns}
+            data={data}
+            onSelectedRowsChange={handleChange}
+          />
           <div className="d-flex justify-content-center">
             <button type="button" className="btn btn-primary" onClick={registrarAlumnos}>
               Registrar alumnos

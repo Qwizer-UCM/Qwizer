@@ -75,24 +75,24 @@ const TestQuestion = ({ mode, id, type, options, infoPreg, addAnswerd }) => {
     return (
       <div className="d-flex flex-column justify-content-center visualize-container">
         <div className="row m-1 justify-content-center">
-          <label className="col-2">Título: &nbsp;</label>
-          <input className="col-8 m-input" type="text" value={questionData.title} disabled />
+          <label className="col-md-2 col-sm-auto">Título: &nbsp;</label>
+          <input className="col-md-8 col-sm-auto m-input" type="text" value={questionData.title} disabled />
         </div>
 
         <div className="row m-1 justify-content-center">
-          <label className="col-2">Pregunta: &nbsp;</label>
-          <input className="col-8 m-input" type="text" value={questionData.question} disabled />
+          <label className="col-md-2 col-sm-auto">Pregunta: &nbsp;</label>
+          <input className="col-md-8 col-sm-auto m-input" type="text" value={questionData.question} disabled />
         </div>
 
         {questionData.options.map((option, indx) => (
           <div key={option.id}>
             <div className="row m-1 justify-content-center">
-              <div className="col-2">
+              <div className="col-md-2 col-sm-auto">
                 <input type="radio" id={option.id} name={`opciones${preguntaId}`} value={option.id} checked={questionData.correct_op === option.id} disabled />
                 <label htmlFor={option.id}>{indx + 1}.- Opción: &nbsp;</label>
               </div>
 
-              <input className="col-8 m-input" type="text" value={questionData.correct_op === option.id ? `${option.op} (Correcta)` : option.op} disabled />
+              <input className="col-md-8 col-sm-auto m-input" type="text" value={questionData.correct_op === option.id ? `${option.op} (Correcta)` : option.op} disabled />
             </div>
           </div>
         ))}
