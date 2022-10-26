@@ -1,17 +1,8 @@
 import { useEffect, useState } from 'react';
 
 const TextQuestion = ({ mode, id, type, infoPreg, addAnswerd }) => {
-  const [textValue, settextValue] = useState('');
+  const [textValue, settextValue] = useState(() => (mode === 'test' ? JSON.parse(localStorage.getItem('answers'))?.respuestas?.find((r) => r.id === id)?.answr : ''));
   // props.mode puede tomar los siguientes valores: test, revision, visualize
-
-  useEffect(() => {
-    if (mode === 'test') {
-      // TODO Esto no tiene mucho sentido que estuviera en didMount, REVISAR
-      const found = JSON.parse(localStorage.getItem('answers'))?.respuestas.find((r) => r.id === id);
-      if (found) settextValue(found.answr);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleChange = (event) => {
     settextValue(event.target.value);

@@ -1,30 +1,13 @@
-import CheckIcon from "@mui/icons-material/Check";
-import ErrorIcon from "@mui/icons-material/Error";
-import { useEffect, useState } from "react";
-import Otro from "../services/NoSeDondeMeterloTodavia";
+import CheckIcon from '@mui/icons-material/Check';
+import ErrorIcon from '@mui/icons-material/Error';
+import useFetch from '../hooks/useFetch';
+import { Otro } from '../services/API';
 
-export default function VisualizarNota({data:cuestionario}) {
-  const [corregido, setcorregido] = useState();
-  const [hashSubida, sethashSubida] = useState();
-  const [qrSent, setqrSent] = useState();
-  const [hashQr, sethashQr] = useState();
+export default function VisualizarNota({ data: cuestionario }) {
+  const { data } = useFetch(Otro.getHashes, { params: { idCuestionario: cuestionario.idCuestionario, idUsuario: cuestionario.id } });
+  const { corrected: corregido, hashSubida, qrSent, hashQr } = data ?? {};
 
-  useEffect(() => {
-    getHashes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const getHashes = () => {
-    Otro.getHashes(cuestionario.idCuestionario, cuestionario.id)
-      .then(({ data }) => {
-        setcorregido(data.corrected);
-        sethashSubida(data.hashSubida);
-        setqrSent(data.qrSent);
-        sethashQr(data.hashQr);
-        // this.generar_tabla(); //TODO Y ESTO???
-      })
-      .catch((error) => console.log(error));
-  };
+  if (!data) return null;
 
   return (
     <div className="pl-3 pt-3">

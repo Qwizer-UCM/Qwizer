@@ -1,100 +1,52 @@
-import { useState,useEffect } from "react";
-import $ from "jquery";
-import { useNavigate } from "react-router-dom";
-import ErrorModal from "./common/modals/ErrorModal";
-import Tests from "../services/Tests";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import ErrorModal from './common/modals/ErrorModal';
+import { Tests } from '../services/API';
+import useFetch from '../hooks/useFetch';
 
-const TarjetaCuestionario = ({offline,cuestionario,idCuestionario,role}) => {
+// TODO que un cuestionario este bloqueado deberia comprobarse en el lado servidor
+// TODO separar en dos (offline, online), sera mas intuitivo el codigo
+const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) => {
   const navigate = useNavigate();
-  const [duracion, setduracion] = useState(0);
-  const [downloaded, setdownloaded] = useState(false);
-  const [calificacion, setcalificacion] = useState(0);
-  const [corregido, setcorregido] = useState(false);
-  const [bloqueado, setbloqueado] = useState(false);
-  const [fechas, setfechas] = useState({
-    fecha_apertura_formateada: "",
-    fecha_cierre_formateada: "",
-    fecha_apertura: "",
-    fecha_cierre: "",
-  });
-  const [loading, setLoading] = useState(true);
+  const [localStorageTest, setLocalStorageTest] = useState(() => JSON.parse(JSON.parse(localStorage.getItem('tests'))?.find((test) => JSON.parse(test).id === idCuestionario) ?? null) );
+  const [downloaded, setdownloaded] = useState(() => localStorageTest);
 
-  useEffect(() => {
-    if (!offline)
-      getInfo();
-    testIsDownloaded();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  const testIsDownloaded = () => {
-    const tests = localStorage.getItem("tests");  // TODO pensar en usar indexDB en vez de localstorage
-    const found = tests && JSON.parse(tests).find(test => JSON.parse(test).id === idCuestionario);
-    if(found){
-      const test = JSON.parse(found);
-      setdownloaded(true);
-      if (offline) {
-        setduracion(test.duracion);
-        setcorregido(false);
-        setfechas({
-          fecha_apertura_formateada: test.formatted_fecha_apertura,
-          fecha_cierre_formateada: test.formatted_fecha_cierre,
-          fecha_apertura: test.fecha_apertura,
-          fecha_cierre: test.fecha_cierre,
-        });
-      }
-      setLoading(false)
-    }
-    
+  const { data, isLoading } = useFetch(Tests.getInfo, { skip: offline, params: { idCuestionario } });
+
+  const source = offline ? localStorageTest : data;
+
+  const { duracion, nota:calificacion } = source ?? {};
+  const corregido = offline ? false : data?.corregido !== 0 
+  const fechas = {
+    fecha_apertura_formateada: source?.formattedFechaApertura || '',
+    fecha_cierre_formateada: source?.formattedFechaCierre || '',
+    fecha_apertura: source?.FechaApertura || '',
+    fecha_cierre: source?.FechaCierre || '',
   };
+  const bloqueado = new Date(fechas.fecha_apertura) > Date.now() || Date.now() > new Date(fechas.fecha_cierre);
 
   const addTestToLocalStorage = (jsonObject) => {
-    const tests = localStorage.getItem("tests");
-    const test = tests ? JSON.stringify([...JSON.parse(tests),jsonObject]) : JSON.stringify([jsonObject]);
-    localStorage.setItem("tests", test);
+    const tests = localStorage.getItem('tests');
+    const test = tests ? JSON.stringify([...JSON.parse(tests), jsonObject]) : JSON.stringify([jsonObject]);
+    localStorage.setItem('tests', test);
   };
 
   const getTest = (id) => {
-    Tests.get(id).then(({ data }) => {
-      addTestToLocalStorage(JSON.stringify(data));
+    Tests.get({ idCuestionario: id }).then(({ data:res }) => {
+      addTestToLocalStorage(JSON.stringify(res));
+      setLocalStorageTest(res)
       setdownloaded(true);
     });
   };
 
-  const getInfo = () => {
-    Tests.getInfo(idCuestionario)
-      .then(({ data }) => {
-        setduracion(data.duracion);
-        setcalificacion(data.nota);
-        setcorregido(data.corregido !== 0);
-        setfechas({
-          fecha_apertura_formateada: data.formattedFechaApertura,
-          fecha_cierre_formateada: data.formattedFechaCierre,
-          fecha_apertura: data.FechaApertura,
-          fecha_cierre: data.FechaCierre,
-        });
-        setbloqueado(comprobarFecha(data.FechaApertura,data.FechaCierre));
-
-        if (data.corregido !== 0){
-          $(`#cuestionario_${idCuestionario}`).css("background-color", data.nota >= 5  ? "#59ac79" : "#9c2400");  // TODO cambiar
-        }
-      })
-      .catch(() => {}).finally(()=> setLoading(false));
-  };
-
-  const comprobarFecha = (fechaApertura,fechaCierre) => {
-    const apertura = new Date(fechaApertura);
-    const cierre = new Date(fechaCierre);
-    const today = new Date(Date.now());
-
-    return apertura > today || today > cierre;
-  };
-
   const showModal = () => {
-    window.$(`#fecha_${idCuestionario}`).modal("show");
+    window.$(`#fecha_${idCuestionario}`).modal('show');
   };
 
-  return ( !loading &&
+  return (
+    !isLoading && (
       <div className="card asignatura-section " name={!offline ? cuestionario : cuestionario.title} id={idCuestionario}>
-        <div id={`cuestionario_${idCuestionario}`} className="card-header header bg-blue-grey">
+        <div id={`cuestionario_${idCuestionario}`} style={{ backgroundColor: corregido && calificacion >= 5 ? '#59ac79' : corregido && '#9c2400' }} className="card-header header bg-blue-grey">
           <h2>{!offline ? cuestionario : cuestionario.title}</h2>
           {!offline && corregido && <h5>Calificación: {calificacion}</h5>}
         </div>
@@ -105,7 +57,7 @@ const TarjetaCuestionario = ({offline,cuestionario,idCuestionario,role}) => {
             <p>Fecha de cierre: {fechas.fecha_cierre_formateada}</p>
           </div>
           <div className="col-md-3 col-sm-auto button-section">
-            {downloaded && !corregido && !bloqueado && role === "student" && (
+            {downloaded && !corregido && !bloqueado && role === 'student' && (
               <button type="button" className="btn btn-primary login-button" onClick={() => navigate(`/test/${idCuestionario}`)}>
                 Realizar
               </button>
@@ -115,22 +67,22 @@ const TarjetaCuestionario = ({offline,cuestionario,idCuestionario,role}) => {
                 Descargar test
               </button>
             )}
-            {downloaded && !corregido && bloqueado && role === "student" && (
+            {downloaded && !corregido && bloqueado && role === 'student' && (
               <button type="button" className="btn btn-primary" data-bs-toggle="modal" onClick={showModal}>
                 Realizar
               </button>
             )}
-            {!offline && corregido && role === "student" && (
+            {!offline && corregido && role === 'student' && (
               <button type="button" className="btn btn-primary login-button" onClick={() => navigate(`/revision/${idCuestionario}`)}>
                 Revisar
               </button>
             )}
-            {downloaded && !corregido && role === "teacher" && (
+            {downloaded && !corregido && role === 'teacher' && (
               <button type="button" className="btn btn-primary login-button" onClick={() => navigate(`/test/${idCuestionario}`)}>
                 Realizar
               </button>
             )}
-            {!offline && role === "teacher" && (
+            {!offline && role === 'teacher' && (
               <button type="button" className="btn btn-primary login-button" onClick={() => navigate(`/revisionNotas/${idCuestionario}`)}>
                 Revisar
               </button>
@@ -139,7 +91,8 @@ const TarjetaCuestionario = ({offline,cuestionario,idCuestionario,role}) => {
           <ErrorModal id={`fecha_${idCuestionario}`} message={`El test solo se puede resolver entre las siguientes fechas:\n${fechas.fecha_apertura_formateada}\n${fechas.fecha_cierre_formateada}`} />
         </div>
       </div>
-    );
+    )
+  );
 };
 
 export default TarjetaCuestionario;

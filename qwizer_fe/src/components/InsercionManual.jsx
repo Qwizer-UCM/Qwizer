@@ -1,30 +1,14 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import SuccessModal from "./common/modals/SuccessModal";
-import ErrorModal from "./common/modals/ErrorModal";
-import Otro from "../services/NoSeDondeMeterloTodavia";
+import { useParams } from 'react-router-dom';
+import SuccessModal from './common/modals/SuccessModal';
+import ErrorModal from './common/modals/ErrorModal';
+import { Otro } from '../services/API';
+import useFetch from '../hooks/useFetch';
 
-const InsercionManual = ({userId}) => {
+const InsercionManual = ({ userId }) => {
   const params = useParams();
-  const [message, setmessage] = useState("");
-
-  useEffect(() => {
-    guardarDatos();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const guardarDatos = () => {
-    Otro.insertQR(userId,params.test,params.hash)
-      .then(({data}) => {
-        setmessage(data.message);
-        if (!data.inserted) {
-          window.$("#inserted_error").modal("show");
-        } else {
-          window.$("#inserted_success").modal("show");
-        }
-      })
-      .catch((error) => console.log(error));
-  };
+  const onSuccess = () => window.$(!inserted ? '#inserted_error' : '#inserted_success').modal('show');
+  const { data } = useFetch(Otro.insertQR, { params: { idUsuario: userId, idCuestionario: params.test, hash: params.hash }, onSuccess });
+  const { message, inserted } = data ?? {};
 
   return (
     <div className="index-body">

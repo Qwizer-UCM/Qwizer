@@ -1,19 +1,10 @@
-import { useEffect, useState } from "react";
 import TarjetaAsignatura from "./TarjetaAsignatura";
-import Subjects from "../services/Subjects";
+import useFetch from "../hooks/useFetch";
+import { Subjects } from "../services/API";
 
 const IndexContainer = () => {
-  const [asignaturas, setAsignaturas] = useState([]);  // Guarda id y nombre de las asignaturas
-
-  useEffect(() => {
-    getAsignaturas();
-  }, []);
-
-  const getAsignaturas = () => {
-    Subjects.getFromStudentOrTeacher().then(({ data }) => {
-      setAsignaturas(data.asignaturas);
-    });
-  };
+  const { data, error, isLoading } = useFetch(Subjects.getFromStudentOrTeacher)  // Guarda id y nombre de las asignaturas
+  const {asignaturas} = data ?? {}
 
   const conexion = navigator.onLine;
 
@@ -37,10 +28,17 @@ const IndexContainer = () => {
       </div>
     );
   } 
-  if (asignaturas) {
+
+  if(error) {
+    return (
+      <div>VISTA ERROR casi tan bonita como este div</div>
+    )
+  }
+
+  if (!isLoading) {
     return (
       <div className="index-body">
-        {asignaturas.map((asignatura) => (
+        {asignaturas?.map((asignatura) => (
             <div key={asignatura.id} className="d-flex justify-content-center mt-1">
               <TarjetaAsignatura asignatura={asignatura.nombre} idAsignatura={asignatura.id} cuestionarios={asignatura.cuestionarios} />
             </div>

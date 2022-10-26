@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ErrorModal from "./common/modals/ErrorModal";
 import SuccessModal from "./common/modals/SuccessModal";
-import Tests from "../services/Tests";
+import {Tests} from '../services/API'
 
 const UploadFile = () => {
   const [file, setFile] = useState("");
@@ -14,7 +14,7 @@ const UploadFile = () => {
       reader.onload = (e) => {
         const ficheroYAML = e.target.result;
 
-        Tests.upload(ficheroYAML)
+        Tests.upload({ficheroYAML})
           .then(({ data }) => {
             setFile("");
             setMessage(data.message);

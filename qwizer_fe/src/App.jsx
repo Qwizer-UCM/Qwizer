@@ -1,35 +1,35 @@
-import { Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Suspense } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
-import IndexContainer from "./components/IndexContainer";
-import QuestionContainer from "./components/QuestionContainer";
+import IndexContainer from './components/IndexContainer';
+import QuestionContainer from './components/QuestionContainer';
 
-import LoginComponent from "./components/LoginComponent";
-import NavBar from "./components/common/NavBar";
+import LoginComponent from './components/LoginComponent';
+import NavBar from './components/common/NavBar';
 
-import BancoPreguntas from "./components/BancoPreguntas";
-import UploadFile from "./components/UploadFile";
-import UploadQuestions from "./components/UploadQuestions";
-import CuestionariosContainer from "./components/CuestionariosContainer";
-import RegisterContainer from "./components/RegisterContainer";
+import BancoPreguntas from './components/BancoPreguntas';
+import UploadFile from './components/UploadFile';
+import UploadQuestions from './components/UploadQuestions';
+import CuestionariosContainer from './components/CuestionariosContainer';
+import RegisterContainer from './components/RegisterContainer';
 
-import QrContainer from "./components/QrContainer";
-import InsercionManual from "./components/InsercionManual";
+import QrContainer from './components/QrContainer';
+import InsercionManual from './components/InsercionManual';
 
-import CrearCuestionario from "./components/CrearCuestionario";
-import RevisionNotasContainer from "./components/RevisionNotasContainer";
+import CrearCuestionario from './components/CrearCuestionario';
+import RevisionNotasContainer from './components/RevisionNotasContainer';
 
-import AvailableOffline from "./components/AvailableOffline";
-import ProtectedRoutes from "./hoc/ProtectedRoutes";
-import NotFound404 from "./components/common/NotFound404";
-import useDocumentTitle from "./hooks/useDocumentTitle";
-import useAuth from "./hooks/useAuth";
+import AvailableOffline from './components/AvailableOffline';
+import ProtectedRoutes from './hoc/ProtectedRoutes';
+import NotFound404 from './components/common/NotFound404';
+import useDocumentTitle from './hooks/useDocumentTitle';
+import useAuth from './hooks/useAuth';
 
 const App = () => {
-  const {  user, isLogged, login, logout} = useAuth();
-  useDocumentTitle() // TODO se puede usar en cada componente pasandole un titulo para cada pagina
+  const { user, isLogged, isLoading, login, logout } = useAuth();
+  useDocumentTitle(); // TODO se puede usar en cada componente pasandole un titulo para cada pagina
 
-  if (isLogged === undefined) return null;
+  if (isLoading) return null;
 
   return (
     <Suspense fallback={<span>Loading...</span>}>
@@ -43,11 +43,11 @@ const App = () => {
         >
           <Route path="/" element={<IndexContainer />} />
           <Route path="/cuestionarios/:id" element={<CuestionariosContainer role={user.role} />} />
-          <Route path="/offline" element={<AvailableOffline role={user.role}/>} />
+          <Route path="/offline" element={<AvailableOffline role={user.role} />} />
           <Route path="/test/:id" element={<QuestionContainer revision={false} />} />
           <Route path="/revision/:id" element={<QuestionContainer revision />} />
           {/* FIXME importante arreglar el back devuelve las notas sin comprobar el rol */}
-          <Route element={<ProtectedRoutes isAllowed={user.role.includes("teacher")} redirectPath="/404" />}>
+          <Route element={<ProtectedRoutes isAllowed={user.role.includes('teacher')} redirectPath="/404" />}>
             <Route path="/banco-preguntas" element={<BancoPreguntas />} />
             <Route path="/upload-questionary" element={<UploadFile />} />
             <Route path="/upload-questions" element={<UploadQuestions />} />
@@ -62,7 +62,7 @@ const App = () => {
         </Route>
         <Route path="/login" element={!isLogged ? <LoginComponent login={login} /> : <Navigate to="/" />} />
         <Route path="/404" element={<NotFound404 />} />
-        <Route path="*" element={<Navigate to="/404"/>} />
+        <Route path="*" element={<Navigate to="/404" />} />
       </Routes>
     </Suspense>
   );

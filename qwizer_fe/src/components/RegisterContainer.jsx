@@ -1,9 +1,9 @@
-import { useEffect, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import DataTable from 'react-data-table-component';
 import ErrorModal from './common/modals/ErrorModal';
 import SuccessModal from './common/modals/SuccessModal';
-import Users from '../services/Users';
-import Subjects from '../services/Subjects';
+import { Users, Subjects } from '../services/API';
+import useFetch from '../hooks/useFetch';
 
 const columns = [
   {
@@ -25,29 +25,12 @@ const columns = [
 ];
 
 const RegisterContainer = () => {
-  const [asignaturas, setAsignaturas] = useState([]);
-  const [data, setData] = useState(undefined);
-  const [alumnosSeleccionados, setAlumnosSeleccionados] = useState(undefined);
+  const { data: asignaturas } = useFetch(Subjects.getFromStudentOrTeacher, {transform: (res) => res.asignaturas});
+  const { data } = useFetch(Users.getStudents, { transform: (res) => res.alumnos.map((a) => ({ id: a.id, nombre: a.nombre, apellidos: a.apellidos })) });
+
+  const [alumnosSeleccionados, setAlumnosSeleccionados] = useState([]);
   const [message, setMessage] = useState(undefined);
   const selectedSubject = useRef();
-
-  useEffect(() => {
-    getAsignaturas();
-    getAlumnos();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const getAsignaturas = () => {
-    Subjects.getFromStudentOrTeacher().then(({ data:res }) => {
-      setAsignaturas(res.asignaturas);
-    });
-  };
-
-  const getAlumnos = () => {
-    Users.getStudents().then(({ data:res }) => {
-      setData(res.alumnos.map((a) => ({ id: a.id, nombre: a.nombre, apellidos: a.apellidos })));
-    });
-  };
 
   const registrarAlumnos = () => {
     const asignatura = selectedSubject.current.options[selectedSubject.current.selectedIndex].value;
@@ -56,8 +39,8 @@ const RegisterContainer = () => {
       setMessage('Selecciona una asignatura y al menos un alumno');
       window.$('#inserted_error').modal('show');
     } else {
-      Subjects.enrollStudents(alumnosSeleccionados, asignatura)
-        .then(({ data:res }) => {
+      Subjects.enrollStudents({ alumnos: alumnosSeleccionados, asignatura })
+        .then(({ data: res }) => {
           if (data.insertados) {
             setMessage('Los alumnos han sido matriculados correctamente.');
             window.$('#inserted_success').modal('show');
@@ -79,8 +62,6 @@ const RegisterContainer = () => {
     setAlumnosSeleccionados(selectedRows);
   };
 
-  if (!data) return null;
-
   return (
     <div className="index-body">
       <div className="card tabla-notas">
@@ -91,7 +72,7 @@ const RegisterContainer = () => {
             <option hidden defaultValue>
               Selecciona una asignatura
             </option>
-            {asignaturas.map((asignatura) => (
+            {asignaturas?.map((asignatura) => (
               <option key={asignatura.id} value={asignatura.id}>
                 {asignatura.nombre}
               </option>

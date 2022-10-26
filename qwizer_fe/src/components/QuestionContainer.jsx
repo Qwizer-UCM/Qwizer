@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import Countdown from "react-countdown";
-import CryptoJS from "crypto-js";
-import TestQuestion from "./TestQuestion";
-import TextQuestion from "./TextQuestion";
-import QuestionNav from "./QuestionNav";
-import ErrorModal from "./common/modals/ErrorModal";
-import Tests from "../services/Tests";
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import Countdown from 'react-countdown';
+import CryptoJS from 'crypto-js';
+import TestQuestion from './TestQuestion';
+import TextQuestion from './TextQuestion';
+import QuestionNav from './QuestionNav';
+import ErrorModal from './common/modals/ErrorModal';
+import { Tests } from '../services/API';
+import useFetch from '../hooks/useFetch';
 
 const getTestFromLocalStorage = (testId) => {
-  const tests = localStorage.getItem("tests");  // TODO pensar en usar indexDB en vez de localstorage
-  const found = tests ? JSON.parse(tests).find(test => JSON.parse(test).id === testId) : false;
+  const tests = localStorage.getItem('tests'); // TODO pensar en usar indexDB en vez de localstorage
+  const found = tests ? JSON.parse(tests).find((test) => JSON.parse(test).id === testId) : false;
   return found ? JSON.parse(found) : null;
 };
 
@@ -23,14 +24,14 @@ const descifrarTest = (currentTest) => {
   const iv = CryptoJS.enc.Hex.parse(input.iv);
 
   const result = CryptoJS.AES.decrypt(cipher, key, { iv, mode: CryptoJS.mode.CFB });
-  
+
   return JSON.parse(result.toString(CryptoJS.enc.Utf8)).questions;
 };
 
-const comprobarPassword = (contra, currentTest) => contra !== "" && CryptoJS.SHA256(contra).toString() === getTestFromLocalStorage(currentTest).password;
+const comprobarPassword = (contra, currentTest) => contra !== '' && CryptoJS.SHA256(contra).toString() === getTestFromLocalStorage(currentTest).password;
 
-const CuestionarioPassword = ({getPass,unlockTest}) => {
-  const message = "Contraseña incorrecta";
+const CuestionarioPassword = ({ getPass, unlockTest }) => {
+  const message = 'Contraseña incorrecta';
 
   return (
     <div className="index-body">
@@ -60,47 +61,35 @@ const CuestionarioPassword = ({getPass,unlockTest}) => {
 };
 
 const addTestToLocalStorage = (jsonObject) => {
-  const tests = localStorage.getItem("tests");
-  const test = tests ? JSON.stringify([...JSON.parse(tests),jsonObject]) : JSON.stringify([jsonObject]);
-  localStorage.setItem("tests", test);
+  const tests = localStorage.getItem('tests');
+  const test = tests ? JSON.stringify([...JSON.parse(tests), jsonObject]) : JSON.stringify([jsonObject]);
+  localStorage.setItem('tests', test);
 };
 
-// FIXME mover revisionTest y revisionTestProfesor de App.js a este componente
-const QuestionContainer = ({revision}) => {
+// TODO separar este componente, no queda claro que estado pertenece a cada caso de uso.
+const QuestionContainer = ({ revision }) => {
   const navigate = useNavigate();
   const params = useParams();
+  const [localStorageTest] = useState(() => getTestFromLocalStorage(params.id)); // TODO no convence lo de guardarlo en localstorage
 
-  const [contra, setContra] = useState("");
+  const { data: testCorregido } = useFetch(Tests.getCorrectedTest, {
+    skip: !revision,
+    transform: (d) => JSON.parse(d.corrected_test),
+    params: { idAlumno: params.id, idCuestionario: params.idAlumno ?? '' },
+  });
+  useFetch(Tests.get, { skip: revision || localStorageTest, onSuccess: (d) => addTestToLocalStorage(JSON.stringify(d)), params: { idCuestionario: params.id } });
+
+  const [contra, setContra] = useState('');
   const [indPregunta, setindPregunta] = useState(0);
   const [questionList, setQuestionList] = useState([]);
   const [answerList, setAnswerList] = useState({}); // TODO revisar metodos que los usan, se vuelven a usar mapas :(
   const [isAllowed, setIsAllowed] = useState(false); // Indica si se ha desbloqueado el test
-  const [descargado, setDescargado] = useState(false);
-  const [testCorregido, setTestCorregido] = useState();
-  const duration = getTestFromLocalStorage(params.id)?.duracion // TODO arreglo momentaneo
 
-  useEffect(() => {
-    if(revision){
-      Tests.getCorrectedTest(params.id, params.idAlumno ?? "")
-      .then(({ data }) => {
-        const jsonData = JSON.parse(data.corrected_test);
-        setTestCorregido(jsonData);
-      })
-      .catch((error) => {
-        console.log("Error", error);
-      });
-    } else if(!getTestFromLocalStorage(params.id)){
-        Tests.get(params.id).then(({ data }) => {
-          addTestToLocalStorage(JSON.stringify(data));
-          setDescargado(true);
-        });
-      }else{
-        setDescargado(true);
-      }
-  }, [params.id, params.idAlumno, revision]);
+  const descargado = Boolean(localStorageTest); // Si existe en localstorage true en caso contrario false
+  const duration = localStorageTest?.duracion; // TODO arreglo momentaneo
 
   const updateTime = () => {
-    let initTime = Number(localStorage.getItem("initTime"));
+    let initTime = Number(localStorage.getItem('initTime'));
     initTime = new Date(initTime);
     let actualTime = Date.now();
     actualTime = new Date(actualTime);
@@ -122,10 +111,33 @@ const QuestionContainer = ({revision}) => {
 
   const questionType = (pregunta) => {
     if (pregunta != null) {
-      if (pregunta.type === "test") {
-        return <TestQuestion mode={revision ? "revision" : "test"} infoPreg={pregunta} key={pregunta.id} idCuestionario={params.id} question={pregunta.question} options={pregunta.options} id={pregunta.id} type={pregunta.type} addAnswerd={addAnswer} />;
+      if (pregunta.type === 'test') {
+        return (
+          <TestQuestion
+            mode={revision ? 'revision' : 'test'}
+            infoPreg={pregunta}
+            key={pregunta.id}
+            idCuestionario={params.id}
+            question={pregunta.question}
+            options={pregunta.options}
+            id={pregunta.id}
+            type={pregunta.type}
+            addAnswerd={addAnswer}
+          />
+        );
       } // else type = 'text'
-      return <TextQuestion mode={revision ? "revision" : "test"} infoPreg={pregunta} key={pregunta.id} idCuestionario={params.id} question={pregunta.question} id={pregunta.id} type={pregunta.type} addAnswerd={addAnswer} />;
+      return (
+        <TextQuestion
+          mode={revision ? 'revision' : 'test'}
+          infoPreg={pregunta}
+          key={pregunta.id}
+          idCuestionario={params.id}
+          question={pregunta.question}
+          id={pregunta.id}
+          type={pregunta.type}
+          addAnswerd={addAnswer}
+        />
+      );
     }
     return null;
   };
@@ -150,7 +162,7 @@ const QuestionContainer = ({revision}) => {
           </button>
         </div>
       );
-    } 
+    }
     if (indPregunta === 0) {
       return (
         <div className="p-2 col text-center">
@@ -159,7 +171,7 @@ const QuestionContainer = ({revision}) => {
           </button>
         </div>
       );
-    } 
+    }
     if (indPregunta > 0 && indPregunta < questionList.length - 1) {
       return (
         <div className="p-2 col text-center">
@@ -171,7 +183,7 @@ const QuestionContainer = ({revision}) => {
           </button>
         </div>
       );
-    } 
+    }
 
     // indPregunta == numPreguntas-1
     return (
@@ -184,7 +196,6 @@ const QuestionContainer = ({revision}) => {
         </button>
       </div>
     );
-    
   };
 
   const navHandler = (val) => {
@@ -195,10 +206,10 @@ const QuestionContainer = ({revision}) => {
     if (completed) {
       // Render a completed state
       endTest();
-      localStorage.removeItem("initTime");
-      localStorage.removeItem("answers");
+      localStorage.removeItem('initTime');
+      localStorage.removeItem('answers');
       return <h1>Test Enviado</h1>;
-    } 
+    }
     // Render a countdown
     const totalSeconds = duration * 60; // segundos
     const leftSeconds = hours * 3600 + minutes * 60 + seconds;
@@ -213,21 +224,20 @@ const QuestionContainer = ({revision}) => {
         </div>
       </div>
     );
-    
   };
 
   const endTest = () => {
-    const respuestas = localStorage.getItem("answers");
+    const respuestas = localStorage.getItem('answers');
     const hash = CryptoJS.SHA256(respuestas).toString();
     const sent = navigator.onLine;
     // TODO por qué no se espera respuesta de esta peticion??
-    console.log(respuestas)
-    Tests.sendTest(respuestas, hash)
-      .then(() => console.log("END"))
+    console.log(respuestas);
+    Tests.sendTest({ respuestas, hash })
+      .then(() => console.log('END'))
       .catch((e) => console.error(e));
 
     if (sent) {
-      navigate("/", { replace: true });
+      navigate('/', { replace: true });
     } else {
       navigate(`/scanner/${params.id}/${hash}`, { replace: true });
     }
@@ -235,7 +245,7 @@ const QuestionContainer = ({revision}) => {
 
   const initAnswerList = (questions) => {
     const list = new Map();
-    questions.forEach((pregunta) => list.set(pregunta.id, { type: pregunta.type, answr: "NULL" }));
+    questions.forEach((pregunta) => list.set(pregunta.id, { type: pregunta.type, answr: 'NULL' }));
     setAnswerList(list);
   };
 
@@ -245,9 +255,9 @@ const QuestionContainer = ({revision}) => {
       initAnswerList(list);
       setQuestionList(list);
       setIsAllowed(true);
-      localStorage.setItem("initTime", Date.now()); // guardamos la hora a la que empieza el examen
+      localStorage.setItem('initTime', Date.now()); // guardamos la hora a la que empieza el examen
     } else {
-      window.$("#password_error").modal("show");
+      window.$('#password_error').modal('show');
     }
   };
 
@@ -265,19 +275,19 @@ const QuestionContainer = ({revision}) => {
       listaRespuestas.push({
         id: key,
         type: value.type,
-        answr: value.type === "test" ? Number(value.answr) : value.answr
+        answr: value.type === 'test' ? Number(value.answr) : value.answr,
       });
     }
 
     const respuestas = { idCuestionario: params.id, respuestas: listaRespuestas };
-    localStorage.setItem("answers", JSON.stringify(respuestas));
+    localStorage.setItem('answers', JSON.stringify(respuestas));
 
     setAnswerList(newlist);
   };
 
   const renderQtype = questionType;
 
-  if(!revision && !descargado) return null;
+  if (!revision && !descargado) return null;
 
   if (!revision && !isAllowed) return <CuestionarioPassword unlockTest={unlockTest} getPass={getPass} />;
 
@@ -297,7 +307,7 @@ const QuestionContainer = ({revision}) => {
             <div className="card">
               <div key={pregunta.id}>
                 <h2 className="p-2 m-2 card">
-                  {" "}
+                  {' '}
                   {indPregunta + 1}
                   {`.-${pregunta.question}`}
                 </h2>
@@ -316,7 +326,7 @@ const QuestionContainer = ({revision}) => {
         </div>
       </div>
     );
-  } 
+  }
   if (revision === true && testCorregido) {
     return (
       <div className="index-body container-fluid" id="questions">
@@ -334,7 +344,7 @@ const QuestionContainer = ({revision}) => {
             <div className="card">
               <div key={testCorregido.questions[indPregunta].id}>
                 <h2 className="p-2 m-2 card">
-                  {" "}
+                  {' '}
                   {indPregunta + 1}
                   {`.-${testCorregido.questions[indPregunta].question}`}
                 </h2>
@@ -349,10 +359,9 @@ const QuestionContainer = ({revision}) => {
         </div>
       </div>
     );
-  } 
-  
+  }
+
   return <h1>Loading...</h1>;
-  
 };
 
 export default QuestionContainer;

@@ -1,20 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import ErrorModal from './common/modals/ErrorModal';
 import SuccessModal from './common/modals/SuccessModal';
-import Subjects from '../services/Subjects';
-import Questions from '../services/Questions';
+import { Subjects, Questions } from '../services/API';
+import useFetch from '../hooks/useFetch';
 
 const UploadQuestions = () => {
   const [file, setFile] = useState('');
   const [message, setMessage] = useState(undefined);
-  const [asignaturasImpartidas, setAsignaturas] = useState([]);
   const [idAsignatura, setIdAsignatura] = useState('');
-
-  useEffect(() => {
-    Subjects.getFromStudentOrTeacher().then(({ data }) => {
-      setAsignaturas(data.asignaturas);
-    });
-  }, []);
+  const { data: asignaturasImpartidas } = useFetch(Subjects.getFromStudentOrTeacher, { transform: (res) => res.asignaturas });
 
   const uploadFile = () => {
     if (file.name !== '' && idAsignatura) {
@@ -22,7 +16,7 @@ const UploadQuestions = () => {
       reader.readAsText(file, 'utf-8');
       reader.onload = (e) => {
         console.log(e.target.result);
-        Questions.upload(e.target.result, idAsignatura)
+        Questions.upload({ ficheroYAML: e.target.result, idAsignatura })
           .then(({ data }) => {
             setFile('');
             setMessage(data.message);

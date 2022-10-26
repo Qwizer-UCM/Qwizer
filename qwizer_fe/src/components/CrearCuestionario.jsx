@@ -1,16 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import BancoPreguntas from './BancoPreguntas';
 import TestQuestion from './TestQuestion';
 import TextQuestion from './TextQuestion';
-import Subjects from '../services/Subjects';
-import Tests from '../services/Tests';
+import {Subjects,Tests} from '../services/API'
+import useFetch from '../hooks/useFetch';
 
+// TODO un poco extraño el funcionamiento de esto
+// Se hace una petición para ver las asignaturas disponibles y luego en el componente
+// bancoPreguntas se vuelve a hacer la misma peticion.
 const CrearCuestionario = () => {
+  const {data:asignaturasImpartidas} = useFetch(Subjects.getFromStudentOrTeacher)
   const navigate = useNavigate();
-  const [asignaturasImpartidas, setAsignaturasImpartidas] = useState([]);
   const [selectedList, setSelectedList] = useState([]);
   const [selectedListInfo, setSelectedListInfo] = useState({});
   const testForm = useRef();
@@ -21,16 +24,6 @@ const CrearCuestionario = () => {
   const testDuration = useRef();
   const testOpeningDate = useRef();
   const testClosingDate = useRef();
-
-  useEffect(() => {
-    getImparteAsignaturas();
-  }, []);
-
-  const getImparteAsignaturas = () => {
-    Subjects.getFromStudentOrTeacher().then(({ data }) => {
-      setAsignaturasImpartidas(data.asignaturas);
-    });
-  };
 
   const addSelectedQuestion = (pregunta) => {
     const listaPregSelec = [...selectedList];
@@ -104,7 +97,7 @@ const CrearCuestionario = () => {
       })),
     };
 
-    Tests.createQuiz(cuestionario).then(() => {
+    Tests.createQuiz({cuestionario}).then(() => {
       navigate('/');
       alert('Cuestionario creado correctamente');
     });
@@ -158,7 +151,7 @@ const CrearCuestionario = () => {
         <InputGroup className='mb-3'>
           <InputGroup.Text id='inputGroup-sizing-default'>Asignatura: &nbsp;</InputGroup.Text>
           <Form.Select defaultValue="null" ref={testSubject}>
-            {asignaturasImpartidas.map((subject) => (
+            {asignaturasImpartidas?.asignaturas?.map((subject) => (
               <option key={subject.id} value={subject.id}>
                 {subject.nombre}
               </option>

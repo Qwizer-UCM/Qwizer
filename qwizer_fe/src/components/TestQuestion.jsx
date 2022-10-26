@@ -1,17 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const TestQuestion = ({ mode, id, type, options, infoPreg, addAnswerd }) => {
-  const [selectedOp, setSelectedOp] = useState(null);
+  const [selectedOp, setSelectedOp] = useState(() => (mode === 'test' ? JSON.parse(localStorage.getItem('answers'))?.respuestas?.find((r) => r.id === id)?.answr : null));
   // props.mode puede tomar los siguientes valores: test, revision, visualize
-
-  useEffect(() => {
-    if (mode === 'test') {
-      // TODO revisar por estar en didMount cuando no deberia estar ahi
-      const found = JSON.parse(localStorage.getItem('answers'))?.respuestas.find((r) => r.id === id);
-      if (found) setSelectedOp(found.answr);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleOnClick = (event) => {
     setSelectedOp(Number(event.target.value));
@@ -54,7 +45,7 @@ const TestQuestion = ({ mode, id, type, options, infoPreg, addAnswerd }) => {
             {questionData.options.map((option, indx) => (
               <tr key={option.id}>
                 <td>
-                  <input type="radio" id={option.id} name={`opciones${preguntaId}`} value={option.id} checked={questionData.user_op === option.id} />
+                  <input type="radio" id={option.id} name={`opciones${preguntaId}`} value={option.id} checked={questionData.user_op === option.id} readOnly />
                   <label htmlFor={option.id}>
                     {indx + 1}.- {option.op}
                   </label>
