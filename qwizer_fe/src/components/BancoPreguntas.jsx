@@ -1,8 +1,6 @@
 import { useRef, useState } from 'react';
 import DataTable from 'react-data-table-component';
 import yaml from 'js-yaml';
-// import ErrorModal from './common/modals/ErrorModal'
-// import SuccessModal from './common/modals/SuccessModal'
 import VisualizarPregunta from './VisualizarPregunta';
 import { Questions, Subjects } from '../services/API';
 import useFetch from '../hooks/useFetch';
@@ -143,11 +141,8 @@ const BancoPreguntas = ({ createQuiz, addQuestion }) => {
           />
         </div>
       </div>
-      {/* <ErrorModal id={"inserted_error"} message="Todo fue bien"></ErrorModal> */}
-      {/* <SuccessModal id={"inserted_success"} message="Todo fue bien"></SuccessModal> */}
     </div>
   );
-  // TODO mensaje de error no entiendo como lo hacían huele a copy paste
 };
 
 export default BancoPreguntas;

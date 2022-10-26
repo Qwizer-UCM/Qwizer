@@ -10,7 +10,7 @@ export default function VisualizarNota({ data: cuestionario }) {
   if (!data) return null;
 
   return (
-    <div className="pl-3 pt-3">
+    <div className="ps-3 pt-3">
       {corregido === true && (
         <div className="form-group">
           <label htmlFor="name" className="col-lg-4">
@@ -22,7 +22,7 @@ export default function VisualizarNota({ data: cuestionario }) {
         </div>
       )}
 
-      {corregido === false && <p className="pl-3">Este exámen aun no ha sido corregido.</p>}
+      {corregido === false && <p>Este exámen aun no ha sido corregido.</p>}
 
       {qrSent === true && (
         <div className="form-group">
@@ -35,16 +35,16 @@ export default function VisualizarNota({ data: cuestionario }) {
         </div>
       )}
 
-      {qrSent === false && <p className="pl-3">El alumno no hizo uso del código QR.</p>}
+      {qrSent === false && <p>El alumno no hizo uso del código QR.</p>}
 
       {qrSent === true && corregido === true && hashSubida === hashQr && (
-        <p className="pl-3">
+        <p>
           <CheckIcon color="primary" /> Los códigos coinciden
         </p>
       )}
 
       {qrSent === true && corregido === true && hashSubida !== hashQr && (
-        <p className="pl-3">
+        <p>
           <ErrorIcon color="primary" /> Los códigos no coinciden
         </p>
       )}

@@ -1,30 +1,32 @@
-import { useState } from "react";
-import ErrorModal from "./common/modals/ErrorModal";
-import SuccessModal from "./common/modals/SuccessModal";
-import {Tests} from '../services/API'
+import { useState } from 'react';
+import Modal from './common/modals/Modal';
+import { Tests } from '../services/API';
 
 const UploadFile = () => {
-  const [file, setFile] = useState("");
-  const [message, setMessage] = useState(undefined);
+  const [file, setFile] = useState('');
+  const [errorModal, setErrorModal] = useState({ show: false, message: '' });
+  const [successModal, setSuccessModal] = useState({ show: false, message: '' });
 
   const uploadFile = () => {
-    if (file.name !== "") {
+    if (file.name !== '') {
       const reader = new FileReader();
-      reader.readAsText(file, "utf-8");
+      reader.readAsText(file, 'utf-8');
       reader.onload = (e) => {
         const ficheroYAML = e.target.result;
 
-        Tests.upload({ficheroYAML})
+        Tests.upload({ ficheroYAML })
           .then(({ data }) => {
-            setFile("");
-            setMessage(data.message);
-            if (data.inserted === "false") {
-              window.$("#inserted_error").modal("show");
+            setFile('');
+            if (data.inserted === 'false') {
+              setErrorModal({ show: true, message: data.message });
             } else {
-              window.$("#inserted_success").modal("show");
+              setSuccessModal({ show: true, message: data.message });
             }
           })
-          .catch((error) => console.log(error));
+          .catch((error) => {
+            setErrorModal({ show: true, message: 'ERROR' });
+            console.log(error);
+          });
       };
     }
   };
@@ -40,15 +42,15 @@ const UploadFile = () => {
             <label htmlFor="myfile">Selecciona un archivo:</label>
           </h4>
           <div className="input-group">
-            <div className="custom-file">
-              <input type="file" className="custom-file-input" aria-describedby="inputGroupFileAddon01" onChange={(e) => setFile(e.target.files[0])} id="myfile" name="myfile" />
-              <label className="custom-file-label" htmlFor="inputGroupFile01">
+            <div>
+              <input type="file" className="form-control" aria-describedby="inputGroupFileAddon01" onChange={(e) => setFile(e.target.files[0])} id="myfile" name="myfile" />
+              <label className="form-label" htmlFor="myfile">
                 {file.name}
               </label>
             </div>
           </div>
           <div className="upload-message-section">
-            {file !== "" && (
+            {file !== '' && (
               <button type="button" className="btn btn-success btn-submit" onClick={uploadFile}>
                 Subir Cuestionario
               </button>
@@ -56,8 +58,8 @@ const UploadFile = () => {
           </div>
         </div>
       </div>
-      <ErrorModal id="inserted_error" message={message} />
-      <SuccessModal id="inserted_success" message={message} />
+      <Modal options={errorModal} onHide={setErrorModal} type='danger'/>
+      <Modal options={successModal} onHide={setSuccessModal} type='success'/>
     </div>
   );
 };

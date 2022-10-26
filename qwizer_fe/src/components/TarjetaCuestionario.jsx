@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ErrorModal from './common/modals/ErrorModal';
+import Modal from './common/modals/Modal';
 import { Tests } from '../services/API';
 import useFetch from '../hooks/useFetch';
 
@@ -8,6 +8,8 @@ import useFetch from '../hooks/useFetch';
 // TODO separar en dos (offline, online), sera mas intuitivo el codigo
 const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) => {
   const navigate = useNavigate();
+  const [errorModal, setErrorModal] = useState({show:false,message:''});
+
   const [localStorageTest, setLocalStorageTest] = useState(() => JSON.parse(JSON.parse(localStorage.getItem('tests'))?.find((test) => JSON.parse(test).id === idCuestionario) ?? null) );
   const [downloaded, setdownloaded] = useState(() => localStorageTest);
 
@@ -40,7 +42,7 @@ const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) =>
   };
 
   const showModal = () => {
-    window.$(`#fecha_${idCuestionario}`).modal('show');
+    setErrorModal({show:true,message:`El test solo se puede resolver entre las siguientes fechas:\n${fechas.fecha_apertura_formateada}\n${fechas.fecha_cierre_formateada}`})
   };
 
   return (
@@ -88,7 +90,7 @@ const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) =>
               </button>
             )}
           </div>
-          <ErrorModal id={`fecha_${idCuestionario}`} message={`El test solo se puede resolver entre las siguientes fechas:\n${fechas.fecha_apertura_formateada}\n${fechas.fecha_cierre_formateada}`} />
+          <Modal options={errorModal} onHide={setErrorModal} type='danger'/>
         </div>
       </div>
     )

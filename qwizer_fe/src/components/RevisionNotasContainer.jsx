@@ -13,11 +13,7 @@ const CustomCell = ({ id, idCuestionario }) => {
   );
 };
 
-const ExpandedComponent = ({ data }) => (
-  <div>
-    <VisualizarNota data={data} />
-  </div>
-);
+const ExpandedComponent = ({ data }) => <VisualizarNota data={data} />;
 
 const paginationComponentOptions = {
   rowsPerPageText: 'Filas por página',

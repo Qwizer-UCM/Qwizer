@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import ErrorModal from './common/modals/ErrorModal';
-import SuccessModal from './common/modals/SuccessModal';
+import Modal from './common/modals/Modal';
 import { Subjects, Questions } from '../services/API';
 import useFetch from '../hooks/useFetch';
 
 const UploadQuestions = () => {
   const [file, setFile] = useState('');
-  const [message, setMessage] = useState(undefined);
+  const [errorModal, setErrorModal] = useState({ show: false, message: '' });
+  const [successModal, setSuccessModal] = useState({ show: false, message: '' });
   const [idAsignatura, setIdAsignatura] = useState('');
   const { data: asignaturasImpartidas } = useFetch(Subjects.getFromStudentOrTeacher, { transform: (res) => res.asignaturas });
 
@@ -15,18 +15,19 @@ const UploadQuestions = () => {
       const reader = new FileReader();
       reader.readAsText(file, 'utf-8');
       reader.onload = (e) => {
-        console.log(e.target.result);
         Questions.upload({ ficheroYAML: e.target.result, idAsignatura })
           .then(({ data }) => {
             setFile('');
-            setMessage(data.message);
             if (data.inserted === 'false') {
-              window.$('#inserted_error').modal('show');
+              setErrorModal({ show: true, message: data.message });
             } else {
-              window.$('#inserted_success').modal('show');
+              setSuccessModal({ show: true, message: data.message });
             }
           })
-          .catch((error) => console.log(error));
+          .catch((error) => {
+            setErrorModal({ show: true, message: 'Error' });
+            console.log(error);
+          });
       };
     }
   };
@@ -47,7 +48,6 @@ const UploadQuestions = () => {
     </div>
   );
 
-
   return (
     asignaturasImpartidas && (
       <div className="upload-body">
@@ -55,12 +55,12 @@ const UploadQuestions = () => {
           <div className="card-header header bg-blue-grey">
             <h2>Sube tus preguntas en formato : YAML</h2>
           </div>
-          <div className='card-body upload-inner-body'>
+          <div className="card-body upload-inner-body">
             <h4>Selecciona un archivo:</h4>
             <div className="input-group">
-              <div className="custom-file">
-                <input type="file" className="custom-file-input" aria-describedby="inputGroupFileAddon01" onChange={(e) => setFile(e.target.files[0])} id="myfile" name="myfile" />
-                <label className="custom-file-label" htmlFor="inputGroupFile01">
+              <div>
+                <input type="file" className="form-control" aria-describedby="inputGroupFileAddon01" onChange={(e) => setFile(e.target.files[0])} id="myfile" name="myfile" />
+                <label className="form-label" htmlFor="myfile">
                   {file.name}
                 </label>
               </div>
@@ -77,8 +77,8 @@ const UploadQuestions = () => {
             </div>
           </div>
         </div>
-        <ErrorModal id="inserted_error" message={message} />
-        <SuccessModal id="inserted_success" message={message} />
+        <Modal options={errorModal} onHide={setErrorModal} type='danger'/>
+        <Modal options={successModal} onHide={setSuccessModal} type='success'/>
       </div>
     )
   );

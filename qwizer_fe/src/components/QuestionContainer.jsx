@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Countdown from 'react-countdown';
 import CryptoJS from 'crypto-js';
 import TestQuestion from './TestQuestion';
 import TextQuestion from './TextQuestion';
 import QuestionNav from './QuestionNav';
-import ErrorModal from './common/modals/ErrorModal';
+import Modal from './common/modals/Modal';
 import { Tests } from '../services/API';
 import useFetch from '../hooks/useFetch';
 
@@ -30,35 +30,31 @@ const descifrarTest = (currentTest) => {
 
 const comprobarPassword = (contra, currentTest) => contra !== '' && CryptoJS.SHA256(contra).toString() === getTestFromLocalStorage(currentTest).password;
 
-const CuestionarioPassword = ({ getPass, unlockTest }) => {
-  const message = 'Contraseña incorrecta';
+const CuestionarioPassword = ({ errorModal, setErrorModal, getPass, unlockTest }) => (
+  <div className="index-body">
+    <div className="card tabla-notas">
+      <div className="card-content">
+        <div className="col text-center">
+          <h3>Introduce la contraseña para empezar el examen!</h3>
+        </div>
 
-  return (
-    <div className="index-body">
-      <div className="card tabla-notas">
-        <div className="card-content">
+        <div className="p-4 row">
           <div className="col text-center">
-            <h3>Introduce la contraseña para empezar el examen!</h3>
+            <input type="text" className="center form-control" onChange={getPass} />
           </div>
-
-          <div className="p-4 row">
-            <div className="col text-center">
-              <input type="text" className="center form-control" onChange={getPass} />
-            </div>
-          </div>
-          <div className="p-4 row">
-            <div className="col text-center">
-              <button type="button" className="btn btn-success" onClick={unlockTest}>
-                Empezar Test
-              </button>
-            </div>
+        </div>
+        <div className="p-4 row">
+          <div className="col text-center">
+            <button type="button" className="btn btn-success" onClick={unlockTest}>
+              Empezar Test
+            </button>
           </div>
         </div>
       </div>
-      <ErrorModal id="password_error" message={message} />
     </div>
-  );
-};
+    <Modal options={errorModal} onHide={setErrorModal} type='error'/>
+  </div>
+);
 
 const addTestToLocalStorage = (jsonObject) => {
   const tests = localStorage.getItem('tests');
@@ -70,6 +66,7 @@ const addTestToLocalStorage = (jsonObject) => {
 const QuestionContainer = ({ revision }) => {
   const navigate = useNavigate();
   const params = useParams();
+  const [errorModal, setErrorModal] = useState({ show: false, message: '' });
   const [localStorageTest] = useState(() => getTestFromLocalStorage(params.id)); // TODO no convence lo de guardarlo en localstorage
 
   const { data: testCorregido } = useFetch(Tests.getCorrectedTest, {
@@ -257,7 +254,7 @@ const QuestionContainer = ({ revision }) => {
       setIsAllowed(true);
       localStorage.setItem('initTime', Date.now()); // guardamos la hora a la que empieza el examen
     } else {
-      window.$('#password_error').modal('show');
+      setErrorModal({ show: true, message: 'Contraseña incorrecta' });
     }
   };
 
@@ -289,7 +286,7 @@ const QuestionContainer = ({ revision }) => {
 
   if (!revision && !descargado) return null;
 
-  if (!revision && !isAllowed) return <CuestionarioPassword unlockTest={unlockTest} getPass={getPass} />;
+  if (!revision && !isAllowed) return <CuestionarioPassword unlockTest={unlockTest} getPass={getPass} errorModal={errorModal} setErrorModal={setErrorModal} />;
 
   if (!revision && questionList.length !== 0) {
     const pregunta = questionList[indPregunta];
