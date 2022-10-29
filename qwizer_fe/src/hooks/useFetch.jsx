@@ -9,13 +9,13 @@ const useFetch = (fetcher, {transform=(data) => data, onSuccess, onError, skip=f
     const fetchData = async () => {
       try {
         const res = await fetcher(params, { signal: abortController.signal });
-        //console.log("SET DATA",res)
+        // console.log("SET DATA",res)
         const resTransform = transform(res.data)
         setData(resTransform);
         if(onSuccess) onSuccess(resTransform);
       } catch (err) {
         if (err.name === 'CanceledError') {
-          //console.log('Request Aborted');
+          // console.log('Request Aborted');
         }else {
           console.log(err)
           setError(err);
@@ -23,7 +23,7 @@ const useFetch = (fetcher, {transform=(data) => data, onSuccess, onError, skip=f
         }
       }
     };
-    
+
     if(!skip)
       fetchData();
 
@@ -33,7 +33,7 @@ const useFetch = (fetcher, {transform=(data) => data, onSuccess, onError, skip=f
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...deps,skip]);
 
-  return { data, error, isLoading: !data && !error };
+  return { data, error, isLoading: !skip && !data && !error };
 };
 
 export default useFetch;
