@@ -1,4 +1,4 @@
-import { Modal as BSModal} from 'bootstrap';
+import { Modal as BSModal } from 'bootstrap';
 import { useEffect, useRef } from 'react';
 
 // TODO se puede usar solo uno en todos los componentes, pero se dejan dos por dejarlo como estaba antes.
@@ -6,15 +6,21 @@ const Modal = ({ options: { show, message } = {}, onHide: setShow, type }) => {
   const modalRef = useRef();
 
   useEffect(() => {
-    const bsModal = new BSModal(modalRef.current);
+    const modal = modalRef.current;
+    const bsModal = new BSModal(modal);
     if (show) {
       bsModal.show();
     } else {
       bsModal.hide();
     }
+
+    modal.addEventListener('hidden.bs.modal', closeModal);
+
     return () => {
+      modal.removeEventListener('hidden.bs.modal', closeModal);
       bsModal.hide();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [show]);
 
   const closeModal = () => {

@@ -8,24 +8,23 @@ import useFetch from '../hooks/useFetch';
 // TODO separar en dos (offline, online), sera mas intuitivo el codigo
 const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) => {
   const navigate = useNavigate();
-  const [errorModal, setErrorModal] = useState({show:false,message:''});
-
-  const [localStorageTest, setLocalStorageTest] = useState(() => JSON.parse(JSON.parse(localStorage.getItem('tests'))?.find((test) => JSON.parse(test).id === idCuestionario) ?? null) );
-  const [downloaded, setdownloaded] = useState(() => localStorageTest);
+  const [errorModal, setErrorModal] = useState({ show: false, message: '' });
+  const [localStorageTest, setLocalStorageTest] = useState(() => JSON.parse(JSON.parse(localStorage.getItem('tests'))?.find((test) => Number(JSON.parse(test).id) === Number(idCuestionario)) ?? null));
 
   const { data, isLoading } = useFetch(Tests.getInfo, { skip: offline, params: { idCuestionario } });
 
   const source = offline ? localStorageTest : data;
 
-  const { duracion, nota:calificacion } = source ?? {};
-  const corregido = offline ? false : data?.corregido !== 0 
+  const { duracion, nota: calificacion } = source ?? {};
+  const corregido = offline ? false : data?.corregido !== 0;
   const fechas = {
-    fecha_apertura_formateada: source?.formattedFechaApertura || '',
-    fecha_cierre_formateada: source?.formattedFechaCierre || '',
-    fecha_apertura: source?.FechaApertura || '',
-    fecha_cierre: source?.FechaCierre || '',
+    fecha_apertura_formateada: source?.formatted_fecha_apertura || '',
+    fecha_cierre_formateada: source?.formatted_fecha_cierre || '',
+    fecha_apertura: source?.fecha_apertura || '',
+    fecha_cierre: source?.fecha_cierre || '',
   };
   const bloqueado = new Date(fechas.fecha_apertura) > Date.now() || Date.now() > new Date(fechas.fecha_cierre);
+  const downloaded = Boolean(localStorageTest);
 
   const addTestToLocalStorage = (jsonObject) => {
     const tests = localStorage.getItem('tests');
@@ -34,15 +33,14 @@ const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) =>
   };
 
   const getTest = (id) => {
-    Tests.get({ idCuestionario: id }).then(({ data:res }) => {
+    Tests.get({ idCuestionario: id }).then(({ data: res }) => {
       addTestToLocalStorage(JSON.stringify(res));
-      setLocalStorageTest(res)
-      setdownloaded(true);
+      setLocalStorageTest(res);
     });
   };
 
   const showModal = () => {
-    setErrorModal({show:true,message:`El test solo se puede resolver entre las siguientes fechas:\n${fechas.fecha_apertura_formateada}\n${fechas.fecha_cierre_formateada}`})
+    setErrorModal({ show: true, message: `El test solo se puede resolver entre las siguientes fechas:\n${fechas.fecha_apertura_formateada}\n${fechas.fecha_cierre_formateada}` });
   };
 
   return (
@@ -58,39 +56,26 @@ const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) =>
             <p>Fecha de apertura: {fechas.fecha_apertura_formateada}</p>
             <p>Fecha de cierre: {fechas.fecha_cierre_formateada}</p>
           </div>
-          <div className="col-md-3 col-sm-auto button-section">
-            {downloaded && !corregido && !bloqueado && role === 'student' && (
-              <button type="button" className="btn btn-primary login-button" onClick={() => navigate(`/test/${idCuestionario}`)}>
-                Realizar
-              </button>
-            )}
+          <div className="col-md-3 col-sm-auto d-flex justify-content-center align-items-center">
             {!offline && !downloaded && !corregido && (
-              <button type="button" className="btn btn-success login-button" onClick={() => getTest(idCuestionario)}>
+              <button type="button" className="btn btn-success me-2" onClick={() => getTest(idCuestionario)}>
                 Descargar test
               </button>
             )}
-            {downloaded && !corregido && bloqueado && role === 'student' && (
-              <button type="button" className="btn btn-primary" data-bs-toggle="modal" onClick={showModal}>
+
+            {downloaded && !corregido && (
+              <button type="button" className="btn btn-primary me-2" onClick={() => (role === 'student' && bloqueado ? showModal() : navigate(`/test/${idCuestionario}`))}>
                 Realizar
               </button>
             )}
-            {!offline && corregido && role === 'student' && (
-              <button type="button" className="btn btn-primary login-button" onClick={() => navigate(`/revision/${idCuestionario}`)}>
-                Revisar
-              </button>
-            )}
-            {downloaded && !corregido && role === 'teacher' && (
-              <button type="button" className="btn btn-primary login-button" onClick={() => navigate(`/test/${idCuestionario}`)}>
-                Realizar
-              </button>
-            )}
-            {!offline && role === 'teacher' && (
-              <button type="button" className="btn btn-primary login-button" onClick={() => navigate(`/revisionNotas/${idCuestionario}`)}>
+
+            {!offline && (corregido || role === 'teacher') && (
+              <button type="button" className="btn btn-primary me-2" onClick={() => (role === 'teacher' ? navigate(`/revisionNotas/${idCuestionario}`) : navigate(`/revision/${idCuestionario}`))}>
                 Revisar
               </button>
             )}
           </div>
-          <Modal options={errorModal} onHide={setErrorModal} type='danger'/>
+          <Modal options={errorModal} onHide={setErrorModal} type="danger" />
         </div>
       </div>
     )

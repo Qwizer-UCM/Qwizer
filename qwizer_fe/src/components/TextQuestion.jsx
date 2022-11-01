@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const TextQuestion = ({ mode, id, type, infoPreg, addAnswerd }) => {
   const [textValue, settextValue] = useState(() => (mode === 'test' ? JSON.parse(localStorage.getItem('answers'))?.respuestas?.find((r) => r.id === id)?.answr : ''));

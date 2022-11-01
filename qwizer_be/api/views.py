@@ -263,10 +263,10 @@ def get_quiz_info(request):
     return Response(
         {
             "duracion": duracion,
-            "formattedFechaApertura": fechaApertura.strftime("%d/%m/%Y, %H:%M:%S"),
-            "formattedFechaCierre": fechaCierre.strftime("%d/%m/%Y, %H:%M:%S"),
-            "FechaApertura": fechaApertura,
-            "FechaCierre": fechaCierre,
+            "formatted_fecha_apertura": fechaApertura.strftime("%d/%m/%Y, %H:%M:%S"),
+            "formatted_fecha_cierre": fechaCierre.strftime("%d/%m/%Y, %H:%M:%S"),
+            "fecha_apertura": fechaApertura,
+            "fecha_cierre": fechaCierre,
             "corregido": corregido,
             "nota": notaCuestionario,
         }
