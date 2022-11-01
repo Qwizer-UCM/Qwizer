@@ -24,7 +24,6 @@ export const Subjects = {
 };
 
 export const Tests = {
-  // TODO revisar funcion abajo
   sendTest: ({ respuestas, hash }, config = {}) => client.post('response', { respuestas, hash }, config),
   getCorrectedTest: ({ idCuestionario, idAlumno }, config = {}) => client.post('test-corrected', { idCuestionario, idAlumno }, config),
   createQuiz: ({ cuestionario }, config = {}) => client.post('create-quiz', { cuestionario }, config),

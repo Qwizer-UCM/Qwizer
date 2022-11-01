@@ -46,7 +46,7 @@ const IndexContainer = () => {
       </div>
     );
   } 
-    return ( // TODO hace falta esto ya?
+    return (
       <div className="d-flex justify-content align-items-center">
         <div className="spinner-grow" role="status">
           <span className="visually-hidden">Loading...</span>

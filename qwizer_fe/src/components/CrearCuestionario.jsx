@@ -61,9 +61,6 @@ const CrearCuestionario = () => {
   };
 
   const enviarCuestionarioCreado = (e) => {
-    // TODO horrible, rehacer y usar required en la etiqueta en vez de estos apaños en javascript
-    // De paso nos quitamos la mitad de los estados :)
-
     e.preventDefault();
     if (!e.target.checkValidity()) {
       e.target.reportValidity();

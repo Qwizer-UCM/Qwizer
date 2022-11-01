@@ -5,7 +5,6 @@ import { Tests } from '../services/API';
 import useFetch from '../hooks/useFetch';
 
 // TODO que un cuestionario este bloqueado deberia comprobarse en el lado servidor
-// TODO separar en dos (offline, online), sera mas intuitivo el codigo
 const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) => {
   const navigate = useNavigate();
   const [errorModal, setErrorModal] = useState({ show: false, message: '' });

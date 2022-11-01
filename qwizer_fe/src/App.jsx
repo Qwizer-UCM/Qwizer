@@ -2,8 +2,6 @@ import { Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import IndexContainer from './components/IndexContainer';
-import QuestionContainer from './components/QuestionContainer';
-
 import LoginComponent from './components/LoginComponent';
 import NavBar from './components/common/NavBar';
 
@@ -24,10 +22,11 @@ import ProtectedRoutes from './hoc/ProtectedRoutes';
 import NotFound404 from './components/common/NotFound404';
 import useDocumentTitle from './hooks/useDocumentTitle';
 import useAuth from './hooks/useAuth';
+import QuestionContainerNoRevision from './components/QuestionContainerNoRevision';
+import QuestionContainerRevision from './components/QuestionContainerRevision';
 
 const App = () => {
   const { user, isLogged, isLoading, login, logout } = useAuth();
-  useDocumentTitle(); // TODO se puede usar en cada componente pasandole un titulo para cada pagina
 
   if (isLoading) return null;
 
@@ -44,8 +43,8 @@ const App = () => {
           <Route path="/" element={<IndexContainer />} />
           <Route path="/cuestionarios/:id" element={<CuestionariosContainer role={user.role} />} />
           <Route path="/offline" element={<AvailableOffline role={user.role} />} />
-          <Route path="/test/:id" element={<QuestionContainer revision={false} />} />
-          <Route path="/revision/:id" element={<QuestionContainer revision />} />
+          <Route path="/test/:id" element={<QuestionContainerNoRevision />} />
+          <Route path="/revision/:id" element={<QuestionContainerRevision />} />
           {/* FIXME importante arreglar el back devuelve las notas sin comprobar el rol */}
           <Route element={<ProtectedRoutes isAllowed={user.role.includes('teacher')} redirectPath="/404" />}>
             <Route path="/banco-preguntas" element={<BancoPreguntas />} />
@@ -53,7 +52,7 @@ const App = () => {
             <Route path="/upload-questions" element={<UploadQuestions />} />
             <Route path="/crear-cuestionario" element={<CrearCuestionario />} />
             <Route path="/revisionNotas/:id" element={<RevisionNotasContainer />} />
-            <Route path="/revisionNotas/:id/:idAlumno" element={<QuestionContainer revision />} />
+            <Route path="/revisionNotas/:id/:idAlumno" element={<QuestionContainerRevision />} />
             <Route path="/register" element={<RegisterContainer />} />
           </Route>
           <Route path="/scanner/:test/:hash" element={<QrContainer userId={user.userId} />} />
