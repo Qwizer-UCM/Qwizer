@@ -4,7 +4,7 @@ const QuestionNav = ({navigationHandler,listaPreguntas}) => {
   };
 
   return (
-    <div className="container">
+    <div className="container-fluid">
       {listaPreguntas.map((pregunta, indx) => (
           <button type="button" className="btn btn-outline-dark" key={pregunta.id} onClick={navigateQuestion} value={indx}>
             {'Pregunta '}

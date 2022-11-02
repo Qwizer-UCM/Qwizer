@@ -19,7 +19,7 @@ const useFetch = (fetcher, {transform=(data) => data, onSuccess, onError, skip=f
         }else {
           console.log(err)
           setError(err);
-          onError(err)
+          if(onError) onError(err);
         }
       }
     };

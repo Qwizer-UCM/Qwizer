@@ -4,9 +4,9 @@ import VisualizarNota from './VisualizarNota';
 import { Tests } from '../services/API';
 import useFetch from '../hooks/useFetch';
 
-const CustomCell = ({ id, idCuestionario }) => {
+const CustomCell = ({ nota, id, idCuestionario }) => {
   const navigate = useNavigate();
-  return (
+  return ( nota !== "No presentado" &&
     <button type="button" className="btn btn-primary" id={id} onClick={() => navigate(`/revisionNotas/${idCuestionario}/${id}`)}>
       Revisar
     </button>
@@ -23,11 +23,6 @@ const paginationComponentOptions = {
 };
 
 const columns = [
-  {
-    name: '#',
-    selector: (row) => row.numero,
-    sortable: true,
-  },
   {
     name: 'id',
     selector: (row) => row.id,
@@ -55,6 +50,7 @@ const columns = [
     selector: (row) => row.nota,
     conditionalCellStyles: [
       {
+        // TODO cambiar estilos por classNames https://react-data-table-component.netlify.app/?path=/docs/api-custom-conditional-formatting--page
         when: (row) => row.nota > 6,
         style: {
           backgroundColor: 'rgba(63, 195, 128, 0.9)',
@@ -89,8 +85,7 @@ const RevisionNotasContainer = () => {
   const { data: dataNotas, error } = useFetch(Tests.getQuizGrades, {
     params: { idCuestionario: params.id },
     transform: ({ notas }) =>
-      notas.map((nota, indx) => ({
-        numero: indx,
+      notas.map((nota) => ({
         id: nota.id,
         idCuestionario: params.id,
         nombre: nota.nombre,

@@ -1,6 +1,6 @@
 .index-body{
     background: #E9E9E9;
-    min-height: 95vh;
+    min-height: 100vh;
     justify-content: center;
     display: flow-root;   
     margin-right: 0px !important;
@@ -115,3 +115,4 @@
     text-align: center;
     margin-top: 20px !important;
 }
+
