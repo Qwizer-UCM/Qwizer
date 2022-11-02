@@ -16,7 +16,7 @@ const QuestionContainerRevision = () => {
   });
   const [indPregunta, setindPregunta] = useState(0);
 
-  const pregunta = testCorregido.questions[indPregunta];
+  const pregunta = testCorregido?.questions[indPregunta];
 
   if (testCorregido && pregunta) {
     return (
