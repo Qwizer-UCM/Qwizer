@@ -804,7 +804,7 @@ Llegan las respuestas de un test:
 @permission_classes([IsAuthenticated])
 def response(request):
     print(request.data)
-    cuestionarioAux = json.loads(request.data["respuestas"])
+    cuestionarioAux = json.loads(request.data["respuestas"]) # TODO pasear el objeto en front
 
     cuestionario = Cuestionarios.objects.get(id=cuestionarioAux["idCuestionario"])
     alumno = request.user
@@ -812,6 +812,7 @@ def response(request):
     respuestas = cuestionarioAux["respuestas"]
     for respuesta in respuestas:
         pregunta = Preguntas.objects.get(id=respuesta["id"])
+
         if respuesta["type"] == "test":
             opcion = OpcionesTest.objects.get(id=respuesta["answr"])
             respuestaEnviada = RespuestasEnviadasTest(
@@ -832,7 +833,7 @@ def response(request):
     print(request.data["hash"])
     nota = calcularNota(alumno, cuestionario, respuestas, request.data["hash"])
 
-    content = {"nota": nota, "preguntasAcertadas": "NULL", "preguntasFalladas": "NULL"}
+    content = {"nota": nota, "preguntasAcertadas": "NULL", "preguntasFalladas": "NULL"} #TODO cambiar a las funcionalidades actuales
 
     return Response(content)
 
@@ -846,7 +847,7 @@ def calcularNota(alumno, cuestionario, respuestas, hash):
 
     notaTest = 0
 
-    for respuesta in respuestas:
+    for respuesta in respuestas:  # TODO Falta logica de negocio
         pregunta = Preguntas.objects.get(id=respuesta["id"])
         pregunta_info = PerteneceACuestionario.objects.get(
             idPregunta=pregunta, idCuestionario=cuestionario

@@ -14,8 +14,7 @@ const IndexContainer = () => {
         <div className="pt-5 ml-1 mr-1">
           <div className="d-flex justify-content-center">
             <span className="material-icons xxl-icon justify-content-center">
-              {" "}
-              wifi_off{" "}
+              wifi_off
             </span>
           </div>
           <div className="d-flex justify-content-center text-center">

@@ -8,6 +8,7 @@ import QuestionNav from './QuestionNav';
 import Modal from './common/modals/Modal';
 import { Tests } from '../services/API';
 import useFetch from '../hooks/useFetch';
+import { useEffect } from 'react';
 
 const CuestionarioPassword = ({ unlockTest, localStorageTest }) => {
   const [contra, setContra] = useState('');
@@ -28,8 +29,11 @@ const CuestionarioPassword = ({ unlockTest, localStorageTest }) => {
   const startTest = () => {
     if (contra !== '' && CryptoJS.SHA256(contra).toString() === localStorageTest.password) {
       const list = descifrarTest(localStorageTest);
-      const listMap = new Map();
-      list.forEach((pregunta) => listMap.set(pregunta.id, { type: pregunta.type, answr: 'NULL' }));
+      const listMap = {}
+      list.forEach((pregunta) => { listMap[pregunta.id] = { type: pregunta.type, answr: 'NULL' } })
+
+      // const listMap = {...list.map((pregunta) => ({[pregunta.id]: { type: pregunta.type, answr: 'NULL' }}))}
+      // console.log(...list.map((pregunta) => ({[pregunta.id]: { type: pregunta.type, answr: 'NULL' }})))
       unlockTest(listMap, list, true);
     } else {
       setErrorModal({ show: true, message: 'Contraseña incorrecta' });
@@ -139,6 +143,8 @@ const QuestionContainerNoRevision = () => {
   const descargado = Boolean(localStorageTest); // Si existe en localstorage true en caso contrario false
   const duration = localStorageTest?.duracion;
 
+  useEffect(() => () => localStorage.removeItem('answers'), []) // TODO mirar que podemos hacer para hacer varios cuestionarios a la vez
+
   const renderButtons = () => {
     const updateIndNext = () => {
       if (indPregunta + 1 <= questionList.length - 1) {
@@ -151,7 +157,7 @@ const QuestionContainerNoRevision = () => {
       }
     };
     return (
-      <div className="p-2 col text-center">
+      <div className="p-2 text-center">
         {indPregunta > 0 && indPregunta <= questionList.length - 1 && (
           <button type="button" className="btn btn-success" onClick={updateIndBack}>
             Atrás
@@ -176,7 +182,6 @@ const QuestionContainerNoRevision = () => {
     const hash = CryptoJS.SHA256(respuestas).toString();
     const sent = navigator.onLine;
     // TODO por qué no se espera respuesta de esta peticion??
-    console.log(respuestas);
     Tests.sendTest({ respuestas, hash })
       .then(() => console.log('END'))
       .catch((e) => console.error(e));
@@ -197,11 +202,10 @@ const QuestionContainerNoRevision = () => {
   };
 
   const addAnswer = (answer) => {
-    const newlist = answerList;
-    newlist.set(answer.id, { type: answer.respuesta.type, answr: answer.respuesta.answer });
-
+    const newlist = { ...answerList };
+    newlist[answer.id] = { type: answer.respuesta.type, answr: answer.respuesta.answer };
     const listaRespuestas = [];
-    for (const [key, value] of newlist.entries()) {
+    for (const [key, value] of Object.entries(newlist)) {
       listaRespuestas.push({
         id: key,
         type: value.type,

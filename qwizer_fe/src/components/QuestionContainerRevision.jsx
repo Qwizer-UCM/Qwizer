@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import TestQuestion from './TestQuestion';
 import TextQuestion from './TextQuestion';
 import QuestionNav from './QuestionNav';
@@ -9,6 +9,7 @@ import useFetch from '../hooks/useFetch';
 
 const QuestionContainerRevision = () => {
   const params = useParams();
+  const navigate = useNavigate()
 
   const { data: testCorregido } = useFetch(Tests.getCorrectedTest, {
     transform: (d) => JSON.parse(d.corrected_test),
@@ -17,6 +18,8 @@ const QuestionContainerRevision = () => {
   const [indPregunta, setindPregunta] = useState(0);
 
   const pregunta = testCorregido?.questions[indPregunta];
+
+  const renderBackToSubject = () => <button className='btn btn-secondary' type='button' onClick={() => {navigate(-1)}}>Finalizar Revisión</button>
 
   if (testCorregido && pregunta) {
     return (
@@ -50,7 +53,12 @@ const QuestionContainerRevision = () => {
             <QuestionNav navigationHandler={setindPregunta} listaPreguntas={testCorregido.questions} />
           </div>
         </div>
+        <div className="p-4 row">
+          <div className="col text-center">{renderBackToSubject()}</div>
+        </div>
       </div>
+
+
     );
   }
 

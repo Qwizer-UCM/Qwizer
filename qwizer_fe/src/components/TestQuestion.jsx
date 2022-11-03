@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 const TestQuestion = ({ mode, id, type, options, infoPreg, addAnswerd }) => {
-  const [selectedOp, setSelectedOp] = useState(() => (mode === 'test' ? JSON.parse(localStorage.getItem('answers'))?.respuestas?.find((r) => r.id === id)?.answr : null));
+  const [selectedOp, setSelectedOp] = useState(() => (mode === 'test' ? JSON.parse(localStorage.getItem('answers'))?.respuestas?.find((r) => Number(r.id) === Number(id))?.answr : null));
   // props.mode puede tomar los siguientes valores: test, revision, visualize
 
   const handleOnClick = (event) => {
@@ -49,7 +49,7 @@ const TestQuestion = ({ mode, id, type, options, infoPreg, addAnswerd }) => {
 
           </div>
         ))}
-        <div className="bg-warning rounded-pill">Respuesta Correcta: {questionData.options.find((option) => questionData.correct_op === option.id).op}</div>
+        <div className="bg-success text-white rounded-pill">Respuesta Correcta: {questionData.options.find((option) => questionData.correct_op === option.id).op}</div>
       </div>
     );
   };

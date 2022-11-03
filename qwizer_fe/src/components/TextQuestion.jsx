@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 const TextQuestion = ({ mode, id, type, infoPreg, addAnswerd }) => {
-  const [textValue, settextValue] = useState(() => (mode === 'test' ? JSON.parse(localStorage.getItem('answers'))?.respuestas?.find((r) => r.id === id)?.answr : ''));
+  const [textValue, settextValue] = useState(() => (mode === 'test' ? JSON.parse(localStorage.getItem('answers'))?.respuestas?.find((r) => Number(r.id) === Number(id))?.answr : ''));
   // props.mode puede tomar los siguientes valores: test, revision, visualize
 
   const handleChange = (event) => {
@@ -23,7 +23,7 @@ const TextQuestion = ({ mode, id, type, infoPreg, addAnswerd }) => {
       <div className="bg-light rounded">
         <p>{infoPreg.user_op}</p>
       </div>
-      <div className="bg-warning rounded-pill">Respuesta Correcta: {infoPreg.correct_op}</div>
+      <div className="bg-success text-white rounded-pill">Respuesta Correcta: {infoPreg.correct_op}</div>
     </div>
   );
 
