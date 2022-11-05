@@ -8,9 +8,13 @@
     docker compose up -d
     ```
 
-2. Web de Qwizer en <http://localhost:3000>.
-3. Panel de administracion de django en <http://localhost:8000>.
-
+2. Web de Qwizer en <https://localhost>.
+3. Panel de administracion de django en <https://localhost/admin>.
+    ```
+    Usuario: root@root.com
+    Contraseña: root
+    ```
+    <sub>* Usuario por defecto si no se cambia el env</sub>
 ### Comandos útiles
 
 - `docker compose exec {service} /bin/bash`: Shell bash de un servicio para ejecutar comandos dentro del contenedor.

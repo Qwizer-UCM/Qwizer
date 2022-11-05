@@ -5,59 +5,66 @@ services:
     image: postgres
     restart: always
     environment:
+      - POSTGRES_MULTIPLE_DATABASES=qwizer_be,qwizer_test
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
-      - POSTGRES_DB=qwizer_be
     ports:
       - '5432:5432'
     healthcheck:
-      test: pg_isready -d $$POSTGRES_DB
+      test: echo $$POSTGRES_MULTIPLE_DATABASES | tr -d '"\r\n' | xargs -d ',' -n1 pg_isready -d
       interval: 5s
       timeout: 5s
       retries: 20
     volumes:
+      - ./db/create-multiple-postgresql-databases.sh:/docker-entrypoint-initdb.d/init.sh
       - pg_data:/var/lib/postgresql/data
 
-  # db:
-  #   image: mysql
-  #   restart: always
-  #   environment:
-  #     MYSQL_DATABASE: 'qwizer-db'
-  #     MYSQL_ROOT_PASSWORD: 'root'
-  #     MYSQL_TCP_PORT: 3307
-  #   ports:
-  #     - '3307:3307'
-  #   healthcheck:
-  #     test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 20
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - front
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl/site.crt:/etc/ssl/certs/site.crt
+      - ./nginx/ssl/site.key:/etc/ssl/private/site.key
+      - back:/static
+      - front:/dist
 
   back:
     build: 
       context: ../
-      dockerfile: ./qwizer_be/Dockerfile
+      dockerfile: ./.docker/back/Dockerfile
     depends_on:
       db_2:
         condition: service_healthy
-    ports:
-      - '8000:8000'
-    # volumes:
-    #   - ../qwizer_be/:/app:ro
+    # ports:
+    #   - '8000:8000'
+    environment:
+      - DEBUG=False
+      - DATABASE_HOST=db_2
+    volumes:
+      - back:/app/staticfiles
 
   front:
     build: 
       context: ../
-      dockerfile: ./qwizer_fe/Dockerfile
+      dockerfile: ./.docker/front/Dockerfile
     # depends_on:
     #   - back
     environment:
+      - REACT_APP_API_URL=api
       - REACT_PORT=3000 #Vite
-      - PORT=3000 #CRA
-    ports:
-      - "3000:3000"
-    # volumes:
-    #   - ../qwizer_fe/src:/app/src:ro
+      - REACT_HOST=0.0.0.0
+    # ports:
+    #   - "3000:3000"
+    volumes:
+      - front:/app/dist
 
 volumes:
   pg_data:
+  back:
+  front:
