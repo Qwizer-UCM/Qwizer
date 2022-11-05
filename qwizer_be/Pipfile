@@ -23,6 +23,8 @@ pylint = "*"
 pylint-django = "*"
 ipython = "*"
 black = "*"
+django-import-export = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.10"

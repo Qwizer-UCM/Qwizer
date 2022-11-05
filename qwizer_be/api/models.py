@@ -9,7 +9,7 @@ from rest_framework.authtoken.models import Token
 # Create your models here.
 
 # CREACION DE UN MODELO DE USUARIO PERSONALIZADO >>>>>>>>>>>>>>>>>>>>>>
-
+# TODO POR QUE SE USA UN EMAIL COMO ID SI NI SE MANDAN CORREOS, HAY ALGUN PROBLEMA CON UN NOMBRE DE USUARIO???
 class UserManager(BaseUserManager):
     def create_user(
             self, email, first_name, last_name, password=None,
@@ -18,7 +18,7 @@ class UserManager(BaseUserManager):
             Creates  and saves a User with the given email, first name, last name
             and password.
         """
-        print(extra_fields)
+
         if not email:
             raise ValueError(_('Users must have an email address'))
         if not first_name:
@@ -45,6 +45,7 @@ class UserManager(BaseUserManager):
             Creates and saves a superuser with the given email, first name,
             last name and password.
         """
+        extra_fields.setdefault('role','teacher') # TODO tenian puesto admin pero solo se permite teacher o student
         user = self.create_user(
             email,
             password=password,
@@ -53,8 +54,6 @@ class UserManager(BaseUserManager):
             commit=False,
             **extra_fields
         )
-
-        extra_fields.setdefault('role','admin')
         user.is_staff = True
         user.is_superuser = True
         user.save(using=self._db)

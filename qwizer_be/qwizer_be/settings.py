@@ -35,8 +35,11 @@ SHELL_PLUS_IMPORTS = [
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
-# Application definition
+# Static files (CSS, JavaScript, Images)
+#STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Application definition
 BASE_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -48,10 +51,11 @@ BASE_APPS = [
 
 LOCAL_APPS = [
     'api',
-    'django_createuser'
 ]
 
 THIRD_PARTY_APPS = [
+    'import_export',
+    'django_createuser',
     'corsheaders', #TODO Por qué??? ELIMINARLOS ANTES DE LA ENTREGA FINAL PORQUE ES UNA VULNERABILIDAD
     'rest_framework',
     'rest_framework.authtoken',
@@ -172,8 +176,9 @@ REST_FRAMEWORK = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS=env.bool('CORS_ALLOW_ALL_ORIGINS')
+CORS_ALLOW_ALL_ORIGINS = env.bool('CORS_ALLOW_ALL_ORIGINS')
 CORS_ORIGIN_WHITELIST = env.list('CORS_ORIGIN_WHITELIST')
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS')
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
@@ -187,3 +192,5 @@ SWAGGER_SETTINGS = {
     'PERSIST_AUTH': True,
     'DOC_EXPANSION': 'none'
 }
+
+IMPORT_EXPORT_USE_TRANSACTIONS = True

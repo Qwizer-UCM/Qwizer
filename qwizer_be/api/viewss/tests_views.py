@@ -310,7 +310,7 @@ class TestsViewSet(
         except:
             content = {
                 "inserted": "false",
-                "message": "Error: La asignatura no existe!",
+                "message": f"Error: La asignatura {nombre_asig} no existe!",
             }
             return Response(content)
 

@@ -618,7 +618,7 @@ def upload(request):
     try:
         asignatura = Asignaturas.objects.get(asignatura=nombreAsig)
     except:
-        content = {"inserted": "false", "message": "Error: La asignatura no existe!"}
+        content = {"inserted": "false", "message": f"Error: La asignatura {nombreAsig} no existe!"}
         return Response(content)
 
     cuestionario = Cuestionarios(
@@ -738,7 +738,7 @@ def upload_questions(request):
     try:
         asignatura = Asignaturas.objects.get(id=nombreAsig)
     except:
-        content = {"inserted": "false", "message": "Error: La asignatura no existe!"}
+        content = {"inserted": "false", "message": f"Error: La asignatura {nombreAsig} no existe!"}
         return Response(content)
 
     preguntas = yamlplscomeon["preguntas"]
