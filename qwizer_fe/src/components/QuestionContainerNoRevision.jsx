@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Countdown from 'react-countdown';
 import CryptoJS from 'crypto-js';
@@ -8,7 +8,6 @@ import QuestionNav from './QuestionNav';
 import Modal from './common/modals/Modal';
 import { Tests } from '../services/API';
 import useFetch from '../hooks/useFetch';
-import { useEffect } from 'react';
 
 const CuestionarioPassword = ({ unlockTest, localStorageTest }) => {
   const [contra, setContra] = useState('');
@@ -31,9 +30,6 @@ const CuestionarioPassword = ({ unlockTest, localStorageTest }) => {
       const list = descifrarTest(localStorageTest);
       const listMap = {}
       list.forEach((pregunta) => { listMap[pregunta.id] = { type: pregunta.type, answr: 'NULL' } })
-
-      // const listMap = {...list.map((pregunta) => ({[pregunta.id]: { type: pregunta.type, answr: 'NULL' }}))}
-      // console.log(...list.map((pregunta) => ({[pregunta.id]: { type: pregunta.type, answr: 'NULL' }})))
       unlockTest(listMap, list, true);
     } else {
       setErrorModal({ show: true, message: 'Contraseña incorrecta' });

@@ -20,15 +20,33 @@ import RevisionNotasContainer from './components/RevisionNotasContainer';
 import AvailableOffline from './components/AvailableOffline';
 import ProtectedRoutes from './hoc/ProtectedRoutes';
 import NotFound404 from './components/common/NotFound404';
-import useDocumentTitle from './hooks/useDocumentTitle';
 import useAuth from './hooks/useAuth';
 import QuestionContainerNoRevision from './components/QuestionContainerNoRevision';
 import QuestionContainerRevision from './components/QuestionContainerRevision';
+import useOnline from './hooks/useOnline';
 
 const App = () => {
   const { user, isLogged, isLoading, login, logout } = useAuth();
+  const { isOnline } = useOnline();
 
   if (isLoading) return null;
+
+  if (!isOnline) {
+    return (
+      <Suspense fallback={<span>Loading...</span>}>
+        <NavBar username={user.username} role={user.role} logout={logout} isOffline />
+        <Routes>
+          <Route path="/" element={<AvailableOffline role={user.role} />} />
+          <Route path="/cuestionarios/:id" element={<CuestionariosContainer role={user.role} />} />
+          <Route path="/test/:id" element={<QuestionContainerNoRevision />} />
+          <Route path="/scanner/:test/:hash" element={<QrContainer userId={user.userId} />} />
+          {/* No se usa */}
+          <Route path="/insercion-manual/:test/:hash" element={<InsercionManual userId={user.userId} />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Suspense>
+    );
+  }
 
   return (
     <Suspense fallback={<span>Loading...</span>}>
