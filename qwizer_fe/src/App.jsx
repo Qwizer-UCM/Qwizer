@@ -31,40 +31,42 @@ const App = () => {
 
   if (isLoading) return null;
 
-  if (!isOnline) {
-    return (
-      <Suspense fallback={<span>Loading...</span>}>
-        <NavBar username={user.username} role={user.role} logout={logout} isOffline />
-        <Routes>
-          <Route path="/" element={<AvailableOffline role={user.role} />} />
-          <Route path="/cuestionarios/:id" element={<CuestionariosContainer role={user.role} />} />
-          <Route path="/test/:id" element={<QuestionContainerNoRevision />} />
-          <Route path="/scanner/:test/:hash" element={<QrContainer userId={user.userId} />} />
-          {/* No se usa */}
-          <Route path="/insercion-manual/:test/:hash" element={<InsercionManual userId={user.userId} />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </Suspense>
-    );
-  }
+  // TODO Si no se renderizan las rutas en el mismo sitio se vuelve a renderizar el componente en el que esta el usuario, perdiendo el progreso.
+  // if (!isOnline) {
+  //   return (
+  //     <Suspense fallback={<span>Loading...</span>}>
+  //       <NavBar username={user.username} role={user.role} logout={logout} isOffline />
+  //       <Routes>
+  //         <Route path="/" element={<AvailableOffline role={user.role} />} />
+  //         <Route path="/cuestionarios/:id" element={<CuestionariosContainer role={user.role} />} />
+  //         <Route path="/test/:id" element={<QuestionContainerNoRevision />} />
+  //         <Route path="/scanner/:test/:hash" element={<QrContainer userId={user.userId} />} />
+  //         {/* No se usa */}
+  //         <Route path="/insercion-manual/:test/:hash" element={<InsercionManual userId={user.userId} />} />
+  //         <Route path="*" element={<Navigate to="/" />} />
+  //       </Routes>
+  //     </Suspense>
+  //   );
+  // }
 
+  // TODO en el navbar se podrian marcar como desactivados los links asi se evita el posible flicker del navbar si se pierde la conexión varias veces
   return (
     <Suspense fallback={<span>Loading...</span>}>
       <Routes>
         <Route
           element={
             <ProtectedRoutes isAllowed={isLogged}>
-              <NavBar username={user.username} role={user.role} logout={logout} />
+              <NavBar username={user.username} role={user.role} logout={logout} isOffline={!isOnline} />
             </ProtectedRoutes>
           }
         >
-          <Route path="/" element={<IndexContainer />} />
+          <Route path="/" element={isOnline ? <IndexContainer /> : <AvailableOffline role={user.role} />} />
           <Route path="/cuestionarios/:id" element={<CuestionariosContainer role={user.role} />} />
-          <Route path="/offline" element={<AvailableOffline role={user.role} />} />
+          <Route path="/offline" element={isOnline ? <AvailableOffline role={user.role} /> : <Navigate to="/404" />} />
           <Route path="/test/:id" element={<QuestionContainerNoRevision />} />
           <Route path="/revision/:id" element={<QuestionContainerRevision />} />
           {/* FIXME importante arreglar el back devuelve las notas sin comprobar el rol */}
-          <Route element={<ProtectedRoutes isAllowed={user.role.includes('teacher')} redirectPath="/404" />}>
+          <Route element={<ProtectedRoutes isAllowed={isOnline && user.role.includes('teacher')} redirectPath="/404" />}>
             <Route path="/banco-preguntas" element={<BancoPreguntas />} />
             <Route path="/upload-questionary" element={<UploadFile />} />
             <Route path="/upload-questions" element={<UploadQuestions />} />
@@ -77,7 +79,7 @@ const App = () => {
           {/* No se usa */}
           <Route path="/insercion-manual/:test/:hash" element={<InsercionManual userId={user.userId} />} />
         </Route>
-        <Route path="/login" element={!isLogged ? <LoginComponent login={login} /> : <Navigate to="/" />} />
+        <Route path="/login" element={isOnline && !isLogged ? <LoginComponent login={login} /> : <Navigate to={isOnline ? "/" : "/404"} />} />
         <Route path="/404" element={<NotFound404 />} />
         <Route path="*" element={<Navigate to="/404" />} />
       </Routes>

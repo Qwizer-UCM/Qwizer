@@ -2,17 +2,17 @@ import { useState } from 'react';
 import TarjetaCuestionario from './TarjetaCuestionario';
 
 const AvailableOffline = ({ role }) => {
-  const [cuestionarios] = useState(() => JSON.parse(localStorage.getItem('tests'))?.map((c) => JSON.parse(c)) || []);
+  const [cuestionarios] = useState(() => JSON.parse(localStorage.getItem('tests')) || []);
 
-  if (cuestionarios?.length !== 0) {
+  if (Object.keys(cuestionarios)?.length !== 0) {
     return (
       <div className="index-body row">
         <div className="section-title">
           <h1>Cuestionarios Descargados</h1>
         </div>
-        {cuestionarios.map((cuestionario) => (
-          <div key={cuestionario.id} className="d-flex justify-content-center">
-            <TarjetaCuestionario offline cuestionario={cuestionario} idCuestionario={cuestionario.id} role={role} />
+        {Object.entries(cuestionarios).map(([id,cuestionario]) => (
+          <div key={id} className="d-flex justify-content-center">
+            <TarjetaCuestionario offline cuestionario={cuestionario} idCuestionario={id} role={role} />
           </div>
         ))}
       </div>

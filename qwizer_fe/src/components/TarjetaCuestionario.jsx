@@ -8,7 +8,7 @@ import useFetch from '../hooks/useFetch';
 const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) => {
   const navigate = useNavigate();
   const [errorModal, setErrorModal] = useState({ show: false, message: '' });
-  const [localStorageTest, setLocalStorageTest] = useState(() => JSON.parse(JSON.parse(localStorage.getItem('tests'))?.find((test) => Number(JSON.parse(test).id) === Number(idCuestionario)) ?? null));
+  const [localStorageTest, setLocalStorageTest] = useState(() => JSON.parse(localStorage.getItem('tests'))?.[idCuestionario] ?? null);
 
   const { data, isLoading } = useFetch(Tests.getInfo, { skip: offline, params: { idCuestionario } });
 
@@ -27,13 +27,13 @@ const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) =>
 
   const addTestToLocalStorage = (jsonObject) => {
     const tests = localStorage.getItem('tests');
-    const test = tests ? JSON.stringify([...JSON.parse(tests), jsonObject]) : JSON.stringify([jsonObject]);
+    const test = tests ? JSON.stringify({...JSON.parse(tests), [jsonObject.id]:jsonObject}) : JSON.stringify({[jsonObject.id]:jsonObject});
     localStorage.setItem('tests', test);
   };
 
   const getTest = (id) => {
     Tests.get({ idCuestionario: id }).then(({ data: res }) => {
-      addTestToLocalStorage(JSON.stringify(res));
+      addTestToLocalStorage(res);
       setLocalStorageTest(res);
     });
   };

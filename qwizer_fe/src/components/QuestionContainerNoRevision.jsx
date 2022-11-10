@@ -28,8 +28,10 @@ const CuestionarioPassword = ({ unlockTest, localStorageTest }) => {
   const startTest = () => {
     if (contra !== '' && CryptoJS.SHA256(contra).toString() === localStorageTest.password) {
       const list = descifrarTest(localStorageTest);
-      const listMap = {}
-      list.forEach((pregunta) => { listMap[pregunta.id] = { type: pregunta.type, answr: 'NULL' } })
+      const listMap = {initTime:null,respuestas:{}};
+      list.forEach((pregunta) => {
+        listMap.respuestas[pregunta.id] = { id:pregunta.id, type: pregunta.type, answr: '' };
+      });
       unlockTest(listMap, list, true);
     } else {
       setErrorModal({ show: true, message: 'Contraseña incorrecta' });
@@ -63,7 +65,7 @@ const CuestionarioPassword = ({ unlockTest, localStorageTest }) => {
   );
 };
 
-const CuentaAtras = ({ endTest, duration }) => {
+const CuentaAtras = ({ startTime, endTest, duration }) => {
   const renderer = ({ hours, minutes, seconds, completed }) => {
     if (completed) {
       // Render a completed state
@@ -75,71 +77,84 @@ const CuentaAtras = ({ endTest, duration }) => {
     // Render a countdown
     const totalSeconds = duration * 60; // segundos
     const leftSeconds = hours * 3600 + minutes * 60 + seconds;
-    const porcentaje = 100 - parseInt((leftSeconds / totalSeconds) * 100, 10);
+    const porcentaje = 100 - Math.floor((leftSeconds / totalSeconds) * 100) + Math.floor(100/totalSeconds);
+    const bg = porcentaje >= 80 && 'bg-danger'
     return (
       <div>
         <p className="text-center">
           {hours}h:{minutes}min:{seconds}s
         </p>
         <div className="progress">
-          <div className="progress-bar progress-bar-striped" role="progressbar" style={{ width: `${porcentaje}%` }} aria-valuenow={porcentaje} aria-valuemin="0" aria-valuemax="100" />
+          <div className={`progress-bar progress-bar-striped progress-bar-animated ${bg}`} role="progressbar" style={{ width: `${porcentaje}%` }} aria-valuenow={porcentaje} aria-valuemin={0} aria-valuemax={100} />
         </div>
       </div>
     );
   };
 
   const updateTime = () => {
-    let initTime = Number(localStorage.getItem('initTime'));
-    initTime = new Date(initTime);
-    let actualTime = Date.now();
-    actualTime = new Date(actualTime);
+    const initTime = new Date(startTime);
+    const actualTime = new Date()
 
-    const tiempoInicial = initTime.getHours() * 3600 + initTime.getMinutes() * 60 + initTime.getSeconds();
-    const tiempoActual = actualTime.getHours() * 3600 + actualTime.getMinutes() * 60 + actualTime.getSeconds();
-    const passedSeconds = tiempoActual - tiempoInicial;
+    const passedMiliseconds = actualTime.getTime() - initTime.getTime();
 
-    let leftSeconds = duration * 60 - passedSeconds;
+    let leftMiliseconds = duration * 60 * 1000 - passedMiliseconds;
 
-    if (leftSeconds <= 0) {
-      leftSeconds = 0;
+    if (leftMiliseconds <= 0) {
+      leftMiliseconds = 0;
     }
 
     // comprobar si se ha pasado de fecha ???
 
-    return leftSeconds;
+    return leftMiliseconds;
   };
 
-  return <Countdown date={Date.now() + updateTime() * 1000} renderer={renderer} />;
+  return <Countdown date={Date.now() + updateTime()} renderer={renderer} />;
 };
 
 const QuestionContainerNoRevision = () => {
   const navigate = useNavigate();
   const params = useParams();
-  const [localStorageTest, setLocalStorageTest] = useState(() => JSON.parse(JSON.parse(localStorage.getItem('tests'))?.find((test) => Number(JSON.parse(test).id) === Number(params.id)) ?? null)); // TODO no convence lo de guardarlo en localstorage
+  const paramsId = Number(params.id); // TODO error con ids invalidos(letras y cosas raras). TEST NOT FOUND o algo asi
+  const [localStorageTest, setLocalStorageTest] = useState(() => JSON.parse(localStorage.getItem('tests'))?.[paramsId] ?? null); // TODO no convence lo de guardarlo en localstorage
 
   const addTestToLocalStorage = (jsonObject) => {
     const tests = localStorage.getItem('tests');
-    const test = tests ? JSON.stringify([...JSON.parse(tests), jsonObject]) : JSON.stringify([jsonObject]);
+    const test = tests ? JSON.stringify({...JSON.parse(tests), [jsonObject.id]:jsonObject}) : JSON.stringify({[jsonObject.id]:jsonObject});
     localStorage.setItem('tests', test);
   };
   useFetch(Tests.get, {
     skip: localStorageTest,
     onSuccess: (d) => {
-      addTestToLocalStorage(JSON.stringify(d));
+      addTestToLocalStorage(d);
       setLocalStorageTest(d);
     },
-    params: { idCuestionario: Number(params.id) },
+    params: { idCuestionario: paramsId },
   });
 
   const [indPregunta, setindPregunta] = useState(0);
   const [questionList, setQuestionList] = useState([]);
-  const [answerList, setAnswerList] = useState({}); // TODO revisar metodos que los usan, se vuelven a usar mapas :(
+  const [answerList, setAnswerList] = useState({initTime:null,respuestas:[]}); // TODO revisar metodos que los usan, se vuelven a usar mapas :(
   const [isAllowed, setIsAllowed] = useState(false); // Indica si se ha desbloqueado el test
 
   const descargado = Boolean(localStorageTest); // Si existe en localstorage true en caso contrario false
   const duration = localStorageTest?.duracion;
 
-  useEffect(() => () => localStorage.removeItem('answers'), []) // TODO mirar que podemos hacer para hacer varios cuestionarios a la vez
+  // useEffect(() => () => localStorage.removeItem('answers'), []); // TODO mirar que podemos hacer para hacer varios cuestionarios a la vez
+
+  useEffect(() => {
+    if (answerList.respuestas.length !== 0) {
+      let respuestas = JSON.parse(localStorage.getItem('answers'));
+    
+      if (respuestas?.[paramsId]) {
+        respuestas[paramsId] = { ...answerList, initTime: respuestas[paramsId].initTime };
+      } else {
+        // respuestas puede ser null
+        respuestas = { ...respuestas, [paramsId]: { ...answerList, initTime: new Date().toISOString()} };
+      }
+      localStorage.setItem('answers', JSON.stringify(respuestas));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paramsId, answerList]);
 
   const renderButtons = () => {
     const updateIndNext = () => {
@@ -174,44 +189,36 @@ const QuestionContainerNoRevision = () => {
   };
 
   const endTest = () => {
-    const respuestas = localStorage.getItem('answers'); // TODO falla si no se responde a nada, capturar excepciones en back
-    const hash = CryptoJS.SHA256(respuestas).toString();
+    const {respuestas} = answerList; // TODO falla si no se responde a nada, capturar excepciones en back
+    const hash = CryptoJS.SHA256(JSON.stringify(respuestas)).toString();
     const sent = navigator.onLine;
     // TODO por qué no se espera respuesta de esta peticion??
-    Tests.sendTest({ respuestas, hash })
+    Tests.sendTest({ respuestas, hash, idCuestionario:paramsId })
       .then(() => console.log('END'))
       .catch((e) => console.error(e));
 
     if (sent) {
       navigate('/', { replace: true });
     } else {
-      navigate(`/scanner/${params.id}/${hash}`, { replace: true });
+      navigate(`/scanner/${paramsId}/${hash}`, { replace: true });
     }
-    localStorage.removeItem("answers") // TODO funciona solo con un cuestionario simultaneo
+    localStorage.removeItem('answers'); // TODO funciona solo con un cuestionario simultaneo
   };
 
   const unlockTest = (answList, questList, allowed) => {
+    const respuestas = JSON.parse(localStorage.getItem('answers'))?.[paramsId]
+    for(const [id,pregunta] of Object.entries(respuestas?.respuestas || {})) {
+      answList.respuestas[id] = { id, type: pregunta.type, answr: pregunta.type === 'test' ? Number(pregunta.answr) : pregunta.answr};
+    }
+    answList.initTime = respuestas ? respuestas.initTime : new Date().toISOString();
     setAnswerList(answList);
     setQuestionList(questList);
     setIsAllowed(allowed);
-    localStorage.setItem('initTime', Date.now()); // guardamos la hora a la que empieza el examen
   };
 
   const addAnswer = (answer) => {
     const newlist = { ...answerList };
-    newlist[answer.id] = { type: answer.respuesta.type, answr: answer.respuesta.answer };
-    const listaRespuestas = [];
-    for (const [key, value] of Object.entries(newlist)) {
-      listaRespuestas.push({
-        id: key,
-        type: value.type,
-        answr: value.type === 'test' ? Number(value.answr) : value.answr,
-      });
-    }
-
-    const respuestas = { idCuestionario: params.id, respuestas: listaRespuestas };
-    localStorage.setItem('answers', JSON.stringify(respuestas));
-
+    newlist.respuestas[answer.id] = { id:answer.id, type: answer.respuesta.type, answr: answer.respuesta.answer };
     setAnswerList(newlist);
   };
 
@@ -219,21 +226,21 @@ const QuestionContainerNoRevision = () => {
 
   if (!isAllowed) return <CuestionarioPassword localStorageTest={localStorageTest} unlockTest={unlockTest} />;
 
-  if (questionList.length !== 0) {
+  if (questionList.length !== 0 && answerList.initTime) {
     const pregunta = questionList[indPregunta];
     return (
       <div className="index-body container-fluid" id="questions">
         <div className="p-4 row-1">
           <div className="col card">
             <h1 className="text-center">{localStorageTest?.title || ''}</h1>
-            <CuentaAtras duration={duration} endTest={endTest} />
+            <CuentaAtras startTime={answerList.initTime} duration={duration} endTest={endTest} />
           </div>
         </div>
 
         <div className="p-4 row">
           <div className="p-2 col-md-9 col-sm-12 order-last order-md-first" id="question">
             <div className="card">
-              <div className='card-body'>
+              <div className="card-body">
                 <div key={pregunta.id}>
                   <h2 className="p-2 m-2">
                     {' '}
@@ -241,9 +248,24 @@ const QuestionContainerNoRevision = () => {
                     {`.-${pregunta.question}`}
                   </h2>
                   {pregunta.type === 'test' ? (
-                    <TestQuestion key={pregunta.id} mode="test" id={pregunta.id} type={pregunta.type} options={pregunta.options} addAnswerd={addAnswer} />
+                    <TestQuestion
+                      respuesta={answerList?.respuestas?.[pregunta.id].answr}
+                      key={pregunta.id}
+                      mode="test"
+                      id={pregunta.id}
+                      type={pregunta.type}
+                      options={pregunta.options}
+                      addAnswerd={addAnswer}
+                    />
                   ) : (
-                    <TextQuestion key={pregunta.id} mode="test" id={pregunta.id} type={pregunta.type} addAnswerd={addAnswer} />
+                    <TextQuestion
+                      respuesta={answerList?.respuestas?.[pregunta.id].answr}
+                      key={pregunta.id}
+                      mode="test"
+                      id={pregunta.id}
+                      type={pregunta.type}
+                      addAnswerd={addAnswer}
+                    />
                   )}
                 </div>
               </div>

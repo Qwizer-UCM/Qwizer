@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { Users } from '../services/API';
 import useFetch from './useFetch';
-
+ 
 const useAuth = () => {
   const [user, setUser] = useState({ username: '', role: '', id: '' });
   const isLogged = user.id !== '';
-
   const changeUser = (newUser) => {
     const { username, role, id } = newUser;
     setUser({ username, role, id });
@@ -39,11 +38,11 @@ const useAuth = () => {
         error = response.data?.detail;
         localStorage.clear(); // TODO Seria correcto borrar localstorage?
       }
-      console.error(error)
-      if(error) setError('El nombre de usuario o contraseña es incorrecto.')
+      console.error(error);
+      if (error) setError('El nombre de usuario o contraseña es incorrecto.');
     }
   };
-
+  
   const logout = () => {
     Users.logout()
       .then(() => {
@@ -53,14 +52,14 @@ const useAuth = () => {
       .catch(({ response }) => {
         console.error(response.data.detail);
       });
-  };  
+  };
 
+  // TODO ahora no se deja cerrar sesión a usuario offline, ¿a donde se le mandaría?
   if (!navigator.onLine) {
-    let localUser = JSON.parse(localStorage.getItem('user'))
-    
+    const localUser = JSON.parse(localStorage.getItem('user'));
     return {
-      user: { username: localUser.username, role: localUser.role, id: localUser.id },
-      isLogged,
+      user: { username: localUser?.username || '', role: localUser?.role || '', id: localUser?.id || '' },
+      isLogged: localUser && localUser?.id !== '',
       isLoading,
     };
   }

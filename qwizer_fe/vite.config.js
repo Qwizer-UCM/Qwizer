@@ -3,15 +3,17 @@ import { defineConfig, loadEnv } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import manifest from './public/manifest.json'
 
-
 // https://vitejs.dev/config/
-export default defineConfig(({mode}) => {
-  const env = loadEnv(mode, process.cwd(),'')
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    server : {
+    build: {
+      sourcemap: false
+    },
+    server: {
       host: env.REACT_HOST,
-      port: env.REACT_PORT
+      port: env.REACT_PORT,
     },
     envPrefix: 'REACT_',
     plugins: [
@@ -23,5 +25,5 @@ export default defineConfig(({mode}) => {
         filename: 'sw.js',
       }),
     ],
-  }
+  };
 });

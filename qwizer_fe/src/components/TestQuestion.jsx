@@ -1,14 +1,14 @@
 import { useState } from 'react';
 
-const TestQuestion = ({ mode, id, type, options, infoPreg, addAnswerd }) => {
-  const [selectedOp, setSelectedOp] = useState(() => (mode === 'test' ? JSON.parse(localStorage.getItem('answers'))?.respuestas?.find((r) => Number(r.id) === Number(id))?.answr : null));
+const TestQuestion = ({ respuesta, mode, id, type, options, infoPreg=null, addAnswerd }) => {
+  const [selectedOp, setSelectedOp] = useState(() => (mode === 'test' ? respuesta : null));
   // props.mode puede tomar los siguientes valores: test, revision, visualize
 
   const handleOnClick = (event) => {
     setSelectedOp(Number(event.target.value));
     addAnswerd({
       id,
-      respuesta: { type, answer: event.target.value },
+      respuesta: { type, answer: Number(event.target.value) },
     });
   };
 

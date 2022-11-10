@@ -19,6 +19,14 @@ services:
       - ./db/create-multiple-postgresql-databases.sh:/docker-entrypoint-initdb.d/init.sh
       - pg_data:/var/lib/postgresql/data
 
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: root@root.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+
   nginx:
     image: nginx:latest
     restart: unless-stopped

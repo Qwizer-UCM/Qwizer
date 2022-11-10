@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
-const useFetch = (fetcher, {transform=(data) => data, onSuccess, onError, skip=false, params={}, deps=[]} = {}) => {
+// eslint-disable-next-line no-unused-vars
+const useFetch = (fetcher, {transform=(data) => data, onSuccess=(_res) => {}, onError=(_err) => {}, skip=false, params={}, deps=[]} = {}) => {
   const [data, setData] = useState();
   const [error, setError] = useState();
 
@@ -12,14 +13,14 @@ const useFetch = (fetcher, {transform=(data) => data, onSuccess, onError, skip=f
         // console.log("SET DATA",res)
         const resTransform = transform(res.data)
         setData(resTransform);
-        if(onSuccess) onSuccess(resTransform);
+        onSuccess(resTransform);
       } catch (err) {
         if (err.name === 'CanceledError') {
           // console.log('Request Aborted');
         }else {
           console.log(err)
           setError(err);
-          if(onError) onError(err);
+          onError(err);
         }
       }
     };

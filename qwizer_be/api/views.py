@@ -40,6 +40,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Cuestionarios.objects.all()
     serializer_class = EncryptedTestsSerializer
     permission_classes = []
+    
 
     # @action(detail=True,methods=['POST'])
     # def response(self, request, pk):
@@ -410,16 +411,21 @@ def testCorrected(request):
             preguntaJSON["correct_op"] = RespuestasTest.objects.get(
                 idPregunta=pregunta
             ).idOpcion.id
-            preguntaJSON["user_op"] = RespuestasEnviadasTest.objects.get(
+            # TODO esto es un apaño para qe funcione hay que reescribirlo todo
+            preguntaJSON["user_op"] = RespuestasEnviadasTest.objects.filter(
                 idCuestionario=cuestionario, idAlumno=alumno, idPregunta=pregunta
-            ).idRespuesta.id
+            ).first()
+            if preguntaJSON["user_op"] is not None:
+                preguntaJSON["user_op"] = preguntaJSON["user_op"].idRespuesta.id
         if pregunta.tipoPregunta == "text":
             preguntaJSON["correct_op"] = RespuestasTexto.objects.get(
                 idPregunta=pregunta
             ).respuesta
-            preguntaJSON["user_op"] = RespuestasEnviadasText.objects.get(
+            preguntaJSON["user_op"] = RespuestasEnviadasText.objects.filter(
                 idCuestionario=cuestionario, idAlumno=alumno, idPregunta=pregunta
-            ).Respuesta
+            ).first()
+            if preguntaJSON["user_op"] is not None:
+                preguntaJSON["user_op"] = preguntaJSON["user_op"].Respuesta
         questions.append(preguntaJSON)
 
     messageJSON = {}
@@ -804,16 +810,17 @@ Llegan las respuestas de un test:
 @permission_classes([IsAuthenticated])
 def response(request):
     print(request.data)
-    cuestionarioAux = json.loads(request.data["respuestas"]) # TODO pasear el objeto en front
-
-    cuestionario = Cuestionarios.objects.get(id=cuestionarioAux["idCuestionario"])
+    respuestas = request.data["respuestas"]
+    idCuestionario = request.data["idCuestionario"]
+    cuestionario = Cuestionarios.objects.get(id=idCuestionario)
     alumno = request.user
 
-    respuestas = cuestionarioAux["respuestas"]
-    for respuesta in respuestas:
+
+    for key,respuesta in respuestas.items():
+        print(respuesta)
         pregunta = Preguntas.objects.get(id=respuesta["id"])
 
-        if respuesta["type"] == "test":
+        if respuesta["type"] == "test" and str(respuesta["answr"]).isdigit():
             opcion = OpcionesTest.objects.get(id=respuesta["answr"])
             respuestaEnviada = RespuestasEnviadasTest(
                 idCuestionario=cuestionario,
@@ -847,12 +854,12 @@ def calcularNota(alumno, cuestionario, respuestas, hash):
 
     notaTest = 0
 
-    for respuesta in respuestas:  # TODO Falta logica de negocio
+    for key,respuesta in respuestas.items():  # TODO Falta logica de negocio
         pregunta = Preguntas.objects.get(id=respuesta["id"])
         pregunta_info = PerteneceACuestionario.objects.get(
             idPregunta=pregunta, idCuestionario=cuestionario
         )
-        if respuesta["type"] == "test":
+        if respuesta["type"] == "test" and str(respuesta["answr"]).isdigit():
             opcionUsuario = int(respuesta["answr"])
             opcionCorrecta = RespuestasTest.objects.get(idPregunta=respuesta["id"])
             opcionCorrecta = opcionCorrecta.idOpcion.id

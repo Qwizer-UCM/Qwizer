@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-const TextQuestion = ({ mode, id, type, infoPreg, addAnswerd }) => {
-  const [textValue, settextValue] = useState(() => (mode === 'test' ? JSON.parse(localStorage.getItem('answers'))?.respuestas?.find((r) => Number(r.id) === Number(id))?.answr : ''));
+const TextQuestion = ({ respuesta, mode, id, type, infoPreg=null, addAnswerd }) => {
+  const [textValue, settextValue] = useState(() => (mode === 'test' ? respuesta : ''));
   // props.mode puede tomar los siguientes valores: test, revision, visualize
 
   const handleChange = (event) => {

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import client from '../client';
 
 // DOCS https://axios-http.com/docs/api_intro#request-method-aliases
@@ -24,7 +25,7 @@ export const Subjects = {
 };
 
 export const Tests = {
-  sendTest: ({ respuestas, hash }, config = {}) => client.post('response', { respuestas, hash }, config),
+  sendTest: ({ respuestas, hash, idCuestionario }, config = {}) => client.post('response', { respuestas, hash, idCuestionario }, config),
   getCorrectedTest: ({ idCuestionario, idAlumno }, config = {}) => client.post('test-corrected', { idCuestionario, idAlumno }, config),
   createQuiz: ({ cuestionario }, config = {}) => client.post('create-quiz', { cuestionario }, config),
   getQuizGrades: ({ idCuestionario }, config = {}) => client.post('get-quiz-grades', { idCuestionario }, config),
