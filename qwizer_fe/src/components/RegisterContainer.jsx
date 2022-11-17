@@ -40,7 +40,7 @@ const RegisterContainer = () => {
     } else {
       Subjects.enrollStudents({ alumnos: alumnosSeleccionados, asignatura })
         .then(({ data: res }) => {
-          if (data.insertados) {
+          if (res.insertados) {
             setSuccessModal({show:true,message:'Los alumnos han sido matriculados correctamente.'})
           } else {
             let errormsg = 'Los siguientes alumnos no se han podido matricular: \n'; // TODO cambiar el mensaje de los errores

@@ -12,7 +12,7 @@ const QuestionContainerRevision = () => {
   const navigate = useNavigate()
 
   const { data: testCorregido } = useFetch(Tests.getCorrectedTest, {
-    transform: (d) => JSON.parse(d.corrected_test),
+    transform:  (d) => d.corrected_test,
     params: { idAlumno: Number(params.idAlumno), idCuestionario: Number(params.id) ?? '' },
   });
   const [indPregunta, setindPregunta] = useState(0);

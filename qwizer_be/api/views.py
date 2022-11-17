@@ -203,33 +203,31 @@ def get_subjects(request):
     print(lista_asignaturas)
     return Response({"asignaturas": lista_asignaturas})
 
-@api_view(["POST"])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def get_all_subjects(
-    request,
-):  # conseguir todas las asignaturas para el banco de preguntas
+def get_all_subjects(request):  # conseguir todas las asignaturas para el banco de preguntas
     listaAsignaturas = []
     # comprobar que es un profesor
-    asignaturas = Asignaturas.objects.all()
+    #if request.user.rol == "teacher":
+    asignaturas = Asignaturas.objects.all() #TODO comprobrar mejora de esto
     for asignatura in asignaturas:
         asig = {}
         asig["asignatura"] = asignatura.asignatura
         asig["id"] = asignatura.id
         listaAsignaturas.append(asig)
-
+    
     return Response({"asignaturas": listaAsignaturas})
 
 
-@api_view(["POST"])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def get_quizzes(request):
+def get_quizzes(request,idAsignatura):
 
-    print(request)
     lista_cuestionarios = []
-    asignatura = Asignaturas.objects.get(id=request.data["idAsignatura"])
+    asignatura = Asignaturas.objects.get(id=idAsignatura)
 
     cuestionarios = Cuestionarios.objects.filter(
-        idAsignatura=request.data["idAsignatura"]
+        idAsignatura=idAsignatura
     ).order_by("-fecha_cierre")
     id_cuestionarios = []
     for cuestionario in cuestionarios:
@@ -430,12 +428,13 @@ def testCorrected(request):
 
     messageJSON = {}
     messageJSON["titulo"] = cuestionario.titulo
-    messageJSON["nota"] = int(
-        notaObj.nota
-    )  # nota en decimal no se serializa bien en json
+    # messageJSON["nota"] = int(
+    #     notaObj.nota
+    # )  # nota en decimal no se serializa bien en json
+    messageJSON["nota"] = notaObj.nota
     messageJSON["questions"] = questions
 
-    quizString = json.dumps(messageJSON)
+    quizString = messageJSON
 
     content = {
         "corrected_test": quizString,

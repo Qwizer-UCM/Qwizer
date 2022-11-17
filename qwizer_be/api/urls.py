@@ -33,7 +33,7 @@ urlpatterns += [
 
     # Subjects
     path("get-subjects", views.get_subjects, name="get-subjects"),
-    path("get-quizzes", views.get_quizzes, name="get-quizzes"),
+    path("get-quizzes/<int:idAsignatura>", views.get_quizzes, name="get-quizzes"),
     path("get-all-subjects", views.get_all_subjects, name="get-all-subjects"),
     path("get-subject-questions",views.get_subject_questions, name="get-subject-questions"),
     path("enroll-students", views.enroll_students, name="enroll-students"),

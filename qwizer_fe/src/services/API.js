@@ -18,8 +18,8 @@ export const Questions = {
 
 export const Subjects = {
   getFromStudentOrTeacher: (_data = {}, config = {}) => client.get('get-subjects', config), // Asignaturas en la que esta matriculado el estudiante o las que imparte el profe
-  getTests: ({ idAsignatura }, config = {}) => client.post('get-quizzes', { idAsignatura }, config),
-  getAll: (_data = {}, config = {}) => client.post('get-all-subjects', _data, config),
+  getTests: ({ idAsignatura }, config = {}) => client.get(`get-quizzes/${idAsignatura}`, config),
+  getAll: (_data = {}, config = {}) => client.get('get-all-subjects', _data, config),
   getQuestions: ({ idAsignatura }, config = {}) => client.post('get-subject-questions', { idAsignatura }, config),
   enrollStudents: ({ alumnos, asignatura }, config = {}) => client.post('enroll-students', { alumnos, asignatura }, config),
 };
