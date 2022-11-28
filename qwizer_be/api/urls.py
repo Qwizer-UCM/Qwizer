@@ -32,23 +32,23 @@ urlpatterns += [
     path("upload-questions", views.upload_questions, name="upload-questions"),
 
     # Subjects
-    path("get-subjects", views.get_subjects, name="get-subjects"),
-    path("get-quizzes/<int:idAsignatura>", views.get_quizzes, name="get-quizzes"),
-    path("get-all-subjects", views.get_all_subjects, name="get-all-subjects"),
-    path("get-subject-questions",views.get_subject_questions, name="get-subject-questions"),
+    path("asignaturas", views.get_subjects, name="asignaturas"),
+    path("asignaturas/<int:idAsignatura>/cuestionarios", views.get_quizzes, name="cuestionarios"),
+    path("get-all-subjects", views.get_all_subjects, name="get-all-subjects"), #TODO pensar esta ruta
+    path("asignaturas/<int:idAsignatura>/preguntas",views.get_subject_questions, name="preguntas"),
     path("enroll-students", views.enroll_students, name="enroll-students"),
 
     # Tests
-    path("response", views.response, name="response"),
-    path("test-corrected", views.testCorrected, name="test-corrected"),
-    path("create-quiz", views.create_quiz, name="create-quiz"),
-    path("get-quiz-grades", views.get_quiz_grades, name="get-quiz-grades"),
-    path("test", views.test, name="test"),
-    path("get-quiz-info", views.get_quiz_info, name="get-quiz-info"),
-    path("upload", views.upload, name="upload"),
+    path("cuestionarios/enviar", views.response, name="enviarCuestionarios"),
+    path("cuestionarios/<int:idCuestionario>/nota/<int:idAlumno>", views.testCorrected, name="test-corrected"),
+    path("cuestionarios/crear", views.create_quiz, name="create-quiz"),
+    path("cuestionarios/<int:idCuestionario>/notas", views.get_quiz_grades, name="get-quiz-grades"),
+    path("cuestionarios/<int:idCuestionario>", views.test, name="test"),
+    path("cuestionarios/<int:idCuestionario>/info", views.get_quiz_info, name="get-quiz-info"),
+    path("cuestionarios/subir", views.upload, name="upload"),
   
     # Users
     path("login", views.app_login, name="login"),
     path("logout", views.app_logout, name="logout"),
-    path("get-students", views.get_students, name="get-students"),
+    path("estudiantes", views.get_students, name="estudiantes"),
 ]

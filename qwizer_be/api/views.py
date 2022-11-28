@@ -183,9 +183,7 @@ def get_subjects(request):
             )
 
         for asignatura in lista_id_asignaturas:
-            asignatura_json = {}
-            asignatura_json["id"] = asignatura.idAsignatura.id
-            asignatura_json["nombre"] = asignatura.idAsignatura.asignatura
+            asignatura_json = {"id": asignatura.idAsignatura.id, "nombre": asignatura.idAsignatura.asignatura}
 
             cuestionarios = Cuestionarios.objects.filter(
                 idAsignatura=asignatura.idAsignatura.id
@@ -211,10 +209,7 @@ def get_all_subjects(request):  # conseguir todas las asignaturas para el banco 
     #if request.user.rol == "teacher":
     asignaturas = Asignaturas.objects.all() #TODO comprobrar mejora de esto
     for asignatura in asignaturas:
-        asig = {}
-        asig["asignatura"] = asignatura.asignatura
-        asig["id"] = asignatura.id
-        listaAsignaturas.append(asig)
+        listaAsignaturas.append({'id': asignatura.id,'asignatura': asignatura.asignatura})
     
     return Response({"asignaturas": listaAsignaturas})
 
@@ -238,10 +233,10 @@ def get_quizzes(request,idAsignatura):
     )
 
 
-@api_view(["POST"])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def get_quiz_info(request):
-    cuestionario = Cuestionarios.objects.get(id=request.data["idCuestionario"])
+def get_quiz_info(request,idCuestionario):
+    cuestionario = Cuestionarios.objects.get(id=idCuestionario)
     duracion = cuestionario.duracion
     fechaApertura = cuestionario.fecha_apertura
     fechaCierre = cuestionario.fecha_cierre
@@ -272,11 +267,10 @@ def get_quiz_info(request):
     )
 
 
-@api_view(["POST"])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def test(request):
+def test(request,idCuestionario):
 
-    idCuestionario = request.data["idCuestionario"]
     cuestionario = Cuestionarios.objects.get(id=idCuestionario)
     duracion = cuestionario.duracion
     title = cuestionario.titulo
@@ -293,16 +287,13 @@ def test(request):
             opcionesLista = []
             opciones = OpcionesTest.objects.filter(idPregunta=pregunta.id)
             for opcion in opciones:
-                opcionesJSON = {}
-                opcionesJSON["id"] = opcion.id
-                opcionesJSON["op"] = opcion.opcion
-                opcionesLista.append(opcionesJSON)
+                opcionesLista.append({'id':opcion.id,'op':opcion.opcion})
             preguntaJSON["options"] = opcionesLista
         questions.append(preguntaJSON)
 
     messageJSON = {}
     messageJSON["questions"] = questions
-    pprint(messageJSON)
+    print(messageJSON)
 
     quizString = json.dumps(messageJSON)
     # Hay que hacer que el texto se pueda enviar en bloques de 16 bytes, sino no funciona
@@ -376,16 +367,15 @@ def test(request):
 """
 
 
-@api_view(["POST"])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def testCorrected(request):
+def testCorrected(request,idCuestionario, idAlumno):
 
-    if request.user.role == "student" or request.data["idAlumno"] == "":
+    if request.user.role == "student" or idAlumno == "":
         alumno = request.user
     else:
-        alumno = User.objects.get(id=request.data["idAlumno"])
-    print(request.data)
-    idCuestionario = request.data["idCuestionario"]
+        alumno = User.objects.get(id=idAlumno)
+    
     cuestionario = Cuestionarios.objects.get(id=idCuestionario)
     pertenecen = PerteneceACuestionario.objects.filter(idCuestionario=cuestionario.id)
     notaObj = Notas.objects.get(idCuestionario=cuestionario, idAlumno=alumno)
@@ -401,10 +391,7 @@ def testCorrected(request):
             opcionesLista = []
             opciones = OpcionesTest.objects.filter(idPregunta=pregunta.id)
             for opcion in opciones:
-                opcionesJSON = {}
-                opcionesJSON["id"] = opcion.id
-                opcionesJSON["op"] = opcion.opcion
-                opcionesLista.append(opcionesJSON)
+                opcionesLista.append({"id": opcion.id, "op": opcion.opcion})
             preguntaJSON["options"] = opcionesLista
             preguntaJSON["correct_op"] = RespuestasTest.objects.get(
                 idPregunta=pregunta
@@ -448,9 +435,9 @@ def testCorrected(request):
 """
 
 
-@api_view(["POST"])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def get_subject_questions(request):
+def get_subject_questions(request,idAsignatura):
 
     if str(request.user.role) == "student":
         content = {
@@ -459,7 +446,7 @@ def get_subject_questions(request):
         }
         return Response(content)
 
-    asignatura = Asignaturas.objects.get(id=int(request.data["idAsignatura"]))
+    asignatura = Asignaturas.objects.get(id=idAsignatura)
     listaPreguntas = Preguntas.objects.filter(idAsignatura=asignatura)
     preguntas = []
     print(listaPreguntas)
@@ -895,12 +882,12 @@ Funcion que devuelve las notas de todos los alumnos para un cuestionario
 """
 
 
-@api_view(["POST"])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def get_quiz_grades(request):
+def get_quiz_grades(request,idCuestionario):
     # comporbar que es alumno
 
-    cuestionario = Cuestionarios.objects.get(id=request.data["idCuestionario"])
+    cuestionario = Cuestionarios.objects.get(id=idCuestionario)
     name_map = {"first_name": "first_name", "last_name": "last_name", "email": "nota"}
 
     alumnos = User.objects.raw(
@@ -914,9 +901,9 @@ def get_quiz_grades(request):
         + "u.id = n.\"idAlumno_id\" "
         + "WHERE alumn.\"idAsignatura_id\" = %s ",
         [
-            str(request.data["idCuestionario"]),
+            str(idCuestionario),
             request.user.id,
-            str(request.data["idCuestionario"]),
+            str(idCuestionario),
             str(cuestionario.idAsignatura.id),
         ],
         translations=name_map,
@@ -924,16 +911,8 @@ def get_quiz_grades(request):
 
     notas = []
     for alumno in alumnos:
-        alumnoJSON = {}
-        alumnoJSON["id"] = alumno.id
-        alumnoJSON["nombre"] = alumno.first_name
-        alumnoJSON["apellidos"] = alumno.last_name
-        nota = alumno.nota
-        if alumno.nota == None:
-            nota = "No presentado"
-        alumnoJSON["nota"] = nota
-        notas.append(alumnoJSON)
-
+        nota = alumno.nota if alumno.nota != None else "No presentado"
+        notas.append({"id": alumno.id, "nombre": alumno.first_name, "apellidos": alumno.last_name, "nota": nota})
     content = {
         "notas": notas,
     }
@@ -1035,7 +1014,7 @@ def update_question(request):
     return Response(content)
 
 
-@api_view(["POST"])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_students(request):
     content = {}
@@ -1044,11 +1023,8 @@ def get_students(request):
         usuarios = User.objects.filter(role="student")
         alumnos = []
         for alumno in usuarios:
-            alumnoJSON = {}
-            alumnoJSON["id"] = alumno.id
-            alumnoJSON["nombre"] = alumno.first_name
-            alumnoJSON["apellidos"] = alumno.last_name
-            alumnos.append(alumnoJSON)
+            alumnos.append({'id': alumno.id,'nombre':alumno.first_name,'apellidos': alumno.last_name})
+        
         content["alumnos"] = alumnos
 
         return Response(content)

@@ -17,27 +17,26 @@ export const Questions = {
 };
 
 export const Subjects = {
-  getFromStudentOrTeacher: (_data = {}, config = {}) => client.get('get-subjects', config), // Asignaturas en la que esta matriculado el estudiante o las que imparte el profe
-  getTests: ({ idAsignatura }, config = {}) => client.get(`get-quizzes/${idAsignatura}`, config),
-  getAll: (_data = {}, config = {}) => client.get('get-all-subjects', _data, config),
-  getQuestions: ({ idAsignatura }, config = {}) => client.post('get-subject-questions', { idAsignatura }, config),
-  enrollStudents: ({ alumnos, asignatura }, config = {}) => client.post('enroll-students', { alumnos, asignatura }, config),
+  getFromStudentOrTeacher: (_data = {}, config = {}) => client.get('asignaturas', config), // Asignaturas en la que esta matriculado el estudiante o las que imparte el profe
+  getTests: ({ idAsignatura }, config = {}) => client.get(`asignaturas/${idAsignatura}/cuestionarios`, config), // Todos los cuestionarios de una asignatura
+  getAll: (_data = {}, config = {}) => client.get('get-all-subjects', _data, config),  // Todas las asignaturas del centro
+  getQuestions: ({ idAsignatura }, config = {}) => client.get(`asignaturas/${idAsignatura}/preguntas`, config), // Todas las preguntas de una asignatura
+  enrollStudents: ({ alumnos, asignatura }, config = {}) => client.post('enroll-students', { alumnos, asignatura }, config), // Inserción de alumnos en una asignatura
 };
 
 export const Tests = {
-  sendTest: ({ respuestas, hash, idCuestionario }, config = {}) => client.post('response', { respuestas, hash, idCuestionario }, config),
-  getCorrectedTest: ({ idCuestionario, idAlumno }, config = {}) => client.post('test-corrected', { idCuestionario, idAlumno }, config),
-  createQuiz: ({ cuestionario }, config = {}) => client.post('create-quiz', { cuestionario }, config),
-  getQuizGrades: ({ idCuestionario }, config = {}) => client.post('get-quiz-grades', { idCuestionario }, config),
-  // TODO diferencia entre test y get-quiz-info?? TarjetaCuestionario.js
-  get: ({ idCuestionario }, config = {}) => client.post('test', { idCuestionario }, config),
-  getInfo: ({ idCuestionario }, config = {}) => client.post('get-quiz-info', { idCuestionario }, config),
-  upload: ({ ficheroYAML }, config = {}) => client.post('upload', { fichero_yaml: ficheroYAML }, config),
+  sendTest: ({ respuestas, hash, idCuestionario }, config = {}) => client.post('cuestionarios/enviar', { respuestas, hash, idCuestionario }, config), // Envio de cuestionario por parte de un usuario
+  getCorrectedTest: ({ idCuestionario, idAlumno }, config = {}) => client.get(`cuestionarios/${idCuestionario}/nota/${idAlumno}`, config), // Test corregido de un alumno
+  createQuiz: ({ cuestionario }, config = {}) => client.post('cuestionarios/crear', { cuestionario }, config), // Creación de cuestionario
+  getQuizGrades: ({ idCuestionario }, config = {}) => client.get(`cuestionarios/${idCuestionario}/notas`, config), // Todas las notas de un cuestionario
+  get: ({ idCuestionario }, config = {}) => client.get(`cuestionarios/${idCuestionario}`, config), // Test especifico para la descarga del usuario
+  getInfo: ({ idCuestionario }, config = {}) => client.get(`cuestionarios/${idCuestionario}/info`, config), // Información general de un cuestionario especifico
+  upload: ({ ficheroYAML }, config = {}) => client.post('cuestionarios/subir', { fichero_yaml: ficheroYAML }, config), // Subir un cuestionario hecho
 };
 
 export const Users = {
   me: (_data = {}, config = {}) => client.get('auth/user/me', config),
   login: ({ email, password }, config = {}) => client.post('auth/token/login', { email, password }, config),
   logout: (_data = {}, config = {}) => client.post('auth/token/logout', _data, config),
-  getStudents: (_data = {}, config = {}) => client.post('get-students', _data, config),
+  getStudents: (_data = {}, config = {}) => client.get('estudiantes', config),
 };
