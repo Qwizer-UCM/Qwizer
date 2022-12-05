@@ -3,6 +3,7 @@ import DataTable from 'react-data-table-component';
 import VisualizarNota from './VisualizarNota';
 import { Tests } from '../services/API';
 import useFetch from '../hooks/useFetch';
+import NotFound404 from './common/NotFound404';
 
 const CustomCell = ({ nota, id, idCuestionario }) => {
   const navigate = useNavigate();
@@ -114,7 +115,7 @@ const RevisionNotasContainer = () => {
     );
   }
 
-  return <div>LOADING</div>;
+  return <NotFound404/>
 };
 
 export default RevisionNotasContainer;

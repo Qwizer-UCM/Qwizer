@@ -6,12 +6,13 @@ import QuestionNav from './QuestionNav';
 
 import { Tests } from '../services/API';
 import useFetch from '../hooks/useFetch';
+import NotFound404 from './common/NotFound404';
 
 const QuestionContainerRevision = () => {
   const params = useParams();
   const navigate = useNavigate()
 
-  const { data: testCorregido } = useFetch(Tests.getCorrectedTest, {
+  const { data: testCorregido, error } = useFetch(Tests.getCorrectedTest, {
     transform:  (d) => d.corrected_test,
     params: { idAlumno: Number(params.idAlumno), idCuestionario: Number(params.id) ?? '' },
   });
@@ -21,7 +22,7 @@ const QuestionContainerRevision = () => {
 
   const renderBackToSubject = () => <button className='btn btn-secondary' type='button' onClick={() => {navigate(-1)}}>Finalizar Revisión</button>
 
-  if (testCorregido && pregunta) {
+  if (testCorregido && !error && pregunta) {
     return (
       <div className="index-body container-fluid" id="questions">
         <div className="p-4">
@@ -57,12 +58,10 @@ const QuestionContainerRevision = () => {
           <div className="col text-center">{renderBackToSubject()}</div>
         </div>
       </div>
-
-
     );
   }
 
-  return <h1>Loading...</h1>;
+  return <NotFound404/>
 };
 
 export default QuestionContainerRevision;

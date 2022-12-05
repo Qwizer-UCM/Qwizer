@@ -16,7 +16,7 @@ const useFetch = (fetcher, {transform=(data) => data, onSuccess=(_res) => {}, on
         onSuccess(resTransform);
       } catch (err) {
         if (err.name === 'CanceledError') {
-          // console.log('Request Aborted');
+          // Request Aborted
         }else {
           console.log(err)
           setError(err);

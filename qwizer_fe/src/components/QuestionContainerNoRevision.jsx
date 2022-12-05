@@ -8,6 +8,7 @@ import QuestionNav from './QuestionNav';
 import Modal from './common/modals/Modal';
 import { Tests } from '../services/API';
 import useFetch from '../hooks/useFetch';
+import NotFound404 from './common/NotFound404';
 
 const CuestionarioPassword = ({ unlockTest, localStorageTest }) => {
   const [contra, setContra] = useState('');
@@ -122,7 +123,7 @@ const QuestionContainerNoRevision = () => {
     const test = tests ? JSON.stringify({...JSON.parse(tests), [jsonObject.id]:jsonObject}) : JSON.stringify({[jsonObject.id]:jsonObject});
     localStorage.setItem('tests', test);
   };
-  useFetch(Tests.get, {
+  const {error} = useFetch(Tests.get, {
     skip: localStorageTest,
     onSuccess: (d) => {
       addTestToLocalStorage(d);
@@ -138,8 +139,6 @@ const QuestionContainerNoRevision = () => {
 
   const descargado = Boolean(localStorageTest); // Si existe en localstorage true en caso contrario false
   const duration = localStorageTest?.duracion;
-
-  // useEffect(() => () => localStorage.removeItem('answers'), []); // TODO mirar que podemos hacer para hacer varios cuestionarios a la vez
 
   useEffect(() => {
     if (answerList.respuestas.length !== 0) {
@@ -221,6 +220,8 @@ const QuestionContainerNoRevision = () => {
     newlist.respuestas[answer.id] = { id:answer.id, type: answer.respuesta.type, answr: answer.respuesta.answer };
     setAnswerList(newlist);
   };
+
+  if(error) return <NotFound404/>
 
   if (!descargado) return null;
 
