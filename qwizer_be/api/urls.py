@@ -32,11 +32,12 @@ urlpatterns += [
     path("upload-questions", views.upload_questions, name="upload-questions"),
 
     # Subjects
-    path("asignaturas", views.get_subjects, name="asignaturas"),
+    path("asignaturas/user", views.get_subjects, name="asignaturas"),
     path("asignaturas/<int:idAsignatura>/cuestionarios", views.get_quizzes, name="cuestionarios"),
-    path("get-all-subjects", views.get_all_subjects, name="get-all-subjects"), #TODO pensar esta ruta
+    path("asignaturas", views.get_all_subjects, name="get-all-subjects"), 
     path("asignaturas/<int:idAsignatura>/preguntas",views.get_subject_questions, name="preguntas"),
-    path("enroll-students", views.enroll_students, name="enroll-students"),
+    path("asignaturas/registro", views.enroll_students, name="enroll-students"),
+    path("asignaturas/borrar", views.deleteStudentsFromSubject, name="delete-students"),
 
     # Tests
     path("cuestionarios/enviar", views.response, name="enviarCuestionarios"),
@@ -51,4 +52,6 @@ urlpatterns += [
     path("login", views.app_login, name="login"),
     path("logout", views.app_logout, name="logout"),
     path("estudiantes", views.get_students, name="estudiantes"),
+    path("estudiantes/<int:idAsignatura>", views.get_studentsFromAsignatura, name="estudiantesAsignatura"),
+    path("estudiantes/<int:idAsignatura>/disponibles",views.get_studentsForEnroll, name="estudiantesNoAsignatura")
 ]

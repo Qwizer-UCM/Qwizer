@@ -17,11 +17,12 @@ export const Questions = {
 };
 
 export const Subjects = {
-  getFromStudentOrTeacher: (_data = {}, config = {}) => client.get('asignaturas', config), // Asignaturas en la que esta matriculado el estudiante o las que imparte el profe
+  getFromStudentOrTeacher: (_data = {}, config = {}) => client.get('asignaturas/user', config), // Asignaturas en la que esta matriculado el estudiante o las que imparte el profe
   getTests: ({ idAsignatura }, config = {}) => client.get(`asignaturas/${idAsignatura}/cuestionarios`, config), // Todos los cuestionarios de una asignatura
-  getAll: (_data = {}, config = {}) => client.get('get-all-subjects', _data, config),  // Todas las asignaturas del centro
+  getAll: (_data = {}, config = {}) => client.get('asignaturas', _data, config),  // Todas las asignaturas del centro
   getQuestions: ({ idAsignatura }, config = {}) => client.get(`asignaturas/${idAsignatura}/preguntas`, config), // Todas las preguntas de una asignatura
-  enrollStudents: ({ alumnos, asignatura }, config = {}) => client.post('enroll-students', { alumnos, asignatura }, config), // Inserción de alumnos en una asignatura
+  enrollStudents: ({ alumnos, asignatura }, config = {}) => client.post('asignaturas/registro', { alumnos, asignatura }, config), // Inserción de alumnos en una asignatura
+  deleteStudentsFromSubject: ({ alumnos, asignatura }, config = {}) => client.post('asignaturas/borrar', { alumnos, asignatura }, config), // Borrar registro de alumnos en una asignatura
 };
 
 export const Tests = {
@@ -39,4 +40,6 @@ export const Users = {
   login: ({ email, password }, config = {}) => client.post('auth/token/login', { email, password }, config),
   logout: (_data = {}, config = {}) => client.post('auth/token/logout', _data, config),
   getStudents: (_data = {}, config = {}) => client.get('estudiantes', config),
+  getStudentsFromSubject: ({idAsignatura}, config = {}) => client.get(`estudiantes/${idAsignatura}`, config),
+  getStudentsForEnroll: ({idAsignatura}, config = {}) => client.get(`estudiantes/${idAsignatura}/disponibles`, config),
 };

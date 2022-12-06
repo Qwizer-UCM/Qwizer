@@ -8,6 +8,7 @@ import yaml
 from api.utils.cifrado import _pad_string
 from Crypto.Cipher import AES  # Usado para cifrar el test
 from Crypto.Random import get_random_bytes
+from django.db.models import Q
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from rest_framework import mixins, viewsets
@@ -1031,6 +1032,56 @@ def get_students(request):
     else:
         return Response("")
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_studentsFromAsignatura(request,idAsignatura):
+    content = {}
+    # comporbar que es alumno
+    if str(request.user.role) != "student":
+        usuariosAsignatura = EsAlumno.objects.filter(idAsignatura=idAsignatura)
+        alumnos = []
+        for alumno in usuariosAsignatura: # TODO cambiar los atributos en los modelos no es un idAlumno es el alumno como tal
+            alumnos.append({'id': alumno.idAlumno.id,'nombre':alumno.idAlumno.first_name,'apellidos': alumno.idAlumno.last_name})
+        
+        content["alumnos"] = alumnos
+        print(content)
+
+        return Response(content)
+    else:
+        return Response("")
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_studentsForEnroll(request,idAsignatura):
+    content = {}
+    # comporbar que es alumno
+    if str(request.user.role) != "student":
+        # TODO cambiar a sintaxis de django
+        usuariosAsignatura = EsAlumno.objects.raw(
+        'SELECT * '
+        + "FROM es_alumno ea "
+        + 'WHERE "idAlumno_id" not in ( '
+        + 'select ea2."idAlumno_id" '
+        + 'from es_alumno ea2 '
+        + 'where "idAsignatura_id" = %s)',
+        [
+            int(idAsignatura),
+        ]
+    )
+        alumnos = []
+        
+        for alumno in usuariosAsignatura:
+            alumnos.append({'id': alumno.idAlumno.id,'nombre':alumno.idAlumno.first_name,'apellidos': alumno.idAlumno.last_name})
+        
+        content["alumnos"] = alumnos
+        print(content)
+
+        return Response(content)
+    else:
+        return Response("")
+
+
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -1060,6 +1111,30 @@ def enroll_students(request):
 
         content["insertados"] = correct
         content["errors"] = alumnosFallidos
+        return Response(content)
+    else:
+        return Response("")
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def deleteStudentsFromSubject(request):
+    if str(request.user.role) != "student":
+        correct = True
+        alumnosFallidos = []
+        alumnos = request.data["alumnos"]
+        asignatura = request.data["asignatura"]
+        for alumno in alumnos:
+            objetoEsAlumno = EsAlumno.objects.filter(
+                idAlumno=alumno["id"], idAsignatura=asignatura
+            )
+
+            try:
+                objetoEsAlumno.delete()
+            except:
+                correct = False
+                alumnosFallidos.append(alumno["nombre"] + " " + alumno["apellidos"])
+
+        content = {"borrados": correct, "errors": alumnosFallidos}
         return Response(content)
     else:
         return Response("")
