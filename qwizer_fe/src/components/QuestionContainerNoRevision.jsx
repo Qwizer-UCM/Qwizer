@@ -22,8 +22,7 @@ const CuestionarioPassword = ({ unlockTest, localStorageTest }) => {
     const iv = CryptoJS.enc.Hex.parse(input.iv);
 
     const result = CryptoJS.AES.decrypt(cipher, key, { iv, mode: CryptoJS.mode.CFB });
-
-    return JSON.parse(result.toString(CryptoJS.enc.Utf8)).questions;
+    return JSON.parse(result.toString(CryptoJS.enc.Utf8));
   };
 
   const startTest = () => {
@@ -112,7 +111,7 @@ const CuentaAtras = ({ startTime, endTest, duration }) => {
   return <Countdown date={Date.now() + updateTime()} renderer={renderer} />;
 };
 
-const QuestionContainerNoRevision = () => {
+const QuestionContainerNoRevision = ({role}) => {
   const navigate = useNavigate();
   const params = useParams();
   const paramsId = Number(params.id); // TODO error con ids invalidos(letras y cosas raras). TEST NOT FOUND o algo asi
@@ -139,6 +138,8 @@ const QuestionContainerNoRevision = () => {
 
   const descargado = Boolean(localStorageTest); // Si existe en localstorage true en caso contrario false
   const duration = localStorageTest?.duracion;
+  const bloqueado = descargado && role === 'student' && (new Date(localStorageTest.fecha_apertura) > Date.now() || Date.now() > new Date(localStorageTest.fecha_cierre));
+  
 
   useEffect(() => {
     if (answerList.respuestas.length !== 0) {
@@ -225,6 +226,8 @@ const QuestionContainerNoRevision = () => {
 
   if (!descargado) return null;
 
+  if (bloqueado) return <div>Bloqueado</div>
+
   if (!isAllowed) return <CuestionarioPassword localStorageTest={localStorageTest} unlockTest={unlockTest} />;
 
   if (questionList.length !== 0 && answerList.initTime) {
@@ -233,7 +236,7 @@ const QuestionContainerNoRevision = () => {
       <div className="index-body container-fluid" id="questions">
         <div className="p-4 row-1">
           <div className="col card">
-            <h1 className="text-center">{localStorageTest?.title || ''}</h1>
+            <h1 className="text-center">{localStorageTest?.titulo || ''}</h1>
             <CuentaAtras startTime={answerList.initTime} duration={duration} endTest={endTest} />
           </div>
         </div>
@@ -246,16 +249,16 @@ const QuestionContainerNoRevision = () => {
                   <h2 className="p-2 m-2">
                     {' '}
                     {indPregunta + 1}
-                    {`.-${pregunta.question}`}
+                    {`.-${pregunta.pregunta}`}
                   </h2>
-                  {pregunta.type === 'test' ? (
+                  {pregunta.tipoPregunta === 'test' ? (
                     <TestQuestion
                       respuesta={answerList?.respuestas?.[pregunta.id].answr}
                       key={pregunta.id}
                       mode="test"
                       id={pregunta.id}
-                      type={pregunta.type}
-                      options={pregunta.options}
+                      type={pregunta.tipoPregunta}
+                      options={pregunta.opciones_test}
                       addAnswerd={addAnswer}
                     />
                   ) : (
@@ -264,7 +267,7 @@ const QuestionContainerNoRevision = () => {
                       key={pregunta.id}
                       mode="test"
                       id={pregunta.id}
-                      type={pregunta.type}
+                      type={pregunta.tipoPregunta}
                       addAnswerd={addAnswer}
                     />
                   )}
@@ -274,7 +277,7 @@ const QuestionContainerNoRevision = () => {
           </div>
 
           <div className="p-2 col-md-3 col-sm-12 order-first order-md-last" id="question-nav">
-            <QuestionNav navigationHandler={setindPregunta} listaPreguntas={questionList} />
+            <QuestionNav navigationHandler={setindPregunta} listaPreguntas={questionList} selectedIdx={indPregunta}/>
           </div>
         </div>
 

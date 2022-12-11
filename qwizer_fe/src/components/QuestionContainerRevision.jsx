@@ -51,7 +51,7 @@ const QuestionContainerRevision = () => {
           </div>
 
           <div className="p-2 col-md-3 col-sm-12 order-first order-md-last" id="question-nav">
-            <QuestionNav navigationHandler={setindPregunta} listaPreguntas={testCorregido.questions} />
+            <QuestionNav navigationHandler={setindPregunta} listaPreguntas={testCorregido.questions} selectedIdx={indPregunta}/>
           </div>
         </div>
         <div className="p-4 row">

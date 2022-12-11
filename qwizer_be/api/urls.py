@@ -1,14 +1,15 @@
 from django.urls import path
-from rest_framework import routers
 from djoser.views import UserViewSet, TokenCreateView, TokenDestroyView
-from .viewss import TestsViewSet
-from . import views
+from rest_framework import routers
+from .views import qr, question, subject, test, user
 
-router = routers.DefaultRouter()
+router = routers.DefaultRouter(trailing_slash=False)
 
-router.register('tests',views.TestsViewSet,'tests')
-#router.register('subjects',views.SubjectsViewSet,'subjects')
-
+# TODO pendiente poner permission_classes
+router.register('qr',qr.QRViewSet,'qr')
+router.register('question',question.QuestionViewSet,'question')
+router.register('subject',subject.SubjectViewSet,'subject')
+router.register('test',test.TestsViewSet,'test')
 
 urlpatterns = router.urls
 urlpatterns += [
@@ -18,40 +19,10 @@ urlpatterns += [
     path("auth/user/me", UserViewSet.as_view({"get": "me"})),
     path("auth/token/login", TokenCreateView.as_view()),
     path("auth/token/logout", TokenDestroyView.as_view()),
-
-    # TODO No he visto que se use
-    path("register", views.registro, name="register"),
-
-    # NoSeDondeMeterloTodavia
-    path("insert-qr", views.insert_qr, name="insert-qr"),
-    path("get-hashes", views.get_hashes, name="get-hashes"),
-
-    # Questions
-    path("delete-question", views.delete_question, name="delete-question"),
-    path("update-question", views.update_question, name="update-question"),
-    path("upload-questions", views.upload_questions, name="upload-questions"),
-
-    # Subjects
-    path("asignaturas/user", views.get_subjects, name="asignaturas"),
-    path("asignaturas/<int:idAsignatura>/cuestionarios", views.get_quizzes, name="cuestionarios"),
-    path("asignaturas", views.get_all_subjects, name="get-all-subjects"), 
-    path("asignaturas/<int:idAsignatura>/preguntas",views.get_subject_questions, name="preguntas"),
-    path("asignaturas/registro", views.enroll_students, name="enroll-students"),
-    path("asignaturas/borrar", views.deleteStudentsFromSubject, name="delete-students"),
-
-    # Tests
-    path("cuestionarios/enviar", views.response, name="enviarCuestionarios"),
-    path("cuestionarios/<int:idCuestionario>/nota/<int:idAlumno>", views.testCorrected, name="test-corrected"),
-    path("cuestionarios/crear", views.create_quiz, name="create-quiz"),
-    path("cuestionarios/<int:idCuestionario>/notas", views.get_quiz_grades, name="get-quiz-grades"),
-    path("cuestionarios/<int:idCuestionario>", views.test, name="test"),
-    path("cuestionarios/<int:idCuestionario>/info", views.get_quiz_info, name="get-quiz-info"),
-    path("cuestionarios/subir", views.upload, name="upload"),
-  
     # Users
-    path("login", views.app_login, name="login"),
-    path("logout", views.app_logout, name="logout"),
-    path("estudiantes", views.get_students, name="estudiantes"),
-    path("estudiantes/<int:idAsignatura>", views.get_studentsFromAsignatura, name="estudiantesAsignatura"),
-    path("estudiantes/<int:idAsignatura>/disponibles",views.get_studentsForEnroll, name="estudiantesNoAsignatura")
+    # TODO pasar a viewset y usar el manager
+    path("estudiantes", user.get_students, name="estudiantes"),
+    path("estudiantes/<int:idAsignatura>", user.get_studentsFromAsignatura, name="estudiantesAsignatura"),
+    path("estudiantes/<int:idAsignatura>/disponibles",user.get_studentsForEnroll, name="estudiantesNoAsignatura")
+
 ]

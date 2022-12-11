@@ -1,8 +1,8 @@
-import { Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import NotFound404 from '../components/common/NotFound404';
 
-const ProtectedRoutes = ({ isAllowed, children = undefined }) => {
-  if (!isAllowed) return <NotFound404 />;
+const ProtectedRoutes = ({ isAllowed, redirectPath, children = undefined }) => {
+  if (!isAllowed) return redirectPath ? <Navigate to={redirectPath} replace /> : <NotFound404 />;
 
   return children ? (
     <>

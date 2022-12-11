@@ -22,7 +22,7 @@ const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) =>
     fecha_apertura: source?.fecha_apertura || '',
     fecha_cierre: source?.fecha_cierre || '',
   };
-  const bloqueado = new Date(fechas.fecha_apertura) > Date.now() || Date.now() > new Date(fechas.fecha_cierre);
+  const bloqueado = role === 'student' &&  (new Date(fechas.fecha_apertura) > Date.now() || Date.now() > new Date(fechas.fecha_cierre));
   const downloaded = Boolean(localStorageTest);
 
   const addTestToLocalStorage = (jsonObject) => {
@@ -46,7 +46,7 @@ const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) =>
     !isLoading && (
       <div className="card asignatura-section " name={!offline ? cuestionario : cuestionario.title} id={idCuestionario}>
         <div id={`cuestionario_${idCuestionario}`} style={{ backgroundColor: corregido && calificacion >= 5 ? '#59ac79' : corregido && '#9c2400' }} className="card-header header bg-blue-grey">
-          <h2>{!offline ? cuestionario : cuestionario.title}</h2>
+          <h2>{!offline ? cuestionario : cuestionario.titulo}</h2>
           {!offline && corregido && <h5>Calificación: {calificacion}</h5>}
         </div>
         <div className="card-body asignatura-inner-body row">
@@ -63,7 +63,7 @@ const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) =>
             )}
 
             {downloaded && !corregido && (
-              <button type="button" className="btn btn-primary me-2" onClick={() => (role === 'student' && bloqueado ? showModal() : navigate(`/test/${idCuestionario}`))}>
+              <button type="button" className="btn btn-primary me-2" onClick={() => (bloqueado ? showModal() : navigate(`/test/${idCuestionario}`))}>
                 Realizar
               </button>
             )}

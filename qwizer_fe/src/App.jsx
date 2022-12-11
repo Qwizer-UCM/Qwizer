@@ -37,7 +37,7 @@ const App = () => {
       <Routes>
         <Route
           element={
-            <ProtectedRoutes isAllowed={isLogged}>
+            <ProtectedRoutes isAllowed={isLogged} redirectPath="/login">
               <NavBar username={user.username} role={user.role} logout={logout} isOffline={!isOnline} />
             </ProtectedRoutes>
           }
@@ -45,7 +45,7 @@ const App = () => {
           <Route path="/" element={isOnline ? <IndexContainer /> : <AvailableOffline role={user.role} />} />
           <Route path="/cuestionarios/:id" element={<CuestionariosContainer role={user.role} />} />
           <Route path="/offline" element={isOnline ? <AvailableOffline role={user.role} /> : <Navigate to="/404" />} />
-          <Route path="/test/:id" element={<QuestionContainerNoRevision />} />
+          <Route path="/test/:id" element={<QuestionContainerNoRevision role={user.role}/>} />
           <Route path="/revision/:id" element={<QuestionContainerRevision />} />
           {/* FIXME importante arreglar el back devuelve las notas sin comprobar el rol */}
           <Route element={<ProtectedRoutes isAllowed={isOnline && user.role.includes('teacher')} />}>

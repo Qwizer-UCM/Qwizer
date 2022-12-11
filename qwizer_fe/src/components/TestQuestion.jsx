@@ -24,7 +24,7 @@ const TestQuestion = ({ respuesta, mode, id, type, options, infoPreg=null, addAn
               <td>
                 <input type="radio" id={option.id} name={`opciones${preguntaId}`} value={option.id} onChange={handle} checked={opcionSelec === option.id} />
                 <label htmlFor={option.id}>
-                  {indx + 1}.- {option.op}
+                  {indx + 1}.- {option.opcion}
                 </label>
               </td>
             </tr>

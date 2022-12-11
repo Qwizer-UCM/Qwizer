@@ -22,7 +22,7 @@ class EncryptedTestsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cuestionarios
         fields = "__all__"
-
+    # TODO representacion no cuadra con front, DTO en React?
     # TODO Salen un poco desordenadas las keys, (por orden de inserción)
     def to_representation(self, instance):
         res = super().to_representation(instance)

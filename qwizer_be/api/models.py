@@ -1,115 +1,71 @@
 from django.db import models
-from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager, PermissionsMixin)
+from django.db.models.signals import post_save
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
-from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
-# Create your models here.
 
-# CREACION DE UN MODELO DE USUARIO PERSONALIZADO >>>>>>>>>>>>>>>>>>>>>>
-# TODO POR QUE SE USA UN EMAIL COMO ID SI NI SE MANDAN CORREOS, HAY ALGUN PROBLEMA CON UN NOMBRE DE USUARIO???
-class UserManager(BaseUserManager):
-    def create_user(
-            self, email, first_name, last_name, password=None,
-            commit=True,**extra_fields):
-        """
-            Creates  and saves a User with the given email, first name, last name
-            and password.
-        """
-
-        if not email:
-            raise ValueError(_('Users must have an email address'))
-        if not first_name:
-            raise ValueError(_('Users must have a first name'))
-        if not last_name:
-            raise ValueError(_('Users must have a last name'))
-        if extra_fields.get('role') not in ['student','teacher']:
-            raise ValueError(_('Users must have student or teacher role'))
-
-        user = self.model(
-            email=self.normalize_email(email),
-            first_name=first_name,
-            last_name=last_name,
-            **extra_fields
-        )
-
-        user.set_password(password)
-        if commit:
-            user.save(using=self._db)
-        return user
-
-    def create_superuser(self, email, first_name, last_name, password,**extra_fields):
-        """
-            Creates and saves a superuser with the given email, first name,
-            last name and password.
-        """
-        extra_fields.setdefault('role','teacher') # TODO tenian puesto admin pero solo se permite teacher o student
-        user = self.create_user(
-            email,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
-            commit=False,
-            **extra_fields
-        )
-        user.is_staff = True
-        user.is_superuser = True
-        user.save(using=self._db)
-        return user
+from api.manager import (
+    AsignaturasManager,
+    CuestionariosManager,
+    EnvioOfflineManager,
+    EsAlumnoManager,
+    ImparteManager,
+    NotasManager,
+    OpcionesTestManager,
+    PerteneceACuestionarioManager,
+    PreguntasManager,
+    RespuestasEnviadasManager,
+    RespuestasEnviadasTestManager,
+    RespuestasEnviadasTextManager,
+    RespuestasTestManager,
+    RespuestasTextoManager,
+    UserManager,
+)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(
-        verbose_name=_('email address'), max_length=255, unique=True
-    )
+    objects = UserManager()
+    email = models.EmailField(verbose_name=_("email address"), max_length=255, unique=True)
     # password field supplied by AbstractBaseUser
     # last_login field supplied by AbstractBaseUser
-    first_name = models.CharField(_('first name'), max_length=30, blank=True)
-    last_name = models.CharField(_('last name'), max_length=150, blank=True)
+    first_name = models.CharField(_("first name"), max_length=30, blank=True)
+    last_name = models.CharField(_("last name"), max_length=150, blank=True)
 
-    #Añadir campo rol del usuario
-    userRole = models.TextChoices('userRole','student teacher admin')
-    role = models.CharField(_('role'),choices=userRole.choices,max_length=7, blank=False)
+    # Añadir campo rol del usuario
+    userRole = models.TextChoices("userRole", "student teacher admin")
+    role = models.CharField(_("role"), choices=userRole.choices, max_length=7, blank=False)
 
     is_active = models.BooleanField(
-        _('active'),
+        _("active"),
         default=True,
-        help_text=_(
-            'Designates whether this user should be treated as active. '
-            'Unselect this instead of deleting accounts.'
-        ),
+        help_text=_("Designates whether this user should be treated as active. " "Unselect this instead of deleting accounts."),
     )
     is_staff = models.BooleanField(
-        _('staff status'),
+        _("staff status"),
         default=False,
-        help_text=_(
-            'Designates whether the user can log into this admin site.'
-        ),
+        help_text=_("Designates whether the user can log into this admin site."),
     )
     # is_superuser field provided by PermissionsMixin
     # groups field provided by PermissionsMixin
     # user_permissions field provided by PermissionsMixin
 
-    date_joined = models.DateTimeField(
-        _('date joined'), default=timezone.now
-    )
+    date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
 
-    objects = UserManager()
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name','role']
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["first_name", "last_name", "role"]
 
     def get_full_name(self):
         """
-            Return the first_name plus the last_name, with a space in between.
+        Return the first_name plus the last_name, with a space in between.
         """
-        full_name = '%s %s' % (self.first_name, self.last_name)
+        full_name = "%s %s" % (self.first_name, self.last_name)
         return full_name.strip()
 
     def __str__(self):
-        return '{} <{}>'.format(self.get_full_name(), self.email)
+        return "{} <{}>".format(self.get_full_name(), self.email)
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"
@@ -120,191 +76,217 @@ class User(AbstractBaseUser, PermissionsMixin):
         "Does the user have permissions to view the app `app_label`?"
         # Simplest possible answer: Yes, always
         return True
-# -------------------------------------------------- >>>>>>>>>>>>>>>>>>>>>>
 
-@receiver(post_save,sender=settings.AUTH_USER_MODEL)
-def create_auth_token(sender, instance=None,created=False, **kwargs):
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
 
-#----------------------         ----------------------------       ------------------------#  
 class OpcionesTest(models.Model):
-    idPregunta = models.ForeignKey('Preguntas',related_name="opciones_test",on_delete=models.CASCADE)
-    opcion = models.CharField(blank=True, max_length=254, verbose_name='opcion')
+    objects = OpcionesTestManager()
+    idPregunta = models.ForeignKey("Preguntas", related_name="opciones_test", on_delete=models.CASCADE)
+    opcion = models.CharField(blank=True, max_length=254, verbose_name="opcion")
+
+    # TODO no estoy seguro de que sea lo ideal pero nos permite refactorizar con facilidad
+    # https://docs.djangoproject.com/en/4.1/ref/models/instances/
 
     def __str__(self):
         return self.opcion
-    
+
     class Meta:
         db_table = "opciones_test"
-        #unique_together = ['opcion', 'idPregunta']
+
 
 class Preguntas(models.Model):
-    tipoPregunta = models.CharField(blank=True, max_length=100, verbose_name='tipoPregunta')
-    pregunta = models.CharField(blank=True, max_length=254, verbose_name='pregunta')
-    idAsignatura = models.ForeignKey('Asignaturas', on_delete=models.CASCADE)
-    titulo = models.CharField(blank=True, max_length=254, verbose_name='titulo')
+    objects = PreguntasManager()
+    tipoPregunta = models.CharField(blank=True, max_length=100, verbose_name="tipoPregunta")
+    pregunta = models.CharField(blank=True, max_length=254, verbose_name="pregunta")
+    idAsignatura = models.ForeignKey("Asignaturas", on_delete=models.CASCADE)
+    titulo = models.CharField(blank=True, max_length=254, verbose_name="titulo")
 
     def __str__(self):
         return self.pregunta
 
     class Meta:
-        ordering = ['pregunta']
+        ordering = ["pregunta"]
         db_table = "preguntas"
-        unique_together = ['pregunta', 'tipoPregunta', 'idAsignatura']                  #No pueden haber preguntas iguales para una asignatura
+        unique_together = [
+            "pregunta",
+            "tipoPregunta",
+            "idAsignatura",
+        ]  # No pueden haber preguntas iguales para una asignatura
+
 
 class Cuestionarios(models.Model):
-    titulo = models.CharField(blank=True, max_length=100, verbose_name='titulo')
+    objects = CuestionariosManager()
+    titulo = models.CharField(blank=True, max_length=100, verbose_name="titulo")
     idProfesor = models.ForeignKey(User, on_delete=models.CASCADE)
-    idAsignatura = models.ForeignKey('Asignaturas', on_delete=models.CASCADE)
-    duracion = models.IntegerField(default=10, verbose_name='duracion')
-    #0 no es secuencial, 1 es secuencial
-    secuencial =  models.IntegerField(default=1, verbose_name='secuencial')
-    password = models.CharField(blank=True, max_length=300, verbose_name='password')
-    fecha_apertura = models.DateTimeField(blank=False, verbose_name='fecha_apertura')
-    fecha_cierre = models.DateTimeField(blank=False,  verbose_name='fecha_cierre')
-    preguntas = models.ManyToManyField(Preguntas, through='PerteneceACuestionario')
+    idAsignatura = models.ForeignKey("Asignaturas", on_delete=models.CASCADE)
+    duracion = models.IntegerField(default=10, verbose_name="duracion")
+    secuencial = models.IntegerField(default=1, verbose_name="secuencial")  # 0 no es secuencial, 1 es secuencial
+    password = models.CharField(blank=True, max_length=300, verbose_name="password")
+    fecha_apertura = models.DateTimeField(blank=False, verbose_name="fecha_apertura")
+    fecha_cierre = models.DateTimeField(blank=False, verbose_name="fecha_cierre")
+    preguntas = models.ManyToManyField(Preguntas, through="PerteneceACuestionario")
 
     def __str__(self):
         return self.titulo
 
     class Meta:
-        ordering = ['titulo']
+        ordering = ["titulo"]
         db_table = "cuestionarios"
-        unique_together = ('idAsignatura', 'titulo')                   #No puede haber dos cuestionarios con el mismo nombre para una asignatura
+        unique_together = (
+            "idAsignatura",
+            "titulo",
+        )  # No puede haber dos cuestionarios con el mismo nombre para una asignatura
+
 
 class PerteneceACuestionario(models.Model):
-    idPregunta = models.ForeignKey('Preguntas', related_name="preguntas",on_delete=models.CASCADE)
-    idCuestionario = models.ForeignKey('Cuestionarios', on_delete=models.CASCADE)
-    nQuestion = models.IntegerField(verbose_name='nPregunta')
-    puntosAcierto = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name='puntosAcierto')
-    #puntosAcierto = models.IntegerField(default= 0, verbose_name='puntos_acierto')
-    #puntosFallo = models.IntegerField(default=0, verbose_name='puntosFallo')
-    puntosFallo = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name='puntosFallo')
+    objects = PerteneceACuestionarioManager()
+    idPregunta = models.ForeignKey("Preguntas", related_name="preguntas", on_delete=models.CASCADE)
+    idCuestionario = models.ForeignKey("Cuestionarios", on_delete=models.CASCADE)
+    nQuestion = models.IntegerField(verbose_name="nPregunta")
+    puntosAcierto = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name="puntosAcierto")
+    puntosFallo = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name="puntosFallo")
 
     def __str__(self):
         return str(self.idPregunta) + "/" + str(self.idCuestionario)
 
     class Meta:
-        ordering = ['idPregunta']
+        ordering = ["idPregunta"]
         db_table = "pertenece_cuestionario"
 
+
 class RespuestasTexto(models.Model):
-    idPregunta = models.ForeignKey('Preguntas', on_delete=models.CASCADE)
-    respuesta = models.CharField(blank=True, max_length=254, verbose_name='respuesta')
+    objects = RespuestasTextoManager()
+    idPregunta = models.ForeignKey("Preguntas", on_delete=models.CASCADE)
+    respuesta = models.CharField(blank=True, max_length=254, verbose_name="respuesta")
 
     def __str__(self):
         return self.respuesta
 
     class Meta:
-        ordering = ['respuesta']
+        ordering = ["respuesta"]
         db_table = "respuestas_texto"
 
+
 class RespuestasTest(models.Model):
-    idPregunta = models.ForeignKey('Preguntas', on_delete=models.CASCADE)
-    idOpcion = models.ForeignKey('OpcionesTest', on_delete=models.CASCADE)
+    objects = RespuestasTestManager()
+    idPregunta = models.ForeignKey("Preguntas", on_delete=models.CASCADE)
+    idOpcion = models.ForeignKey("OpcionesTest", on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.idPregunta) + "/" +  str(self.idOpcion) 
+        return str(self.idPregunta) + "/" + str(self.idOpcion)
 
     class Meta:
         db_table = "respuestas_test"
-        unique_together = ['idPregunta', 'idOpcion']
+        unique_together = ["idPregunta", "idOpcion"]
 
 
 class Asignaturas(models.Model):
-    asignatura = models.CharField(blank=True, max_length=254, verbose_name='asignatura')
-    
+    objects = AsignaturasManager()
+    asignatura = models.CharField(blank=True, max_length=254, verbose_name="asignatura")
+
     def __str__(self):
         return self.asignatura
 
     class Meta:
-        ordering = ['asignatura']
+        ordering = ["asignatura"]
         db_table = "asignaturas"
 
+
 class Imparte(models.Model):
+    objects = ImparteManager()
     idProfesor = models.ForeignKey(User, on_delete=models.CASCADE)
-    idAsignatura = models.ForeignKey('Asignaturas', on_delete=models.CASCADE)
+    idAsignatura = models.ForeignKey("Asignaturas", on_delete=models.CASCADE)
 
     class Meta:
         db_table = "imparte"
-        unique_together = ['idProfesor', 'idAsignatura']
-    
+        unique_together = ["idProfesor", "idAsignatura"]
+
+
 class EsAlumno(models.Model):
+    objects = EsAlumnoManager()
     idAlumno = models.ForeignKey(User, on_delete=models.CASCADE)
-    idAsignatura = models.ForeignKey('Asignaturas', on_delete=models.CASCADE)
+    idAsignatura = models.ForeignKey("Asignaturas", on_delete=models.CASCADE)
 
     class Meta:
         db_table = "es_alumno"
-        unique_together = ['idAlumno', 'idAsignatura']
+        unique_together = ["idAlumno", "idAsignatura"]
 
 
 class Notas(models.Model):
+    objects = NotasManager()
     idAlumno = models.ForeignKey(User, on_delete=models.CASCADE)
-    idCuestionario = models.ForeignKey('Cuestionarios', on_delete=models.CASCADE)
-    nota = models.DecimalField(default=0, max_digits=10, decimal_places=2, verbose_name='nota')
-    hash = models.CharField(blank=True, max_length=254, verbose_name='hash')
+    idCuestionario = models.ForeignKey("Cuestionarios", on_delete=models.CASCADE)
+    nota = models.DecimalField(default=0, max_digits=10, decimal_places=2, verbose_name="nota")
+    hash = models.CharField(blank=True, max_length=254, verbose_name="hash")
 
     class Meta:
         db_table = "notas"
-        unique_together = ('idCuestionario', 'idAlumno') 
+        unique_together = ("idCuestionario", "idAlumno")
+
 
 class EnvioOffline(models.Model):
+    objects = EnvioOfflineManager()
     idAlumno = models.ForeignKey(User, on_delete=models.CASCADE)
-    idCuestionario = models.ForeignKey('Cuestionarios', on_delete=models.CASCADE)
-    hash = models.CharField(blank=True, max_length=254, verbose_name='hash')
+    idCuestionario = models.ForeignKey("Cuestionarios", on_delete=models.CASCADE)
+    hash = models.CharField(blank=True, max_length=254, verbose_name="hash")
 
     class Meta:
         db_table = "Envio_offline"
-        unique_together = ('idCuestionario', 'idAlumno') 
+        unique_together = ("idCuestionario", "idAlumno")
 
-#TODO existen modelos abstractos revisar docs
+
+# TODO existen modelos abstractos revisar docs
 # https://docs.djangoproject.com/en/dev/topics/db/models/#multi-table-inheritance
 # Y este paquete parece que facilita las cosas
 # https://django-polymorphic.readthedocs.io/en/latest/
 # Aún haciendolo asi no lo veo muy claro para luego en las vistas no hacer distincion entre las instancias
 
+
 class RespuestasEnviadas(models.Model):
+    objects = RespuestasEnviadasManager()
+    # TODO Cambiar atributos, no son id's son referencias a la propia tabla
+    idCuestionario = models.ForeignKey("Cuestionarios", on_delete=models.CASCADE)
+    idAlumno = models.ForeignKey(User, on_delete=models.CASCADE)  # TODO puede ser profesor tambien, vaya nombres :/
+    idPregunta = models.ForeignKey("Preguntas", on_delete=models.CASCADE)
+
     class Meta:
         abstract = True
-        ordering = ['idPregunta']
-    #TODO Cambiar atributos, no son id's son referencias a la propia tabla
-    idCuestionario = models.ForeignKey('Cuestionarios', on_delete=models.CASCADE)
-    idAlumno = models.ForeignKey(User, on_delete=models.CASCADE) #TODO puede ser profesor tambien, vaya nombres :/     
-    idPregunta = models.ForeignKey('Preguntas', on_delete=models.CASCADE)     
-    
+        ordering = ["idPregunta"]
+
     @classmethod
-    def calcular_nota(cls,respuesta,id_cuestionario):
-        #TODO alguna manera mejor de calcular nota?
-        pregunta_info = PerteneceACuestionario.objects.get(
-            idPregunta_id=respuesta["id"], idCuestionario_id=id_cuestionario
-        )
-        opcion_usuario,opcion_correcta = None, None
+    def calcular_nota(cls, respuesta, id_cuestionario):
+        # TODO alguna manera mejor de calcular nota?
+        pregunta_info = PerteneceACuestionario.objects.get_by_pregunta_cuestionario(id_pregunta=respuesta["id"], id_cuestionario=id_cuestionario)
+        opcion_usuario, opcion_correcta = None, None
 
         if respuesta["type"] == "test":
             opcion_usuario = int(respuesta["answr"])
-            opcion_correcta = RespuestasTest.objects.get(
-                idPregunta=respuesta["id"]
-            ).idOpcion.id
+            opcion_correcta = RespuestasTest.objects.get_by_pregunta(id_pregunta=respuesta["id"]).idOpcion.id
         elif respuesta["type"] == "text":
             opcion_usuario = respuesta["answr"].lower().replace(" ", "")
-            opcion_correcta = RespuestasTexto.objects.get(
-                idPregunta=respuesta["id"]
-            ).respuesta.lower().replace(" ", "")
+            opcion_correcta = RespuestasTexto.objects.get_by_pregunta(id_pregunta=respuesta["id"]).respuesta.lower().replace(" ", "")
 
         if opcion_usuario == opcion_correcta:
             return pregunta_info.puntosAcierto
         else:
             return pregunta_info.puntosFallo
 
-class RespuestasEnviadasTest(RespuestasEnviadas):               #No debería ser on delete cascade
-    idRespuesta = models.ForeignKey('OpcionesTest', on_delete=models.CASCADE)
+
+class RespuestasEnviadasTest(RespuestasEnviadas):  # No debería ser on delete cascade
+    objects = RespuestasEnviadasTestManager()
+    idRespuesta = models.ForeignKey("OpcionesTest", on_delete=models.CASCADE)
 
     class Meta:
         db_table = "respuestas_enviadas_test"
 
+
 class RespuestasEnviadasText(RespuestasEnviadas):
-    Respuesta = models.CharField(blank=True, max_length=254, verbose_name='respuesta')
+    objects = RespuestasEnviadasTextManager()
+    Respuesta = models.CharField(blank=True, max_length=254, verbose_name="respuesta")
 
     class Meta:
         db_table = "respuestas_enviadas_text"
