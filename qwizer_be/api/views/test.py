@@ -5,14 +5,14 @@ from datetime import datetime
 
 import yaml
 from api.models import (
-    Asignaturas,
-    Cuestionarios,
-    Notas,
-    OpcionesTest,
-    PerteneceACuestionario,
-    Preguntas,
-    RespuestasEnviadasTest,
-    RespuestasEnviadasText,
+    Asignatura,
+    Cuestionario,
+    Intento,
+    OpcionTest,
+    PreguntaCuestionario,
+    Pregunta,
+    RespuestaEnviadaTest,
+    RespuestaEnviadaText,
     RespuestasTest,
     RespuestasTexto,
     User,
@@ -28,15 +28,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from ..models import (
-    Asignaturas,
-    Cuestionarios,
-    Notas,
-    OpcionesTest,
-    PerteneceACuestionario,
-    Preguntas,
-    RespuestasEnviadas,
-    RespuestasEnviadasTest,
-    RespuestasEnviadasText,
+    Asignatura,
+    Cuestionario,
+    Intento,
+    OpcionTest,
+    PreguntaCuestionario,
+    Pregunta,
+    RespuestaEnviada,
+    RespuestaEnviadaTest,
+    RespuestaEnviadaText,
     RespuestasTest,
     RespuestasTexto,
     User,
@@ -45,7 +45,7 @@ from ..serializer import EncryptedTestsSerializer
 
 # TODO No se han indicado permisos todavia
 class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
-    queryset = Cuestionarios.objects.all()
+    queryset = Cuestionario.objects.all()
     serializer_class = EncryptedTestsSerializer
     permission_classes = []
 
@@ -76,12 +76,12 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         lista_preguntas = cuestionario_data["questionList"]
 
         try:
-            asignatura = Asignaturas.objects.get_by_id(id_asignatura=id_asignatura)
+            asignatura = Asignatura.objects.get_by_id(id_asignatura=id_asignatura)
         except:
             content = {"inserted": "false", "message": "Error: La asignatura no existe!"}
             return Response(content)
 
-        cuestionario = Cuestionarios.objects.create_cuestionarios(
+        cuestionario = Cuestionario.objects.create_cuestionarios(
             titulo=title,
             secuencial=sec,
             idAsignatura=asignatura,
@@ -101,12 +101,12 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         i = 0
         for preguntas in lista_preguntas:
    
-            pertenece = PerteneceACuestionario.objects.create_pertenece_a_cuestionario(
+            pertenece = PreguntaCuestionario.objects.create_pertenece_a_cuestionario(
                 nQuestion=i,
                 puntosAcierto=preguntas["punt_positiva"],
                 puntosFallo=preguntas["punt_negativa"],
                 idCuestionario=cuestionario,
-                idPregunta=Preguntas.objects.get_by_id(id_pregunta=preguntas["id"]),
+                idPregunta=Pregunta.objects.get_by_id(id_pregunta=preguntas["id"]),
             )
             pertenece.save()
 
@@ -126,17 +126,17 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         """
         respuestas = request.data["respuestas"]
         id_cuestionario = pk
-        cuestionario = Cuestionarios.objects.get_by_id(id_cuestionario=id_cuestionario)
+        cuestionario = Cuestionario.objects.get_by_id(id_cuestionario=id_cuestionario)
         alumno = request.user
 
         nota = 0
         for key,respuesta in respuestas.items():
             print(respuesta)
-            pregunta = Preguntas.objects.get_by_id(id_pregunta=respuesta["id"])
+            pregunta = Pregunta.objects.get_by_id(id_pregunta=respuesta["id"])
 
             if respuesta["type"] == "test" and str(respuesta["answr"]).isdigit():
-                opcion = OpcionesTest.objects.get_by_id(id_opciones=respuesta["answr"])
-                respuesta_enviada = RespuestasEnviadasTest.objects.create_respuesta(
+                opcion = OpcionTest.objects.get_by_id(id_opciones=respuesta["answr"])
+                respuesta_enviada = RespuestaEnviadaTest.objects.create_respuesta(
                     idCuestionario=cuestionario,
                     idAlumno=alumno,
                     idPregunta=pregunta,
@@ -144,7 +144,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 )
                 respuesta_enviada.save()
             if respuesta["type"] == "text":
-                respuesta_enviada = RespuestasEnviadasText.objects.create_respuesta(
+                respuesta_enviada = RespuestaEnviadaText.objects.create_respuesta(
                     idCuestionario=cuestionario,
                     idAlumno=alumno,
                     idPregunta=pregunta,
@@ -152,9 +152,9 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 )
                 respuesta_enviada.save()
 
-            nota = nota + RespuestasEnviadas.calcular_nota(respuesta,id_cuestionario)
+            nota = nota + RespuestaEnviada.calcular_nota(respuesta,id_cuestionario)
 
-        nota_alumno = Notas.objects.create_notas(
+        nota_alumno = Intento.objects.create_notas(
             idAlumno=request.user,
             idCuestionario=cuestionario,
             nota=nota,
@@ -179,9 +179,9 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         else:
             alumno = User.objects.get_by_id(id_usuario=id_alumno)
 
-        cuestionario = Cuestionarios.objects.get_by_id(id_cuestionario=pk)
-        pertenecen = PerteneceACuestionario.objects.get_by_cuestionario(id_cuestionario=cuestionario.id)
-        nota_obj = Notas.objects.get_by_cuestionario_alumno(id_cuestionario=pk, id_alumno=id_alumno)
+        cuestionario = Cuestionario.objects.get_by_id(id_cuestionario=pk)
+        pertenecen = PreguntaCuestionario.objects.get_by_cuestionario(id_cuestionario=cuestionario.id)
+        nota_obj = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=pk, id_alumno=id_alumno)
 
         questions = []
         for pertenece in pertenecen:
@@ -192,18 +192,18 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             pregunta_json["type"] = pregunta.tipoPregunta
             if pregunta.tipoPregunta == "test":
                 opciones_lista = []
-                opciones = OpcionesTest.objects.get_by_pregunta(id_pregunta=pregunta.id)
+                opciones = OpcionTest.objects.get_by_pregunta(id_pregunta=pregunta.id)
                 for opcion in opciones:
                     opciones_lista.append({"id": opcion.id, "op": opcion.opcion})
                 pregunta_json["options"] = opciones_lista
                 pregunta_json["correct_op"] = RespuestasTest.objects.get_by_pregunta(id_pregunta=pregunta.id).idOpcion.id
                 # TODO esto es un apaño para qe funcione hay que reescribirlo todo
-                pregunta_json["user_op"] = RespuestasEnviadasTest.objects.get_by_cuestionario_alumno_pregunta(id_cuestionario=pk,id_alumno=id_alumno,id_pregunta=pregunta.id)
+                pregunta_json["user_op"] = RespuestaEnviadaTest.objects.get_by_cuestionario_alumno_pregunta(id_cuestionario=pk,id_alumno=id_alumno,id_pregunta=pregunta.id)
                 if pregunta_json["user_op"] is not None:
                     pregunta_json["user_op"] = pregunta_json["user_op"].idRespuesta.id
             if pregunta.tipoPregunta == "text":
                 pregunta_json["correct_op"] = RespuestasTexto.objects.get_by_pregunta(id_pregunta=pregunta.id).respuesta
-                pregunta_json["user_op"] = RespuestasEnviadasText.objects.get_by_cuestionario_alumno_pregunta(id_cuestionario=pk,id_alumno=id_alumno,id_pregunta=pregunta.id)
+                pregunta_json["user_op"] = RespuestaEnviadaText.objects.get_by_cuestionario_alumno_pregunta(id_cuestionario=pk,id_alumno=id_alumno,id_pregunta=pregunta.id)
                 if pregunta_json["user_op"] is not None:
                     pregunta_json["user_op"] = pregunta_json["user_op"].Respuesta
             questions.append(pregunta_json)
@@ -226,7 +226,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         """
         POST /get-quiz-grades -> GET /tests/{pk}/grades
         """
-        cuestionario = Cuestionarios.objects.get_by_id(id_cuestionario=pk)
+        cuestionario = Cuestionario.objects.get_by_id(id_cuestionario=pk)
 
         alumnos = User.objects.get_users_from_test(id_asignatura=cuestionario.idAsignatura.id,id_cuestionario=pk)
         notas = []
@@ -240,7 +240,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         """
         POST /get-quiz-info -> GET /tests/{pk}/info
         """
-        cuestionario = Cuestionarios.objects.get_by_id(id_cuestionario=pk)
+        cuestionario = Cuestionario.objects.get_by_id(id_cuestionario=pk)
         duracion = cuestionario.duracion
         fecha_apertura = cuestionario.fecha_apertura
         fecha_cierre = cuestionario.fecha_cierre
@@ -250,7 +250,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             # -----
             # Corregir Un alumno solo puede tener una nota para un cuestionario, solo puede hacer un cuestionrio una vez
             # ......
-            nota = Notas.objects.get_by_cuestionario_alumno(
+            nota = Intento.objects.get_by_cuestionario_alumno(
                 id_cuestionario=pk, id_alumno=request.user.id
             )  # <-- Salta excepcion si devuelve mas de uno
             corregido = 1
@@ -302,7 +302,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         sec = yamlplscomeon["cuestionario"]["secuencial"]
         durat = yamlplscomeon["cuestionario"]["duracion"]
         try:
-            asignatura = Asignaturas.objects.get_by_asignatura(nombre_asignatura=nombre_asig)
+            asignatura = Asignatura.objects.get_by_asignatura(nombre_asignatura=nombre_asig)
         except:
             content = {
                 "inserted": "false",
@@ -310,7 +310,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             }
             return Response(content)
 
-        cuestionario = Cuestionarios.objects.create_cuestionarios(
+        cuestionario = Cuestionario.objects.create_cuestionarios(
             titulo=title,
             secuencial=sec,
             idAsignatura=asignatura,
@@ -336,7 +336,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             print(q["tipo"])
 
             try:
-                pregunta = Preguntas.objects.create_preguntas(
+                pregunta = Pregunta.objects.create_preguntas(
                     tipoPregunta=q["tipo"],
                     pregunta=q["pregunta"],
                     idAsignatura=asignatura,
@@ -344,13 +344,13 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 )
                 pregunta.save()
             except:
-                pregunta = Preguntas.objects.get_by_asignatura_pregunta_tipo_titulo(
+                pregunta = Pregunta.objects.get_by_asignatura_pregunta_tipo_titulo(
                     tipo=q["tipo"],
                     pregunta=q["pregunta"],
                     id_asignatura=asignatura.id,
                     titulo=q["titulo"],
                 )
-                pertenece = PerteneceACuestionario.objects.create_pertenece_a_cuestionario(
+                pertenece = PreguntaCuestionario.objects.create_pertenece_a_cuestionario(
                     nQuestion=i,
                     puntosAcierto=q["punt_positiva"],
                     puntosFallo=q["punt_negativa"],
@@ -360,7 +360,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 pertenece.save()
                 continue
 
-            pertenece = PerteneceACuestionario.objects.create_pertenece_a_cuestionario(
+            pertenece = PreguntaCuestionario.objects.create_pertenece_a_cuestionario(
                 nQuestion=i,
                 puntosAcierto=q["punt_positiva"],
                 puntosFallo=q["punt_negativa"],
@@ -369,7 +369,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             )
             pertenece.save()
 
-            pregunta = Preguntas.objects.get_by_asignatura_pregunta_tipo_titulo(
+            pregunta = Pregunta.objects.get_by_asignatura_pregunta_tipo_titulo(
                 tipo=q["tipo"],
                 pregunta=q["pregunta"],
                 id_asignatura=asignatura.id,
@@ -380,7 +380,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 j = 0
                 opciones = q["opciones"]
                 for o in opciones:
-                    opcion = OpcionesTest.objects.create_opciones_test(opcion=o, idPregunta=pregunta)
+                    opcion = OpcionTest.objects.create_opciones_test(opcion=o, idPregunta=pregunta)
                     try:
                         opcion.save()
                         if j == q["op_correcta"]:

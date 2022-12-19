@@ -1,26 +1,26 @@
 from rest_framework import serializers
 from .utils.cifrado import encrypt_tests
-from .models import Cuestionarios, OpcionesTest, Preguntas, RespuestasEnviadasTest, RespuestasEnviadasText
+from .models import Cuestionario, OpcionTest, Pregunta, RespuestaEnviadaTest, RespuestaEnviadaText
 
 #TODO mejor indicar los campos concretos en vez de __all__
 
 class OpcionesTestSerializer(serializers.ModelSerializer):
     class Meta:
-        model = OpcionesTest
+        model = OpcionTest
         exclude = ["idPregunta"]
 
 class PreguntasSerializer(serializers.ModelSerializer):
     opciones_test = OpcionesTestSerializer(many=True)
 
     class Meta:
-        model = Preguntas
+        model = Pregunta
         fields = "__all__"  
 
 class EncryptedTestsSerializer(serializers.ModelSerializer):
     preguntas = PreguntasSerializer(many=True)
 
     class Meta:
-        model = Cuestionarios
+        model = Cuestionario
         fields = "__all__"
     # TODO representacion no cuadra con front, DTO en React?
     # TODO Salen un poco desordenadas las keys, (por orden de inserción)
@@ -43,11 +43,11 @@ class EncryptedTestsSerializer(serializers.ModelSerializer):
 
 class RespuestasEnviadasTestSerializer(serializers.ModelSerializer):
     class Meta:
-        model = RespuestasEnviadasTest
+        model = RespuestaEnviadaTest
         fields = "__all__"
 class RespuestasEnviadasTextSerializer(serializers.ModelSerializer):
     class Meta:
-        model = RespuestasEnviadasText
+        model = RespuestaEnviadaText
         fields = "__all__"
 
 class RespuestasSerializer(serializers.Serializer):

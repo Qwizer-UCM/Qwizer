@@ -1,5 +1,5 @@
 import yaml
-from api.models import Asignaturas, OpcionesTest, Preguntas, RespuestasTest, RespuestasTexto
+from api.models import Asignatura, OpcionTest, Pregunta, RespuestasTest, RespuestasTexto
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -29,7 +29,7 @@ class QuestionViewSet(viewsets.ViewSet):
         nombre_asig = request.data["idAsignatura"]
 
         try:
-            asignatura = Asignaturas.objects.get_by_id(id_asignatura=nombre_asig)
+            asignatura = Asignatura.objects.get_by_id(id_asignatura=nombre_asig)
         except:
             content = {"inserted": "false", "message": f"Error: La asignatura {nombre_asig} no existe!"}
             return Response(content)
@@ -38,7 +38,7 @@ class QuestionViewSet(viewsets.ViewSet):
 
         for preg in preguntas:
             try:
-                pregunta = Preguntas.objects.create_preguntas(
+                pregunta = Pregunta.objects.create_preguntas(
                     tipoPregunta=preg["tipo"],
                     pregunta=preg["pregunta"],
                     idAsignatura=asignatura,
@@ -46,7 +46,7 @@ class QuestionViewSet(viewsets.ViewSet):
                 )
                 pregunta.save()
             except:
-                pregunta = Preguntas.objects.get_by_asignatura_pregunta_tipo_titulo(
+                pregunta = Pregunta.objects.get_by_asignatura_pregunta_tipo_titulo(
                     tipo=preg["tipo"], pregunta=preg["pregunta"], id_asignatura=asignatura.id,titulo=preg["titulo"]
                 )
                 continue
@@ -56,7 +56,7 @@ class QuestionViewSet(viewsets.ViewSet):
                 j = 0
                 opciones = preg["opciones"]
                 for opc in opciones:
-                    opcion = OpcionesTest.objects.create_opciones_test(opcion=opc, idPregunta=pregunta)
+                    opcion = OpcionTest.objects.create_opciones_test(opcion=opc, idPregunta=pregunta)
                     try:
                         opcion.save()
                         if j == preg["op_correcta"]:
@@ -82,19 +82,19 @@ class QuestionViewSet(viewsets.ViewSet):
         print(request.data["preguntaActualizada"])
         updated_question = request.data["preguntaActualizada"]
 
-        pregunta = Preguntas.objects.get_by_id(id_pregunta=pk)
+        pregunta = Pregunta.objects.get_by_id(id_pregunta=pk)
         pregunta.titulo = updated_question["title"]
         pregunta.pregunta = updated_question["question"]
         pregunta.save()
 
         if updated_question["type"] == "test":
             for option in updated_question["options"]:
-                option_obj = OpcionesTest.objects.get_by_id(id_opciones=option["id"])
+                option_obj = OpcionTest.objects.get_by_id(id_opciones=option["id"])
                 option_obj.opcion = option["op"]
                 option_obj.save()
 
             resp_test = RespuestasTest.objects.get_by_pregunta(id_pregunta=pk)
-            resp_test.idOpcion = OpcionesTest.objects.get_by_id(id_opciones=updated_question["correct_op"])
+            resp_test.idOpcion = OpcionTest.objects.get_by_id(id_opciones=updated_question["correct_op"])
             resp_test.save()
 
         elif updated_question["type"] == "text":
@@ -112,7 +112,7 @@ class QuestionViewSet(viewsets.ViewSet):
             content = {"message": "Error: Para eliminar una pregunta debes ser un profesor."}
             return Response(content)
 
-        pregunta = Preguntas.objects.get_by_id(id_pregunta=pk)
+        pregunta = Pregunta.objects.get_by_id(id_pregunta=pk)
         pregunta.delete()
 
         content = {

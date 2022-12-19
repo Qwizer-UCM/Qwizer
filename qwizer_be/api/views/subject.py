@@ -1,11 +1,11 @@
 from api.models import (
-    Asignaturas,
-    Cuestionarios,
-    EsAlumno,
+    Asignatura,
+    Cuestionario,
+    Cursa,
     Imparte,
-    Notas,
-    OpcionesTest,
-    Preguntas,
+    Intento,
+    OpcionTest,
+    Pregunta,
     RespuestasTest,
     RespuestasTexto,
     User,
@@ -23,7 +23,7 @@ class SubjectViewSet(viewsets.ViewSet):
         lista_asignaturas = []
         # comprobar que es un profesor
         # if request.user.rol == "teacher":
-        asignaturas = Asignaturas.objects.all()  # TODO comprobrar mejora de esto
+        asignaturas = Asignatura.objects.all()  # TODO comprobrar mejora de esto
         for asignatura in asignaturas:
             lista_asignaturas.append({"id": asignatura.id, "asignatura": asignatura.asignatura})
 
@@ -32,9 +32,9 @@ class SubjectViewSet(viewsets.ViewSet):
     @action(methods=["GET"], detail=True)
     def cuestionarios(self, request, pk):
         lista_cuestionarios = []
-        asignatura = Asignaturas.objects.get_by_id(id_asignatura=pk)
+        asignatura = Asignatura.objects.get_by_id(id_asignatura=pk)
 
-        cuestionarios = Cuestionarios.objects.get_by_asignatura(id_asignatura=pk).order_by_fecha_cierre_desc()
+        cuestionarios = Cuestionario.objects.get_by_asignatura(id_asignatura=pk).order_by_fecha_cierre_desc()
         id_cuestionarios = []
         for cuestionario in cuestionarios:
             lista_cuestionarios.append(cuestionario.titulo)
@@ -53,8 +53,8 @@ class SubjectViewSet(viewsets.ViewSet):
             }
             return Response(content)
 
-        asignatura = Asignaturas.objects.get_by_id(id_asignatura=pk)
-        lista_preguntas = Preguntas.objects.get_by_asignatura(id_asignatura=pk)
+        asignatura = Asignatura.objects.get_by_id(id_asignatura=pk)
+        lista_preguntas = Pregunta.objects.get_by_asignatura(id_asignatura=pk)
         preguntas = []
         print(lista_preguntas)
         for pregunta in lista_preguntas:
@@ -65,7 +65,7 @@ class SubjectViewSet(viewsets.ViewSet):
             pregunta_json["type"] = pregunta.tipoPregunta
             if pregunta.tipoPregunta == "test":
                 opciones_lista = []
-                opciones = OpcionesTest.objects.get_by_pregunta(id_pregunta=pregunta.id)
+                opciones = OpcionTest.objects.get_by_pregunta(id_pregunta=pregunta.id)
                 for opcion in opciones:
                     opciones_json = {}
                     opciones_json["id"] = opcion.id
@@ -93,16 +93,16 @@ class SubjectViewSet(viewsets.ViewSet):
 
         if role == "student" or role == "teacher":
             if role == "student":
-                lista_id_asignaturas = EsAlumno.objects.get_by_alumno(id_alumno=identif).order_by("idAsignatura")
+                lista_id_asignaturas = Cursa.objects.get_by_alumno(id_alumno=identif).order_by("idAsignatura")
             elif role == "teacher":
                 lista_id_asignaturas = Imparte.objects.get_by_profesor(id_profesor=identif).order_by_id_asignatura()
 
             for asignatura in lista_id_asignaturas:
                 asignatura_json = {"id": asignatura.idAsignatura.id, "nombre": asignatura.idAsignatura.asignatura}
 
-                cuestionarios = Cuestionarios.objects.get_by_asignatura(id_asignatura=asignatura.idAsignatura.id)
+                cuestionarios = Cuestionario.objects.get_by_asignatura(id_asignatura=asignatura.idAsignatura.id)
                 n_cuestionarios = cuestionarios.count()
-                n_corregidos = Notas.objects.count_corregidos(cuestionarios=cuestionarios, id_alumno=identif)
+                n_corregidos = Intento.objects.count_corregidos(cuestionarios=cuestionarios, id_alumno=identif)
                 n_pendientes = n_cuestionarios - n_corregidos
                 asignatura_json["cuestionarios"] = {
                     "nCuestionarios": n_cuestionarios,
@@ -135,8 +135,8 @@ class SubjectViewSet(viewsets.ViewSet):
                 print(alumno["id"])
                 objeto_alumno = User.objects.get_by_id(id_usuario=alumno["id"])
                 print(objeto_alumno)
-                objeto_asignatura = Asignaturas.objects.get_by_id(id_asignatura=asignatura)
-                objeto_es_alumno = EsAlumno.objects.create_es_alumno(idAlumno=objeto_alumno, idAsignatura=objeto_asignatura)
+                objeto_asignatura = Asignatura.objects.get_by_id(id_asignatura=asignatura)
+                objeto_es_alumno = Cursa.objects.create_es_alumno(idAlumno=objeto_alumno, idAsignatura=objeto_asignatura)
 
                 try:
                     objeto_es_alumno.save()
@@ -161,7 +161,7 @@ class SubjectViewSet(viewsets.ViewSet):
             alumnosFallidos = []
             alumnos = request.data["alumnos"]
             for alumno in alumnos:
-                objetoEsAlumno = EsAlumno.objects.get_by_alumno_asignatura(id_alumno=alumno["id"], id_asignatura=pk)
+                objetoEsAlumno = Cursa.objects.get_by_alumno_asignatura(id_alumno=alumno["id"], id_asignatura=pk)
 
                 try:
                     objetoEsAlumno.delete()

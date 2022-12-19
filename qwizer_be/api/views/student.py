@@ -6,7 +6,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.models import EsAlumno, User
+from api.models import Cursa, User
 
 
 class StudentsViewSet(viewsets.ViewSet):
@@ -37,7 +37,7 @@ class StudentsViewSet(viewsets.ViewSet):
         content = {}
         # comporbar que es alumno
         if str(request.user.role) != "student":
-            usuarios_asignatura = EsAlumno.objects.get_by_asignatura(id_asignatura=pk)
+            usuarios_asignatura = Cursa.objects.get_by_asignatura(id_asignatura=pk)
             alumnos = []
             for alumno in usuarios_asignatura:  # TODO cambiar los atributos en los modelos no es un idAlumno es el alumno como tal
                 alumnos.append({"id": alumno.idAlumno.id, "nombre": alumno.idAlumno.first_name, "apellidos": alumno.idAlumno.last_name})

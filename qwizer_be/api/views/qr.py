@@ -1,4 +1,4 @@
-from api.models import Cuestionarios, EnvioOffline, Notas, User
+from api.models import Cuestionario, EnvioOffline, Intento, User
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from rest_framework import viewsets
 from rest_framework.decorators import action, api_view, permission_classes
@@ -16,7 +16,7 @@ class QRViewSet(viewsets.ViewSet):
                 id_usuario = request.data["idUsuario"]
                 alumno = User.objects.get_by_id(id_usuario=id_usuario)
                 id_cuestionario = request.data["idCuestionario"]
-                cuestionario = Cuestionarios.objects.get_by_id(id_cuestionario=id_cuestionario)
+                cuestionario = Cuestionario.objects.get_by_id(id_cuestionario=id_cuestionario)
                 req_hash = request.data["hash"]
                 objeto_insercion_manual = EnvioOffline.objects.create_envio_offline(idAlumno=alumno, idCuestionario=cuestionario, hash=req_hash)
             except (ObjectDoesNotExist, MultipleObjectsReturned):
@@ -55,7 +55,7 @@ class QRViewSet(viewsets.ViewSet):
         content = {}
         if request.user.role == "teacher":
             try:
-                hash1 = Notas.objects.get_by_cuestionario_alumno(id_cuestionario=id_cuestionario,id_alumno=id_usuario)
+                hash1 = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=id_cuestionario,id_alumno=id_usuario)
                 content["corrected"] = True
                 content["hashSubida"] = hash1.hash
             except:

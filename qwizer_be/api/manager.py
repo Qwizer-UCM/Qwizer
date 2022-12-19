@@ -119,7 +119,7 @@ class CuestionariosManager(models.Manager):
         return self.get_queryset().order_by_fecha_cierre_desc()
 
 
-class PerteneceACuestionarioManager(models.Manager):
+class PreguntaCuestionarioManager(models.Manager):
     def create_pertenece_a_cuestionario(self, nQuestion, puntosAcierto, puntosFallo, idCuestionario, idPregunta, commit=False,**extra_fields):
         obj = self.model(nQuestion=nQuestion, puntosAcierto=puntosAcierto, puntosFallo=puntosFallo, idCuestionario=idCuestionario, idPregunta=idPregunta, **extra_fields)
         if commit:
@@ -132,30 +132,7 @@ class PerteneceACuestionarioManager(models.Manager):
     def get_by_cuestionario(self, id_cuestionario):
         return self.get_queryset().filter(idCuestionario_id=id_cuestionario)
 
-
-class RespuestasTextoManager(models.Manager):
-    def create_respuestas_texto(self, respuesta, idPregunta, commit=False,**extra_fields):
-        obj = self.model(respuesta=respuesta, idPregunta=idPregunta, **extra_fields)
-        if commit:
-            obj.save()
-        return obj
-
-    def get_by_pregunta(self, id_pregunta):
-        return self.get_queryset().get(idPregunta_id=id_pregunta)
-
-
-class RespuestasTestManager(models.Manager):
-    def create_respuestas_test(self, idOpcion, idPregunta, commit=False,**extra_fields):
-        obj = self.model(idOpcion=idOpcion, idPregunta=idPregunta, **extra_fields)
-        if commit:
-            obj.save()
-        return obj
-
-    def get_by_pregunta(self, id_pregunta):
-        return self.get_queryset().get(idPregunta=id_pregunta)
-
-
-class AsignaturasManager(models.Manager):
+class AsignaturaManager(models.Manager):
     # TODO no se crean
     def create_asignaturas(self, commit=False,**extra_fields):
         obj = self.model(**extra_fields)
@@ -198,7 +175,7 @@ class EsAlumnoQuerySet(models.QuerySet):
         return self.order_by("idAsignatura")
 
 
-class EsAlumnoManager(models.Manager):
+class CursaManager(models.Manager):
     def get_queryset(self):
         return ImparteQuerySet(model=self.model, using=self._db)
 

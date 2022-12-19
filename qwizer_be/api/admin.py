@@ -9,7 +9,7 @@ from import_export import resources
 
 # Register your models here.
 from .models import (
-    Asignaturas,
+    Asignatura,
     Imparte,
     # Cuestionarios,
     # EsAlumno,
@@ -92,7 +92,7 @@ admin.site.register(User, UserAdmin)
 # admin.site.register(OpcionesTest)
 # admin.site.register(RespuestasTexto)
 # admin.site.register(RespuestasTest)
-admin.site.register(Asignaturas)    # TODO no hay otra manera de crear asignaturas!!!
+admin.site.register(Asignatura)    # TODO no hay otra manera de crear asignaturas!!!
 admin.site.register(Imparte)
 # admin.site.register(EsAlumno)
 # admin.site.register(Notas)
