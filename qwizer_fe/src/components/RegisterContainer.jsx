@@ -25,7 +25,7 @@ const columns = [
 ];
 
 const RegisterContainer = () => {
-  const { data: asignaturas } = useFetch(Subjects.getAll, { transform: (res) => res.asignaturas });
+  const { data: asignaturas } = useFetch(Subjects.getFromStudentOrTeacher, { transform: (res) => res.asignaturas });
 
   const [errorModal, setErrorModal] = useState({ show: false, message: '' });
   const [successModal, setSuccessModal] = useState({ show: false, message: '' });
@@ -88,7 +88,7 @@ const RegisterContainer = () => {
             </option>
             {asignaturas?.map((asignatura) => (
               <option key={asignatura.id} value={asignatura.id}>
-                {asignatura.asignatura}
+                {asignatura.nombre}
               </option>
             ))}
           </select>

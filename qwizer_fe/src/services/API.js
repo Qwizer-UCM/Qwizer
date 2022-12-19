@@ -17,7 +17,7 @@ export const Questions = {
 };
 
 export const Subjects = {
-  getAll: (_data = {}, config = {}) => client.get('subject', _data, config),  // Todas las asignaturas del centro
+  getAll: (_data = {}, config = {}) => client.get('subject', config),  // Todas las asignaturas del centro
   getTests: ({ idAsignatura }, config = {}) => client.get(`subject/${idAsignatura}/cuestionarios`, config), // Todos los cuestionarios de una asignatura
   getQuestions: ({ idAsignatura }, config = {}) => client.get(`subject/${idAsignatura}/preguntas`, config), // Todas las preguntas de una asignatura
   getFromStudentOrTeacher: (_data = {}, config = {}) => client.get('subject/me', config), // Asignaturas en la que esta matriculado el estudiante o las que imparte el profe

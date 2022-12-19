@@ -161,7 +161,7 @@ class SubjectViewSet(viewsets.ViewSet):
             alumnosFallidos = []
             alumnos = request.data["alumnos"]
             for alumno in alumnos:
-                objetoEsAlumno = EsAlumno.objects.filter(idAlumno=alumno["id"], idAsignatura=pk)
+                objetoEsAlumno = EsAlumno.objects.get_by_alumno_asignatura(id_alumno=alumno["id"], id_asignatura=pk)
 
                 try:
                     objetoEsAlumno.delete()

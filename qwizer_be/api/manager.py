@@ -51,7 +51,6 @@ class UserManager(BaseUserManager):
     def get_students(self):
         return self.get_queryset().filter(role="student")
 
-
 # TODO redefinir aqui metodos necesarios, getById, getBy...
 class OpcionesTestManager(models.Manager):
     def create_opciones_test(self, opcion, idPregunta, commit=False,**extra_fields):
@@ -211,6 +210,12 @@ class EsAlumnoManager(models.Manager):
 
     def get_by_alumno(self, id_alumno):
         return self.get_queryset().filter(idAlumno_id=id_alumno)
+
+    def get_by_asignatura(self,id_asignatura):
+        return self.get_queryset().filter(idAsignatura_id=id_asignatura)
+
+    def get_by_alumno_asignatura(self,id_alumno,id_asignatura):
+        return self.get_queryset().filter(idAlumno_id=id_alumno,idAsignatura_id=id_asignatura)
 
     def order_by_id_asignatura(self):
         return self.get_queryset().order_by_id_asignatura()
