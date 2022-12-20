@@ -3,25 +3,20 @@ import hashlib
 import json
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
+from Crypto.Util.Padding import pad, unpad
 
-
-def _pad_string(in_string):
-    """Pad an input string according to PKCS#7"""
-    in_len = len(in_string)
-    pad_size = 16 - (in_len % 16)
-    return in_string.ljust(in_len + pad_size, chr(pad_size))
-
+BLOCK_SIZE = 16
 
 def encrypt_tests(message, passw):
     # Hay que hacer que el texto se pueda enviar en bloques de 16 bytes, sino no funciona
-    message = _pad_string(json.dumps(message))
+    message = json.dumps(message).encode()
     # Proceso de generación de la key a partir del password
     key = hashlib.sha256(bytes(passw, "utf-8")).digest()
 
-    iv_random = get_random_bytes(16)
+    iv_random = get_random_bytes(BLOCK_SIZE)
 
     cipher = AES.new(key, mode=AES.MODE_CFB, iv=iv_random, segment_size=128)
-    encrypted = cipher.encrypt(message.encode())
+    encrypted = cipher.encrypt(message)
 
     return {
         "password": key.hex(),
@@ -40,16 +35,12 @@ def decrypt(message, in_iv, in_key):
     """
     key = binascii.a2b_hex(in_key)
     iv = binascii.a2b_hex(in_iv)
-    aes = AES.new(key, AES.MODE_CFB, iv, segment_size=128)
+    aes = AES.new(key, AES.MODE_CFB, iv)
 
     decrypted = aes.decrypt(binascii.a2b_base64(message).rstrip())
-    return _unpad_string(decrypted)
-
-
-def _unpad_string(in_string):
-    """Remove the PKCS#7 padding from a text string"""
-    in_len = len(in_string)
-    pad_size = ord(in_string[-1])
-    if pad_size > 16:
-        raise ValueError("Input is not padded or padding is corrupt")
-    return in_string[: in_len - pad_size]
+    decoded = "Nope"
+    try:
+        decoded = decrypted.decode()
+    except:
+        pass
+    return decoded

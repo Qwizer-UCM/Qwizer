@@ -6,9 +6,9 @@ from api.models import (
     Intento,
     OpcionTest,
     Pregunta,
-    RespuestasTest,
-    RespuestasTexto,
     User,
+    PreguntaTest,
+    PreguntaText
 )
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -53,7 +53,6 @@ class SubjectViewSet(viewsets.ViewSet):
             }
             return Response(content)
 
-        asignatura = Asignatura.objects.get_by_id(id_asignatura=pk)
         lista_preguntas = Pregunta.objects.get_by_asignatura(id_asignatura=pk)
         preguntas = []
         print(lista_preguntas)
@@ -73,9 +72,9 @@ class SubjectViewSet(viewsets.ViewSet):
                     opciones_lista.append(opciones_json)
                 pregunta_json["options"] = opciones_lista
 
-                pregunta_json["correct_op"] = RespuestasTest.objects.get_by_pregunta(id_pregunta=pregunta.id).idOpcion.id
+                pregunta_json["correct_op"] = PreguntaTest.objects.get_by_pregunta(id_pregunta=pregunta.id).respuesta.id
             if pregunta.tipoPregunta == "text":
-                pregunta_json["correct_op"] = RespuestasTexto.objects.get_by_pregunta(id_pregunta=pregunta.id).respuesta
+                pregunta_json["correct_op"] = PreguntaText.objects.get_by_pregunta(id_pregunta=pregunta.id).respuesta
             preguntas.append(pregunta_json)
 
         message_json = {}
@@ -91,29 +90,28 @@ class SubjectViewSet(viewsets.ViewSet):
         role = str(request.user.role)
         print(role)
 
-        if role == "student" or role == "teacher":
-            if role == "student":
-                lista_id_asignaturas = Cursa.objects.get_by_alumno(id_alumno=identif).order_by("idAsignatura")
-            elif role == "teacher":
-                lista_id_asignaturas = Imparte.objects.get_by_profesor(id_profesor=identif).order_by_id_asignatura()
-
-            for asignatura in lista_id_asignaturas:
-                asignatura_json = {"id": asignatura.idAsignatura.id, "nombre": asignatura.idAsignatura.asignatura}
-
-                cuestionarios = Cuestionario.objects.get_by_asignatura(id_asignatura=asignatura.idAsignatura.id)
-                n_cuestionarios = cuestionarios.count()
-                n_corregidos = Intento.objects.count_corregidos(cuestionarios=cuestionarios, id_alumno=identif)
-                n_pendientes = n_cuestionarios - n_corregidos
-                asignatura_json["cuestionarios"] = {
-                    "nCuestionarios": n_cuestionarios,
-                    "nCorregidos": n_corregidos,
-                    "nPendientes": n_pendientes,
-                }
-
-                lista_asignaturas.append(asignatura_json)
-
-        else:
+        if role != User.STUDENT and role != User.TEACHER:
             return Response("El admin no tiene ninguna asignatura")
+
+        if role == User.STUDENT:
+            lista_id_asignaturas = Cursa.objects.get_by_alumno(id_alumno=identif).order_by("idAsignatura")
+        elif role == User.TEACHER:
+            lista_id_asignaturas = Imparte.objects.get_by_profesor(id_profesor=identif).order_by_id_asignatura()
+
+        for asignatura in lista_id_asignaturas:
+            asignatura_json = {"id": asignatura.asignatura.id, "nombre": asignatura.asignatura.nombreAsignatura}
+
+            cuestionarios = Cuestionario.objects.get_by_asignatura(id_asignatura=asignatura.asignatura.id)
+            n_cuestionarios = cuestionarios.count()
+            n_corregidos = Intento.objects.count_corregidos(cuestionarios=cuestionarios, id_alumno=identif)
+            n_pendientes = n_cuestionarios - n_corregidos
+            asignatura_json["cuestionarios"] = {
+                "nCuestionarios": n_cuestionarios,
+                "nCorregidos": n_corregidos,
+                "nPendientes": n_pendientes,
+            }
+
+            lista_asignaturas.append(asignatura_json)
 
         print(lista_asignaturas)
         return Response({"asignaturas": lista_asignaturas})
@@ -123,21 +121,14 @@ class SubjectViewSet(viewsets.ViewSet):
         """
         POST /asignatura/{pk}/enroll
         """
-        if str(request.user.role) != "student":
+        if str(request.user.role) != User.STUDENT:
             content = {}
             correct = True
             alumnos_fallidos = []
             alumnos = request.data["alumnos"]
-            asignatura = pk
-            print(alumnos)
-            print(asignatura)
-            for alumno in alumnos:
-                print(alumno["id"])
-                objeto_alumno = User.objects.get_by_id(id_usuario=alumno["id"])
-                print(objeto_alumno)
-                objeto_asignatura = Asignatura.objects.get_by_id(id_asignatura=asignatura)
-                objeto_es_alumno = Cursa.objects.create_es_alumno(idAlumno=objeto_alumno, idAsignatura=objeto_asignatura)
 
+            for alumno in alumnos:
+                objeto_es_alumno = Cursa.objects.create_es_alumno(idAlumno=alumno["id"], idAsignatura=pk)
                 try:
                     objeto_es_alumno.save()
                 except:
@@ -158,18 +149,17 @@ class SubjectViewSet(viewsets.ViewSet):
         print(request.data)
         if str(request.user.role) != "student":
             correct = True
-            alumnosFallidos = []
+            alumnos_fallidos = []
             alumnos = request.data["alumnos"]
             for alumno in alumnos:
-                objetoEsAlumno = Cursa.objects.get_by_alumno_asignatura(id_alumno=alumno["id"], id_asignatura=pk)
-
+                objeto_es_alumno = Cursa.objects.get_by_alumno_asignatura(id_alumno=alumno["id"], id_asignatura=pk)
                 try:
-                    objetoEsAlumno.delete()
+                    objeto_es_alumno.delete()
                 except:
                     correct = False
-                    alumnosFallidos.append(alumno["nombre"] + " " + alumno["apellidos"])
+                    alumnos_fallidos.append(alumno["nombre"] + " " + alumno["apellidos"])
 
-            content = {"borrados": correct, "errors": alumnosFallidos}
+            content = {"borrados": correct, "errors": alumnos_fallidos}
             return Response(content)
         else:
             return Response("")

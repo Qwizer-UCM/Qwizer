@@ -13,7 +13,7 @@ const QrContainer = ({ userId }) => {
         <p>Se ha generado un código QR para que se lo muestres al profesor</p>
       </div>
       <div className="d-flex justify-content-center mt-4">
-        <QRCode value={`${window.location.protocol}//${window.location.host}/scanner/${userId}/${params.test}/${params.hash}`} />
+        <QRCode value={`${window.location.protocol}//${window.location.host}/insercion-manual/${userId}/${params.test}/${params.hash}/${params.resp}`} />
       </div>
     </div>
   );

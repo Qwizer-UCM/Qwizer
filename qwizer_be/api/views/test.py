@@ -337,15 +337,13 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
             try:
                 pregunta = Pregunta.objects.create_preguntas(
-                    tipoPregunta=q["tipo"],
                     pregunta=q["pregunta"],
                     idAsignatura=asignatura,
                     titulo=q["titulo"],
                 )
                 pregunta.save()
             except:
-                pregunta = Pregunta.objects.get_by_asignatura_pregunta_tipo_titulo(
-                    tipo=q["tipo"],
+                pregunta = Pregunta.objects.get_by_asignatura_pregunta_titulo(
                     pregunta=q["pregunta"],
                     id_asignatura=asignatura.id,
                     titulo=q["titulo"],
@@ -369,8 +367,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             )
             pertenece.save()
 
-            pregunta = Pregunta.objects.get_by_asignatura_pregunta_tipo_titulo(
-                tipo=q["tipo"],
+            pregunta = Pregunta.objects.get_by_asignatura_pregunta_titulo(
                 pregunta=q["pregunta"],
                 id_asignatura=asignatura.id,
                 titulo=q["titulo"],

@@ -10,6 +10,16 @@ import { Tests } from '../services/API';
 import useFetch from '../hooks/useFetch';
 import NotFound404 from './common/NotFound404';
 
+
+const cifrarTest = (input) => {
+  // TODO en el back no se desencripta correctamente
+  const result = CryptoJS.AES.encrypt(input.message, input.password, { mode: CryptoJS.mode.CFB, padding: CryptoJS.pad.NoPadding});
+  const message = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Hex.parse(result.ciphertext.toString()))
+  const iv = result.iv.toString(CryptoJS.enc.Hex)
+  const key = result.key.toString(CryptoJS.enc.Hex)
+  return {message,iv,key}
+};
+
 const CuestionarioPassword = ({ unlockTest, localStorageTest }) => {
   const [contra, setContra] = useState('');
   const [errorModal, setErrorModal] = useState({ show: false, message: '' });
@@ -200,7 +210,8 @@ const QuestionContainerNoRevision = ({role}) => {
     if (sent) {
       navigate('/', { replace: true });
     } else {
-      navigate(`/scanner/${paramsId}/${hash}`, { replace: true });
+      const respBase64 = Buffer.from(JSON.stringify(respuestas)).toString('base64url')
+      navigate(`/scanner/${paramsId}/${hash}/${respBase64}`, { replace: true });
     }
     localStorage.removeItem('answers'); // TODO funciona solo con un cuestionario simultaneo
   };

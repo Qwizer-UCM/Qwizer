@@ -12,7 +12,7 @@ from api.manager import (
     CuestionariosManager,
     CursaManager,
     ImparteManager,
-    NotasManager,
+    IntentoManager,
     OpcionesTestManager,
     PreguntaCuestionarioManager,
     PreguntasManager,
@@ -201,11 +201,12 @@ class Cursa(models.Model):
 
 
 class Intento(models.Model):
-    objects = NotasManager()
+    objects = IntentoManager()
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     cuestionario = models.ForeignKey(Cuestionario, on_delete=models.CASCADE)
     nota = models.DecimalField(default=0, max_digits=10, decimal_places=2, verbose_name="nota")
     hash = models.CharField(blank=True, max_length=254, verbose_name="hash")
+    hash_offline = models.CharField(blank=True, max_length=254, verbose_name="hash_offline")
     fecha_inicio = models.DateTimeField(null=True,blank=False, verbose_name="fecha_inicio")
     fecha_fin = models.DateTimeField(null=True,blank=False, verbose_name="fecha_fin")
 

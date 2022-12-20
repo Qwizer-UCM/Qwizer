@@ -39,15 +39,14 @@ class QuestionViewSet(viewsets.ViewSet):
         for preg in preguntas:
             try:
                 pregunta = Pregunta.objects.create_preguntas(
-                    tipoPregunta=preg["tipo"],
                     pregunta=preg["pregunta"],
                     idAsignatura=asignatura,
                     titulo=preg["titulo"],
                 )
                 pregunta.save()
             except:
-                pregunta = Pregunta.objects.get_by_asignatura_pregunta_tipo_titulo(
-                    tipo=preg["tipo"], pregunta=preg["pregunta"], id_asignatura=asignatura.id,titulo=preg["titulo"]
+                pregunta = Pregunta.objects.get_by_asignatura_pregunta_titulo(
+                    pregunta=preg["pregunta"], id_asignatura=asignatura.id,titulo=preg["titulo"]
                 )
                 continue
 

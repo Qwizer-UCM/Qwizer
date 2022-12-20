@@ -3,16 +3,21 @@ from djoser.views import UserViewSet, TokenCreateView, TokenDestroyView
 from rest_framework import routers
 
 from api.views import student
-from .views import qr, question, subject, test
+from .views import (
+    qr,
+    # question,
+    # subject,
+    # test
+)
 
 router = routers.DefaultRouter(trailing_slash=False)
 
 # TODO pendiente poner permission_classes
 router.register('qr',qr.QRViewSet,'qr')
-router.register('question',question.QuestionViewSet,'question')
-router.register('subject',subject.SubjectViewSet,'subject')
-router.register('test',test.TestsViewSet,'test')
-router.register('estudiantes',student.StudentsViewSet,'estudiantes')
+# router.register('question',question.QuestionViewSet,'question')
+## router.register('subject',subject.SubjectViewSet,'subject')
+# router.register('test',test.TestsViewSet,'test')
+# router.register('estudiantes',student.StudentsViewSet,'estudiantes')
 
 
 urlpatterns = router.urls

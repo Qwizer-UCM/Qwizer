@@ -6,7 +6,7 @@ import client from '../client';
 // axios.post(url[, data[, config]])
 
 export const Otro = {
-  insertQR: ({ idUsuario, idCuestionario, hash }, config = {}) => client.post('qr', { idUsuario, idCuestionario, hash }, config),
+  insertQR: ({ idUsuario, idCuestionario, hash, respuestas }, config = {}) => client.post('qr', { idUsuario, idCuestionario, hash, respuestas }, config),
   getHashes: ({ idCuestionario, idUsuario }, config = {}) => client.get(`qr/${idUsuario}/${idCuestionario}`, config),
 };
 

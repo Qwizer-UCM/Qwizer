@@ -54,7 +54,7 @@ class UserManager(BaseUserManager):
 # TODO redefinir aqui metodos necesarios, getById, getBy...
 class OpcionesTestManager(models.Manager):
     def create_opciones_test(self, opcion, idPregunta, commit=False,**extra_fields):
-        obj = self.model(opcion=opcion, idPregunta=idPregunta, **extra_fields)
+        obj = self.model(opcion=opcion, pregunta_id=idPregunta, **extra_fields)
         if commit:
             obj.save()
         return obj
@@ -63,12 +63,12 @@ class OpcionesTestManager(models.Manager):
         return self.get_queryset().get(id=id_opciones)
 
     def get_by_pregunta(self, id_pregunta):
-        return self.get_queryset().filter(idPregunta_id=id_pregunta)
+        return self.get_queryset().filter(pregunta_id=id_pregunta)
 
 
 class PreguntasManager(models.Manager):
-    def create_preguntas(self, tipoPregunta, pregunta, idAsignatura, titulo, commit=False,**extra_fields):
-        obj = self.model(tipoPregunta=tipoPregunta, pregunta=pregunta, idAsignatura=idAsignatura, titulo=titulo, **extra_fields)
+    def create_preguntas(self, pregunta, idAsignatura, titulo, commit=False,**extra_fields):
+        obj = self.model(pregunta=pregunta, asignatura_id=idAsignatura, titulo=titulo, **extra_fields)
         if commit:
             obj.save()
         return obj
@@ -77,11 +77,11 @@ class PreguntasManager(models.Manager):
         return self.get_queryset().get(id=id_pregunta)
 
     # TODO query extraña
-    def get_by_asignatura_pregunta_tipo_titulo(self, tipo, pregunta, id_asignatura, titulo):
-        return self.get_queryset().get(tipoPregunta=tipo, pregunta=pregunta, idAsignatura_id=id_asignatura, titulo=titulo)
+    def get_by_asignatura_pregunta_titulo(self, pregunta, id_asignatura, titulo):
+        return self.get_queryset().get(pregunta=pregunta, asignatura_id=id_asignatura, titulo=titulo)
 
     def get_by_asignatura(self, id_asignatura):
-        return self.get_queryset().filter(idAsignatura_id=id_asignatura)
+        return self.get_queryset().filter(asignatura_id=id_asignatura)
 
 
 class CuestionariosQuerySet(models.QuerySet):
@@ -97,8 +97,8 @@ class CuestionariosManager(models.Manager):
         obj = self.model(
             titulo=titulo,
             secuencial=secuencial,
-            idAsignatura=idAsignatura,
-            idProfesor=idProfesor,
+            asignatura_id=idAsignatura,
+            profesor_id=idProfesor,
             duracion=duracion,
             password=password,
             fecha_cierre=fecha_cierre,
@@ -113,7 +113,7 @@ class CuestionariosManager(models.Manager):
         return self.get_queryset().get(id=id_cuestionario)
 
     def get_by_asignatura(self, id_asignatura):
-        return self.get_queryset().filter(idAsignatura_id=id_asignatura)
+        return self.get_queryset().filter(asignatura_id=id_asignatura)
 
     def order_by_fecha_cierre_desc(self):
         return self.get_queryset().order_by_fecha_cierre_desc()
@@ -121,16 +121,16 @@ class CuestionariosManager(models.Manager):
 
 class PreguntaCuestionarioManager(models.Manager):
     def create_pertenece_a_cuestionario(self, nQuestion, puntosAcierto, puntosFallo, idCuestionario, idPregunta, commit=False,**extra_fields):
-        obj = self.model(nQuestion=nQuestion, puntosAcierto=puntosAcierto, puntosFallo=puntosFallo, idCuestionario=idCuestionario, idPregunta=idPregunta, **extra_fields)
+        obj = self.model(nPregunta=nQuestion, puntosAcierto=puntosAcierto, puntosFallo=puntosFallo, cuestionario_id=idCuestionario, pregunta_id=idPregunta, **extra_fields)
         if commit:
             obj.save()
         return obj
 
     def get_by_pregunta_cuestionario(self, id_pregunta, id_cuestionario):
-        return self.get_queryset().get(idPregunta_id=id_pregunta, idCuestionario_id=id_cuestionario)
+        return self.get_queryset().get(pregunta_id=id_pregunta, cuestionario_id=id_cuestionario)
 
     def get_by_cuestionario(self, id_cuestionario):
-        return self.get_queryset().filter(idCuestionario_id=id_cuestionario)
+        return self.get_queryset().filter(cuestionario_id=id_cuestionario)
 
 class AsignaturaManager(models.Manager):
     # TODO no se crean
@@ -164,7 +164,7 @@ class ImparteManager(models.Manager):
         return obj
 
     def get_by_profesor(self, id_profesor):
-        return self.get_queryset().filter(idProfesor_id=id_profesor)
+        return self.get_queryset().filter(profesor_id=id_profesor)
 
     def order_by_id_asignatura(self):
         return self.get_queryset().order_by_id_asignatura()
@@ -180,76 +180,71 @@ class CursaManager(models.Manager):
         return ImparteQuerySet(model=self.model, using=self._db)
 
     def create_es_alumno(self, idAlumno, idAsignatura, commit=False,**extra_fields):
-        obj = self.model(idAlumno=idAlumno, idAsignatura=idAsignatura, **extra_fields)
+        obj = self.model(alumno_id=idAlumno, asignatura_id=idAsignatura, **extra_fields)
         if commit:
             obj.save()
         return obj
 
     def get_by_alumno(self, id_alumno):
-        return self.get_queryset().filter(idAlumno_id=id_alumno)
+        return self.get_queryset().filter(alumno_id=id_alumno)
 
     def get_by_asignatura(self,id_asignatura):
-        return self.get_queryset().filter(idAsignatura_id=id_asignatura)
+        return self.get_queryset().filter(asignatura_id=id_asignatura)
 
     def get_by_alumno_asignatura(self,id_alumno,id_asignatura):
-        return self.get_queryset().filter(idAlumno_id=id_alumno,idAsignatura_id=id_asignatura)
+        return self.get_queryset().filter(alumno_id=id_alumno,asignatura_id=id_asignatura)
 
     def order_by_id_asignatura(self):
         return self.get_queryset().order_by_id_asignatura()
 
 
-class NotasManager(models.Manager):
-    def create_notas(self, idAlumno, idCuestionario, nota, hash, commit=False,**extra_fields):
-        obj = self.model(idAlumno=idAlumno, idCuestionario=idCuestionario, nota=nota, hash=hash, **extra_fields)
+class IntentoManager(models.Manager):
+    def create_intento(self, idAlumno, idCuestionario, nota=None,hash=None, hash_offline=None, commit=False,**extra_fields):
+        obj = self.model(usuario_id=idAlumno, cuestionario_id=idCuestionario, **extra_fields)
+        if hash is not None:
+            obj.hash = hash
+        if hash_offline is not None:
+            obj.hash_offline = hash_offline
+        if nota is not None:
+            obj.nota = nota
         if commit:
             obj.save()
         return obj
 
     def get_by_cuestionario_alumno(self, id_cuestionario, id_alumno):
-        return self.get_queryset().get(idCuestionario_id=id_cuestionario, idAlumno_id=id_alumno)
+        return self.get_queryset().get(cuestionario_id=id_cuestionario, usuario_id=id_alumno)
 
     def count_corregidos(self, cuestionarios, id_alumno):
-        return self.get_queryset().filter(idCuestionario__in=cuestionarios, idAlumno_id=id_alumno).count()
-
-
-class EnvioOfflineManager(models.Manager):
-    def create_envio_offline(self, idAlumno, idCuestionario, hash, commit=False,**extra_fields):
-        obj = self.model(idAlumno=idAlumno, idCuestionario=idCuestionario, hash=hash, **extra_fields)
-        if commit:
-            obj.save()
-        return obj
-
-    def get_by_cuestionario_alumno(self, id_cuestionario, id_alumno):
-        return self.get_queryset().get(idCuestionario_id=id_cuestionario, idAlumno_id=id_alumno)
+        return self.get_queryset().filter(cuestionario__in=cuestionarios, usuario_id=id_alumno).count()
 
 
 class RespuestasEnviadasTestManager(models.Manager):
     def create_respuesta(self, idCuestionario, idAlumno, idPregunta, idRespuesta, commit=False,**extra_fields):
-        obj = self.model(idCuestionario=idCuestionario, idAlumno=idAlumno, idPregunta=idPregunta, idRespuesta=idRespuesta, **extra_fields)
+        obj = self.model(cuestionario_id=idCuestionario, alumno_id=idAlumno, pregunta_id=idPregunta, respuesta_id=idRespuesta, **extra_fields)
         if commit:
             obj.save()
         return obj
 
     # TODO first es un apaño
     def get_by_cuestionario_alumno_pregunta(self, id_cuestionario, id_alumno, id_pregunta):
-        return self.get_queryset().filter(idCuestionario_id=id_cuestionario, idAlumno_id=id_alumno, idPregunta_id=id_pregunta).first()
+        return self.get_queryset().filter(cuestionario_id=id_cuestionario, alumno_id=id_alumno, pregunta_id=id_pregunta).first()
 
 
 class RespuestasEnviadasTextManager(models.Manager):
     def create_respuesta(self, idCuestionario, idAlumno, idPregunta, Respuesta, commit=False,**extra_fields):
-        obj = self.model(idCuestionario=idCuestionario, idAlumno=idAlumno, idPregunta=idPregunta, Respuesta=Respuesta, **extra_fields)
+        obj = self.model(cuestionario_id=idCuestionario, alumno_id=idAlumno, pregunta_id=idPregunta, respuesta=Respuesta, **extra_fields)
         if commit:
             obj.save()
         return obj
 
     def get_by_cuestionario_alumno_pregunta(self, id_cuestionario, id_alumno, id_pregunta):
-        return self.get_queryset().filter(idCuestionario_id=id_cuestionario, idAlumno_id=id_alumno, idPregunta_id=id_pregunta).first()
+        return self.get_queryset().filter(cuestionario_id=id_cuestionario, alumno_id=id_alumno, pregunta_id=id_pregunta).first()
 
 
 class RespuestasEnviadasManager(models.Manager):
     # TODO reemplazar instancias por id's
     def create_respuesta(self, idCuestionario, idAlumno, idPregunta, Respuesta=None, idRespuesta=None, commit=False,**extra_fields):
-        obj = self.model(idCuestionario=idCuestionario, idAlumno=idAlumno, idPregunta=idPregunta, **extra_fields)
+        obj = self.model(cuestionario_id=idCuestionario, alumno_id=idAlumno, pregunta_id=idPregunta, **extra_fields)
         # Son exclusivas entre sí, seguramente hay una mejor manera de hacerlo
         if Respuesta is not None:
             obj.Respuesta = Respuesta
@@ -260,4 +255,4 @@ class RespuestasEnviadasManager(models.Manager):
         return obj
 
     def get_by_cuestionario_alumno_pregunta(self, id_cuestionario, id_alumno, id_pregunta):
-        return self.get_queryset().filter(idCuestionario_id=id_cuestionario, idAlumno_id=id_alumno, idPregunta_id=id_pregunta).first()
+        return self.get_queryset().filter(cuestionario_id=id_cuestionario, alumno_id=id_alumno, pregunta_id=id_pregunta).first()

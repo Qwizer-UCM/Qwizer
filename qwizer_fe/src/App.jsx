@@ -1,5 +1,6 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import CryptoJS from 'crypto-js';
 
 import IndexContainer from './components/IndexContainer';
 import LoginComponent from './components/LoginComponent';
@@ -45,7 +46,7 @@ const App = () => {
           <Route path="/" element={isOnline ? <IndexContainer /> : <AvailableOffline role={user.role} />} />
           <Route path="/cuestionarios/:id" element={<CuestionariosContainer role={user.role} />} />
           <Route path="/offline" element={isOnline ? <AvailableOffline role={user.role} /> : <Navigate to="/404" />} />
-          <Route path="/test/:id" element={<QuestionContainerNoRevision role={user.role}/>} />
+          <Route path="/test/:id" element={<QuestionContainerNoRevision role={user.role} />} />
           <Route path="/revision/:id" element={<QuestionContainerRevision />} />
           {/* FIXME importante arreglar el back devuelve las notas sin comprobar el rol */}
           <Route element={<ProtectedRoutes isAllowed={isOnline && user.role.includes('teacher')} />}>
@@ -57,11 +58,11 @@ const App = () => {
             <Route path="/revisionNotas/:id/:idAlumno" element={<QuestionContainerRevision />} />
             <Route path="/register" element={<RegisterContainer />} />
           </Route>
-          <Route path="/scanner/:test/:hash" element={<QrContainer userId={user.userId} />} />
+          <Route path="/scanner/:test/:hash/:resp" element={<QrContainer userId={user.userId} />} />
           {/* No se usa */}
-          <Route path="/insercion-manual/:test/:hash" element={<InsercionManual userId={user.userId} />} />
+          <Route path="/insercion-manual/:test/:hash/:resp" element={<InsercionManual userId={user.userId} />} />
         </Route>
-        <Route path="/login" element={isOnline && !isLogged ? <LoginComponent login={login} /> : <Navigate to={isOnline ? "/" : "/404"} />} />
+        <Route path="/login" element={isOnline && !isLogged ? <LoginComponent login={login} /> : <Navigate to={isOnline ? '/' : '/404'} />} />
         <Route path="*" element={<NotFound404 />} />
       </Routes>
     </Suspense>
