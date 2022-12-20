@@ -22,7 +22,7 @@ from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from django.db import IntegrityError
 from django.db.models import Q
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -126,48 +126,42 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         """
         respuestas = request.data["respuestas"]
         id_cuestionario = pk
-        cuestionario = Cuestionario.objects.get_by_id(id_cuestionario=id_cuestionario)
         alumno = request.user
+        intento = None
+        try:
+            intento = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=pk,id_alumno=alumno.id)
+        except Intento.DoesNotExist:
+            intento = Intento.objects.create_intento(idAlumno=alumno.id,idCuestionario=pk,hash=request.data["hash"])
 
-        nota = 0
-        for key,respuesta in respuestas.items():
-            print(respuesta)
-            pregunta = Pregunta.objects.get_by_id(id_pregunta=respuesta["id"])
+        if intento is None:
+            return Response(status=status.HTTP_200_OK)
+        else:
+            nota = 0
+            for key,respuesta in respuestas.items():
+                print(respuesta)
+                pregunta = Pregunta.objects.get_by_id(id_pregunta=respuesta["id"])
 
-            if respuesta["type"] == "test" and str(respuesta["answr"]).isdigit():
-                opcion = OpcionTest.objects.get_by_id(id_opciones=respuesta["answr"])
-                respuesta_enviada = RespuestaEnviadaTest.objects.create_respuesta(
-                    idCuestionario=cuestionario,
-                    idAlumno=alumno,
-                    idPregunta=pregunta,
-                    idRespuesta=opcion,
-                )
-                respuesta_enviada.save()
-            if respuesta["type"] == "text":
-                respuesta_enviada = RespuestaEnviadaText.objects.create_respuesta(
-                    idCuestionario=cuestionario,
-                    idAlumno=alumno,
-                    idPregunta=pregunta,
-                    Respuesta=respuesta["answr"],
-                )
-                respuesta_enviada.save()
+                if respuesta["type"] == "test" and str(respuesta["answr"]).isdigit():
+                    opcion = OpcionTest.objects.get_by_id(id_opciones=respuesta["answr"])
+                    respuesta_enviada = RespuestaEnviadaTest.objects.create_respuesta(
+                        idIntento = intento.id,
+                        idPregunta=pregunta.id,
+                        idRespuesta=opcion.id,
+                    )
+                    respuesta_enviada.save()
+                if respuesta["type"] == "text":
+                    respuesta_enviada = RespuestaEnviadaText.objects.create_respuesta(
+                        idIntento = intento.id,
+                        idPregunta=pregunta.id,
+                        Respuesta=respuesta["answr"],
+                    )
+                    respuesta_enviada.save()
 
-            nota = nota + RespuestaEnviada.calcular_nota(respuesta,id_cuestionario)
+                nota = nota + RespuestaEnviada.calcular_nota(respuesta,id_cuestionario)
 
-        nota_alumno = Intento.objects.create_notas(
-            idAlumno=request.user,
-            idCuestionario=cuestionario,
-            nota=nota,
-            hash=request.data["hash"],
-        )
-        nota_alumno.save()
-        content = {
-            "nota": nota,
-            "preguntasAcertadas": "NULL",  # TODO Por que?
-            "preguntasFalladas": "NULL",
-        }
-
-        return Response(content)
+            intento.nota = nota
+            intento.save()
+            return Response({"nota": nota})
 
     @action(detail=True, methods=["GET"], url_path=r"nota/(?P<id_alumno>\d+)")
     def nota(self, request, pk, id_alumno):
