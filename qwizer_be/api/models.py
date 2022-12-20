@@ -16,6 +16,8 @@ from api.manager import (
     OpcionesTestManager,
     PreguntaCuestionarioManager,
     PreguntasManager,
+    PreguntasTestManager,
+    PreguntasTextManager,
     RespuestasEnviadasManager,
     RespuestasEnviadasTestManager,
     RespuestasEnviadasTextManager,
@@ -124,9 +126,11 @@ class Pregunta(models.Model):
         ]  # No pueden haber preguntas iguales para una asignatura
 
 class PreguntaTest(Pregunta):
+    objects = PreguntasTestManager()
     respuesta = models.ForeignKey(OpcionTest,on_delete=models.CASCADE)
 
 class PreguntaText(Pregunta):
+    objects = PreguntasTextManager()
     respuesta = models.TextField()
 
 class Cuestionario(models.Model):

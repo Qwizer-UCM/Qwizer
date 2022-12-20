@@ -1,5 +1,5 @@
 import yaml
-from api.models import Asignatura, OpcionTest, Pregunta, RespuestasTest, RespuestasTexto
+from api.models import Asignatura, OpcionTest, Pregunta,PreguntaTest,PreguntaText,User
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -10,7 +10,7 @@ class QuestionViewSet(viewsets.ViewSet):
     permission_classes = []
 
     def create(self, request):
-        if str(request.user.role) == "student":  # TODO controlar con permisos
+        if str(request.user.role) == User.STUDENT:  # TODO controlar con permisos
             content = {
                 "inserted": "false",
                 "message": "Error: Para poder subir preguntas debes de ser administrador o profesor.",
@@ -26,12 +26,12 @@ class QuestionViewSet(viewsets.ViewSet):
             }
             return Response(content)
 
-        nombre_asig = request.data["idAsignatura"]
+        id_asignatura = request.data["idAsignatura"]
 
         try:
-            asignatura = Asignatura.objects.get_by_id(id_asignatura=nombre_asig)
+            asignatura = Asignatura.objects.get_by_id(id_asignatura=id_asignatura)
         except:
-            content = {"inserted": "false", "message": f"Error: La asignatura {nombre_asig} no existe!"}
+            content = {"inserted": "false", "message": f"Error: La asignatura {id_asignatura} no existe!"}
             return Response(content)
 
         preguntas = yamlplscomeon["preguntas"]
@@ -45,28 +45,24 @@ class QuestionViewSet(viewsets.ViewSet):
                 )
                 pregunta.save()
             except:
-                pregunta = Pregunta.objects.get_by_asignatura_pregunta_titulo(
-                    pregunta=preg["pregunta"], id_asignatura=asignatura.id,titulo=preg["titulo"]
-                )
                 continue
 
             # Guardamos las opciones
             if preg["tipo"] == "test":
-                j = 0
                 opciones = preg["opciones"]
-                for opc in opciones:
+                for index ,opc in enumerate(opciones): #TODO comprobar si funciona no sabemos si opciones es un array                    
                     opcion = OpcionTest.objects.create_opciones_test(opcion=opc, idPregunta=pregunta)
                     try:
                         opcion.save()
-                        if j == preg["op_correcta"]:
-                            respuesta = RespuestasTest.objects.create_respuestas_test(idOpcion=opcion, idPregunta=pregunta)
-                            respuesta.save()
-                        j += 1
+                        if index == preg["op_correcta"]:
+                            preguntaTest = PreguntaTest.objects.create_preguntasTest(idPregunta=pregunta,respuesta=opcion)
+                            preguntaTest.save()
                     except:
                         print("La pregunta ya existia")
+
             elif preg["tipo"] == "text":
-                respuesta_text = RespuestasTexto.objects.create_respuestas_texto(respuesta=preg["opciones"], idPregunta=pregunta)
-                respuesta_text.save()
+                preguntaText = PreguntaText.objects.create_preguntasText(respuesta=preg["opciones"], idPregunta=pregunta)
+                preguntaText.save()
 
         content = {
             "inserted": "true",
@@ -75,31 +71,31 @@ class QuestionViewSet(viewsets.ViewSet):
         return Response(content)
 
     def update(self, request, pk):
-        if str(request.user.role) == "student":
+        if str(request.user.role) == User.STUDENT:
             content = {"message": "Error: Para actualizar una pregunta debes ser un profesor."}
             return Response(content)
         print(request.data["preguntaActualizada"])
         updated_question = request.data["preguntaActualizada"]
 
-        pregunta = Pregunta.objects.get_by_id(id_pregunta=pk)
+        pregunta = Pregunta.objects.get_by_id(id_pregunta=pk)  #TODO cambiar al servicio
         pregunta.titulo = updated_question["title"]
         pregunta.pregunta = updated_question["question"]
-        pregunta.save()
+        pregunta.save(update_fields=['titulo','pregunta'])
 
         if updated_question["type"] == "test":
             for option in updated_question["options"]:
                 option_obj = OpcionTest.objects.get_by_id(id_opciones=option["id"])
-                option_obj.opcion = option["op"]
-                option_obj.save()
+                option_obj.opcion = option["op"] # TODO añadir para que pueda añadir más respuestas
+                option_obj.save(update_fields=['opcion'])
 
-            resp_test = RespuestasTest.objects.get_by_pregunta(id_pregunta=pk)
-            resp_test.idOpcion = OpcionTest.objects.get_by_id(id_opciones=updated_question["correct_op"])
-            resp_test.save()
+            pregunta_test =PreguntaTest.objects.get_by_id(id_pregunta=pk)
+            pregunta_test.respuesta = OpcionTest.objects.get_by_id(id_opciones=updated_question["correct_op"])  
+            pregunta_test.save(update_fields=['respuesta'])
 
         elif updated_question["type"] == "text":
-            resp_text = RespuestasTexto.objects.get_by_pregunta(id_pregunta=pk)
-            resp_text.respuesta = updated_question["correct_op"]
-            resp_text.save()
+            pregunta_text = PreguntaText.objects.get_by_id(id_pregunta=pk)
+            pregunta_text.respuesta = updated_question["correct_op"]
+            pregunta_text.save(update_fields=['respuesta'])
 
         content = {
             "message": "Pregunta actualizada correctamente",
@@ -107,12 +103,12 @@ class QuestionViewSet(viewsets.ViewSet):
         return Response(content)
 
     def destroy(self, request, pk):
-        if str(request.user.role) == "student":
+        if str(request.user.role) == User.STUDENT:
             content = {"message": "Error: Para eliminar una pregunta debes ser un profesor."}
             return Response(content)
 
         pregunta = Pregunta.objects.get_by_id(id_pregunta=pk)
-        pregunta.delete()
+        pregunta.delete() #TODO comprobar que pasa aqui con los hijos
 
         content = {
             "message": "Pregunta eliminada correctamente",

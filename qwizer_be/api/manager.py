@@ -83,6 +83,25 @@ class PreguntasManager(models.Manager):
     def get_by_asignatura(self, id_asignatura):
         return self.get_queryset().filter(asignatura_id=id_asignatura)
 
+class PreguntasTestManager(models.Manager):
+    def create_preguntasTest(self, idPregunta, respuesta, commit=False,**extra_fields):
+        obj = self.model(id=idPregunta,respuesta=respuesta, **extra_fields)
+        if commit:
+            obj.save()
+        return obj
+
+    def get_by_id(self, id_pregunta):
+        return self.get_queryset().get(id=id_pregunta)
+
+class PreguntasTextManager(models.Manager):
+    def create_preguntasText(self, pregunta, idAsignatura, titulo, commit=False,**extra_fields):
+        obj = self.model(pregunta=pregunta, asignatura_id=idAsignatura, titulo=titulo, **extra_fields)
+        if commit:
+            obj.save()
+        return obj
+
+    def get_by_id(self, id_pregunta):
+        return self.get_queryset().get(id=id_pregunta)
 
 class CuestionariosQuerySet(models.QuerySet):
     def order_by_fecha_cierre_desc(self):
