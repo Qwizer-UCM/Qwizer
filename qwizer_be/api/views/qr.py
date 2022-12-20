@@ -39,8 +39,8 @@ def copy_paste_test(respuestas,alumno,cuestionario):
     #     nota = nota + RespuestaEnviada.calcular_nota(respuesta,cuestionario)
     print("Insertadas respuestas")
 
-# class QRViewSet(viewsets.ViewSet):
-#     permission_classes = []
+class QRViewSet(viewsets.ViewSet):
+    permission_classes = []
 
     def create(self, request):
         # TODO revisar porque hay que hacer dos veces el json.loads

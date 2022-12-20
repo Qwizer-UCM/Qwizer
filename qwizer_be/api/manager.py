@@ -46,8 +46,8 @@ class UserManager(BaseUserManager):
         return (
             self.get_queryset()
             .filter(
-                Q(esalumno__idAsignatura_id=id_asignatura) | Q(imparte__idAsignatura_id=id_asignatura),
-                Q(notas__idCuestionario_id=id_cuestionario) | Q(notas__idCuestionario_id__isnull=True),
+                Q(cursa__asignatura_id=id_asignatura) | Q(imparte__asignatura_id=id_asignatura),
+                Q(intento__cuestionario_id=id_cuestionario) | Q(intento__cuestionario_id__isnull=True),
             )
             .values("id", "first_name", "last_name", "notas__nota")
         )
@@ -90,25 +90,27 @@ class PreguntasManager(models.Manager):
 
 
 class PreguntasTestManager(models.Manager):
-    def create_preguntasTest(self, idPregunta, respuesta, commit=False, **extra_fields):
-        obj = self.model(id=idPregunta, respuesta=respuesta, **extra_fields)
+    def create_pregunta_test(self, pregunta, idAsignatura, titulo, id_pregunta, commit=False, **extra_fields):
+        obj = self.model(pregunta=pregunta, asignatura_id=idAsignatura, titulo=titulo,pregunta_ptr_id=id_pregunta, **extra_fields)
         if commit:
             obj.save()
         return obj
 
     def get_by_id(self, id_pregunta):
-        return self.get_queryset().get(id=id_pregunta)
+        return self.get_queryset().get(pregunta_ptr_id=id_pregunta)
+
+    
 
 
 class PreguntasTextManager(models.Manager):
-    def create_preguntasText(self, pregunta, idAsignatura, titulo, commit=False, **extra_fields):
-        obj = self.model(pregunta=pregunta, asignatura_id=idAsignatura, titulo=titulo, **extra_fields)
+    def create_pregunta_text(self,  pregunta, idAsignatura, titulo,id_pregunta,respuesta, commit=False, **extra_fields):
+        obj = self.model(pregunta=pregunta, asignatura_id=idAsignatura, titulo=titulo,pregunta_ptr_id=id_pregunta,respuesta=respuesta, **extra_fields)
         if commit:
             obj.save()
         return obj
 
     def get_by_id(self, id_pregunta):
-        return self.get_queryset().get(id=id_pregunta)
+        return self.get_queryset().get(pregunta_ptr_id=id_pregunta)
 
 
 class CuestionariosQuerySet(models.QuerySet):
@@ -147,7 +149,7 @@ class CuestionariosManager(models.Manager):
 
 
 class PreguntaCuestionarioManager(models.Manager):
-    def create_pertenece_a_cuestionario(self, nQuestion, puntosAcierto, puntosFallo, idCuestionario, idPregunta, commit=False, **extra_fields):
+    def create_pregunta_cuestionario(self, nQuestion, puntosAcierto, puntosFallo, idCuestionario, idPregunta, commit=False, **extra_fields):
         obj = self.model(nPregunta=nQuestion, puntosAcierto=puntosAcierto, puntosFallo=puntosFallo, cuestionario_id=idCuestionario, pregunta_id=idPregunta, **extra_fields)
         if commit:
             obj.save()
@@ -172,12 +174,12 @@ class AsignaturaManager(models.Manager):
         return self.get_queryset().get(id=id_asignatura)
 
     def get_by_asignatura(self, nombre_asignatura):
-        return self.get_queryset().get(asignatura=nombre_asignatura)
+        return self.get_queryset().get(nombreAsignatura=nombre_asignatura)
 
 
 class ImparteQuerySet(models.QuerySet):
     def order_by_id_asignatura(self):
-        return self.order_by("idAsignatura")
+        return self.order_by("asignatura")
 
 
 class ImparteManager(models.Manager):
@@ -200,7 +202,7 @@ class ImparteManager(models.Manager):
 
 class EsAlumnoQuerySet(models.QuerySet):
     def order_by_id_asignatura(self):
-        return self.order_by("idAsignatura")
+        return self.order_by("asignatura")
 
 
 class CursaManager(models.Manager):

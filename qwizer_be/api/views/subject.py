@@ -25,7 +25,7 @@ class SubjectViewSet(viewsets.ViewSet):
         # if request.user.rol == "teacher":
         asignaturas = Asignatura.objects.all()  # TODO comprobrar mejora de esto
         for asignatura in asignaturas:
-            lista_asignaturas.append({"id": asignatura.id, "asignatura": asignatura.asignatura})
+            lista_asignaturas.append({"id": asignatura.id, "asignatura": asignatura.nombreAsignatura})
 
         return Response({"asignaturas": lista_asignaturas})
 
@@ -61,8 +61,7 @@ class SubjectViewSet(viewsets.ViewSet):
             pregunta_json["id"] = pregunta.id
             pregunta_json["question"] = pregunta.pregunta
             pregunta_json["title"] = pregunta.titulo
-            pregunta_json["type"] = pregunta.tipoPregunta
-            if pregunta.tipoPregunta == "test":
+            if hasattr(pregunta, "respuesta_id"): #TODO apaño bien malo
                 opciones_lista = []
                 opciones = OpcionTest.objects.get_by_pregunta(id_pregunta=pregunta.id)
                 for opcion in opciones:
@@ -72,8 +71,8 @@ class SubjectViewSet(viewsets.ViewSet):
                     opciones_lista.append(opciones_json)
                 pregunta_json["options"] = opciones_lista
 
-                pregunta_json["correct_op"] = PreguntaTest.objects.get_by_pregunta(id_pregunta=pregunta.id).respuesta.id
-            if pregunta.tipoPregunta == "text":
+                pregunta_json["correct_op"] = PreguntaTest.objects.get_by_id(id_pregunta=pregunta.id).respuesta.id
+            if  hasattr(pregunta, "respuesta"):
                 pregunta_json["correct_op"] = PreguntaText.objects.get_by_pregunta(id_pregunta=pregunta.id).respuesta
             preguntas.append(pregunta_json)
 
@@ -94,7 +93,7 @@ class SubjectViewSet(viewsets.ViewSet):
             return Response("El admin no tiene ninguna asignatura")
 
         if role == User.STUDENT:
-            lista_id_asignaturas = Cursa.objects.get_by_alumno(id_alumno=identif).order_by("idAsignatura")
+            lista_id_asignaturas = Cursa.objects.get_by_alumno(id_alumno=identif).order_by("asignatura")
         elif role == User.TEACHER:
             lista_id_asignaturas = Imparte.objects.get_by_profesor(id_profesor=identif).order_by_id_asignatura()
 

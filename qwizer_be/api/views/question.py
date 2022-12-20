@@ -35,33 +35,49 @@ class QuestionViewSet(viewsets.ViewSet):
             return Response(content)
 
         preguntas = yamlplscomeon["preguntas"]
-
         for preg in preguntas:
             try:
                 pregunta = Pregunta.objects.create_preguntas(
                     pregunta=preg["pregunta"],
-                    idAsignatura=asignatura,
+                    idAsignatura=asignatura.id,
                     titulo=preg["titulo"],
                 )
                 pregunta.save()
-            except:
+            except Exception as e:  #TODO hay que controlar mejor excepciones ni sabia que saltaba excepcion
+                print(e)
                 continue
 
             # Guardamos las opciones
             if preg["tipo"] == "test":
+                
+                preguntaTest = PreguntaTest.objects.create_pregunta_test(pregunta=preg["pregunta"],
+                idAsignatura=asignatura.id,
+                titulo=preg["titulo"],
+                id_pregunta=pregunta.id)
+                
+                try:
+                    preguntaTest.save()
+                except Exception as e:
+                    print(e)
+                
                 opciones = preg["opciones"]
-                for index ,opc in enumerate(opciones): #TODO comprobar si funciona no sabemos si opciones es un array                    
-                    opcion = OpcionTest.objects.create_opciones_test(opcion=opc, idPregunta=pregunta)
+                for index , opc in enumerate(opciones): 
+                    opcion = OpcionTest.objects.create_opciones_test(opcion=opc, idPregunta=pregunta.id)
                     try:
                         opcion.save()
                         if index == preg["op_correcta"]:
-                            preguntaTest = PreguntaTest.objects.create_preguntasTest(idPregunta=pregunta,respuesta=opcion)
+                            preguntaTest.respuesta_id = opcion.id
                             preguntaTest.save()
-                    except:
+                    except Exception as e:
+                        print(e)
                         print("La pregunta ya existia")
 
             elif preg["tipo"] == "text":
-                preguntaText = PreguntaText.objects.create_preguntasText(respuesta=preg["opciones"], idPregunta=pregunta)
+                preguntaText = PreguntaText.objects.create_pregunta_text(pregunta=preg["pregunta"],
+                idAsignatura=asignatura.id,
+                titulo=preg["titulo"],
+                id_pregunta=pregunta.id,
+                respuesta=preg['opciones'])
                 preguntaText.save()
 
         content = {

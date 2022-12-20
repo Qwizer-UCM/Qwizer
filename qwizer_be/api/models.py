@@ -92,7 +92,6 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 class OpcionTest(models.Model):
     objects = OpcionesTestManager()
     pregunta = models.ForeignKey("PreguntaTest", related_name="opciones_test", on_delete=models.CASCADE)
-    num_orden = models.PositiveSmallIntegerField()
     opcion = models.CharField(blank=True, max_length=254, verbose_name="opcion")
 
     # TODO no estoy seguro de que sea lo ideal pero nos permite refactorizar con facilidad
@@ -105,7 +104,6 @@ class OpcionTest(models.Model):
         unique_together = (
             "pregunta",
             "opcion",
-            "num_orden"
         )
 
 
@@ -127,7 +125,7 @@ class Pregunta(models.Model):
 
 class PreguntaTest(Pregunta):
     objects = PreguntasTestManager()
-    respuesta = models.ForeignKey(OpcionTest,on_delete=models.CASCADE)
+    respuesta = models.ForeignKey(OpcionTest,null=True ,on_delete=models.CASCADE)
 
 class PreguntaText(Pregunta):
     objects = PreguntasTextManager()
