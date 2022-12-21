@@ -39,7 +39,7 @@ class SubjectViewSet(viewsets.ViewSet):
         for cuestionario in cuestionarios:
             lista_cuestionarios.append(cuestionario.titulo)
             id_cuestionarios.append(cuestionario.id)
-        return Response({"cuestionarios": lista_cuestionarios, "idCuestionarios": id_cuestionarios, "nombre": asignatura.asignatura})
+        return Response({"cuestionarios": lista_cuestionarios, "idCuestionarios": id_cuestionarios, "nombre": asignatura.nombreAsignatura})
 
     @action(methods=["GET"], detail=True)
     def preguntas(self, request, pk):
@@ -61,7 +61,8 @@ class SubjectViewSet(viewsets.ViewSet):
             pregunta_json["id"] = pregunta.id
             pregunta_json["question"] = pregunta.pregunta
             pregunta_json["title"] = pregunta.titulo
-            if hasattr(pregunta, "respuesta_id"): #TODO apaño bien malo
+            if hasattr(pregunta, "preguntatest"): 
+                pregunta_json["type"] = "test"
                 opciones_lista = []
                 opciones = OpcionTest.objects.get_by_pregunta(id_pregunta=pregunta.id)
                 for opcion in opciones:
@@ -72,8 +73,9 @@ class SubjectViewSet(viewsets.ViewSet):
                 pregunta_json["options"] = opciones_lista
 
                 pregunta_json["correct_op"] = PreguntaTest.objects.get_by_id(id_pregunta=pregunta.id).respuesta.id
-            if  hasattr(pregunta, "respuesta"):
-                pregunta_json["correct_op"] = PreguntaText.objects.get_by_pregunta(id_pregunta=pregunta.id).respuesta
+            if  hasattr(pregunta, "preguntatext"):
+                pregunta_json["type"] = "text"
+                pregunta_json["correct_op"] = PreguntaText.objects.get_by_id(id_pregunta=pregunta.id).respuesta
             preguntas.append(pregunta_json)
 
         message_json = {}

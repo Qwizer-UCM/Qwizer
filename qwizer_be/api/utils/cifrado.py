@@ -9,7 +9,7 @@ BLOCK_SIZE = 16
 
 def encrypt_tests(message, passw):
     # Hay que hacer que el texto se pueda enviar en bloques de 16 bytes, sino no funciona
-    message = json.dumps(message).encode()
+    message = pad(json.dumps(message).encode(),BLOCK_SIZE)
     # Proceso de generación de la key a partir del password
     key = hashlib.sha256(bytes(passw, "utf-8")).digest()
 
@@ -40,7 +40,7 @@ def decrypt(message, in_iv, in_key):
     decrypted = aes.decrypt(binascii.a2b_base64(message).rstrip())
     decoded = "Nope"
     try:
-        decoded = decrypted.decode()
+        decoded = unpad(decrypted, BLOCK_SIZE).decode()
     except:
         pass
     return decoded

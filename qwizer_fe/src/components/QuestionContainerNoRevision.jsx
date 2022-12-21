@@ -32,6 +32,7 @@ const CuestionarioPassword = ({ unlockTest, localStorageTest }) => {
     const iv = CryptoJS.enc.Hex.parse(input.iv);
 
     const result = CryptoJS.AES.decrypt(cipher, key, { iv, mode: CryptoJS.mode.CFB });
+    console.log(result.toString(CryptoJS.enc.Utf8))
     return JSON.parse(result.toString(CryptoJS.enc.Utf8));
   };
 
@@ -44,7 +45,7 @@ const CuestionarioPassword = ({ unlockTest, localStorageTest }) => {
       });
       unlockTest(listMap, list, true);
     } else {
-      setErrorModal({ show: true, message: 'Contraseña incorrecta' });
+      setErrorModal({ show: true, message: 'Contraseña incorrecta' })
     }
   };
 

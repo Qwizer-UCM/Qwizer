@@ -24,6 +24,8 @@ const CrearCuestionario = () => {
   const testDuration = useRef();
   const testOpeningDate = useRef();
   const testClosingDate = useRef();
+  const testVisibleDate = useRef();
+
 
   const addSelectedQuestion = (pregunta) => {
     const listaPregSelec = [...selectedList];
@@ -87,6 +89,7 @@ const CrearCuestionario = () => {
       testDuration: testDuration.current.value,
       fechaApertura: testOpeningDate.current.valueAsNumber,
       fechaCierre: testClosingDate.current.valueAsNumber,
+      fechaVisible: testVisibleDate.current.valueAsNumber,
       questionList: Object.keys(selectedListInfo).map((key) => ({
         id: key,
         punt_positiva: selectedListInfo[key].punt_positiva,
@@ -186,6 +189,15 @@ const CrearCuestionario = () => {
             min={testOpeningDate.current?.value ?? new Date().toISOString().slice(0, 16)}
             name="fechaCierre"
             ref={testClosingDate}
+            required />
+        </InputGroup>
+        <InputGroup className='mb-3'>
+          <InputGroup.Text id='inputGroup-sizing-default'>Fecha Visible: &nbsp;</InputGroup.Text>
+          <Form.Control className="form-control"
+            type="datetime-local"
+            defaultValue={new Date().toISOString().slice(0, 16)}
+            name="fechaVisible"
+            ref={testVisibleDate}
             required />
         </InputGroup>
       </div>

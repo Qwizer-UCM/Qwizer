@@ -1,20 +1,43 @@
 from rest_framework import serializers
 from .utils.cifrado import encrypt_tests
-from .models import Cuestionario, OpcionTest, Pregunta, RespuestaEnviadaTest, RespuestaEnviadaText
+from .models import Cuestionario, OpcionTest, Pregunta,PreguntaTest,PreguntaText, RespuestaEnviadaTest, RespuestaEnviadaText
 
 #TODO mejor indicar los campos concretos en vez de __all__
 
 class OpcionesTestSerializer(serializers.ModelSerializer):
     class Meta:
         model = OpcionTest
-        exclude = ["idPregunta"]
+        exclude = ["pregunta"]
 
 class PreguntasSerializer(serializers.ModelSerializer):
-    opciones_test = OpcionesTestSerializer(many=True)
 
     class Meta:
         model = Pregunta
-        fields = "__all__"  
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        pregunta = None
+        if hasattr(instance, "preguntatest"):
+            pregunta = PreguntasTestSerializer(instance=instance.preguntatest).data
+        if hasattr(instance, "preguntatext"):
+            pregunta = PreguntasTextSerializer(instance=instance.preguntatext).data
+        return pregunta
+
+class PreguntasTestSerializer(serializers.ModelSerializer):
+    opciones_test = OpcionesTestSerializer(many=True)
+    tipoPregunta = serializers.CharField(default="test")
+
+    class Meta:
+        model = PreguntaTest
+        fields = "__all__"
+
+class PreguntasTextSerializer(serializers.ModelSerializer):
+    tipoPregunta = serializers.CharField(default="text")
+
+
+    class Meta:
+        model = PreguntaText
+        fields = "__all__"
 
 class EncryptedTestsSerializer(serializers.ModelSerializer):
     preguntas = PreguntasSerializer(many=True)
@@ -37,7 +60,7 @@ class EncryptedTestsSerializer(serializers.ModelSerializer):
         res["formatted_fecha_cierre"] = instance.fecha_cierre.strftime(
             "%d/%m/%Y, %H:%M:%S"
         )
-        res.pop("preguntas")
+#        res.pop("preguntas")
         return res
 
 

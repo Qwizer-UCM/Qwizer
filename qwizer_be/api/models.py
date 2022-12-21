@@ -239,15 +239,15 @@ class RespuestaEnviada(models.Model):
 
         if respuesta["type"] == "test":
             opcion_usuario = int(respuesta["answr"])
-            opcion_correcta = pregunta_info.pregunta.respuesta.id
+            opcion_correcta = pregunta_info.pregunta.preguntatest.respuesta.id
         elif respuesta["type"] == "text":
             opcion_usuario = respuesta["answr"].lower().replace(" ", "")
-            opcion_correcta = pregunta_info.pregunta.respuesta.lower().replace(" ", "")
+            opcion_correcta = pregunta_info.pregunta.preguntatext.respuesta.lower().replace(" ", "")
 
         if opcion_usuario == opcion_correcta:
             return pregunta_info.puntosAcierto
         else:
-            return pregunta_info.puntosFallo
+            return -pregunta_info.puntosFallo
 
 
 class RespuestaEnviadaTest(RespuestaEnviada):  # No debería ser on delete cascade

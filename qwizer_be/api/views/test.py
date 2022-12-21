@@ -66,6 +66,9 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         fecha_cierre = cuestionario_data["fechaCierre"]
         date_time_cierre = datetime.fromtimestamp(fecha_cierre / 1000)
 
+        fecha_visible = cuestionario_data["fechaVisible"]
+        date_time_visible = datetime.fromtimestamp(fecha_visible / 1000)
+
         lista_preguntas = cuestionario_data["questionList"]
 
         try:
@@ -78,12 +81,13 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             cuestionario = Cuestionario.objects.create_cuestionarios(
                 titulo=title,
                 secuencial=sec,
-                idAsignatura=asignatura,
-                idProfesor=profesor,
+                idAsignatura=asignatura.id,
+                idProfesor=profesor.id,
                 duracion=durat,
                 password=passw,
                 fecha_cierre=date_time_cierre,
                 fecha_apertura=date_time_apertura,
+                fecha_visible=date_time_visible
             )
             cuestionario.save()
         except:
@@ -97,8 +101,8 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 nQuestion=i,
                 puntosAcierto=preguntas["punt_positiva"],
                 puntosFallo=preguntas["punt_negativa"],
-                idCuestionario=cuestionario,
-                idPregunta=Pregunta.objects.get_by_id(id_pregunta=preguntas["id"]),
+                idCuestionario=cuestionario.id,
+                idPregunta=Pregunta.objects.get_by_id(id_pregunta=preguntas["id"]).id,
             )
             pertenece.save()
 
@@ -123,7 +127,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         try:
             intento = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=pk,id_alumno=alumno.id)
         except Intento.DoesNotExist:
-            intento = Intento.objects.create_intento(idAlumno=alumno.id,idCuestionario=pk,hash=request.data["hash"])
+            intento = Intento.objects.create_intento(idAlumno=alumno.id,idCuestionario=pk,hash=request.data["hash"],commit=True)
 
         if intento is None:
             return Response(status=status.HTTP_200_OK)
@@ -167,36 +171,37 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
         cuestionario = Cuestionario.objects.get_by_id(id_cuestionario=pk)
         pertenecen = PreguntaCuestionario.objects.get_by_cuestionario(id_cuestionario=cuestionario.id)
-        nota_obj = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=pk, id_alumno=id_alumno)
+        intento_obj = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=pk, id_alumno=id_alumno)
 
         questions = []
         for pertenece in pertenecen:
-            pregunta = pertenece.idPregunta
+            pregunta = pertenece.pregunta
             pregunta_json = {}
             pregunta_json["id"] = pregunta.id
             pregunta_json["question"] = pregunta.pregunta
-            pregunta_json["type"] = pregunta.tipoPregunta
-            if pregunta.tipoPregunta == "test":
+            if hasattr(pregunta, "preguntatest"): 
+                pregunta_json["type"] = "test"
                 opciones_lista = []
                 opciones = OpcionTest.objects.get_by_pregunta(id_pregunta=pregunta.id)
                 for opcion in opciones:
                     opciones_lista.append({"id": opcion.id, "op": opcion.opcion})
                 pregunta_json["options"] = opciones_lista
-                pregunta_json["correct_op"] = PreguntaTest.objects.get_by_id(id_pregunta=pregunta.id).respuesta.opcion
+                pregunta_json["correct_op"] = PreguntaTest.objects.get_by_id(id_pregunta=pregunta.id).respuesta.id
                 # TODO esto es un apaño para qe funcione hay que reescribirlo todo
-                pregunta_json["user_op"] = RespuestaEnviadaTest.objects.get_by_cuestionario_alumno_pregunta(id_cuestionario=pk,id_alumno=id_alumno,id_pregunta=pregunta.id)
+                pregunta_json["user_op"] = RespuestaEnviadaTest.objects.get_by_intento_pregunta(id_intento=intento_obj.id,id_pregunta=pregunta.id)
                 if pregunta_json["user_op"] is not None:
-                    pregunta_json["user_op"] = pregunta_json["user_op"].idRespuesta.id
-            if pregunta.tipoPregunta == "text":
+                    pregunta_json["user_op"] = pregunta_json["user_op"].respuesta.id
+            if hasattr(pregunta, "preguntatext"): 
+                pregunta_json["type"] = "text"
                 pregunta_json["correct_op"] = PreguntaText.objects.get_by_id(id_pregunta=pregunta.id).respuesta
-                pregunta_json["user_op"] = RespuestaEnviadaText.objects.get_by_cuestionario_alumno_pregunta(id_cuestionario=pk,id_alumno=id_alumno,id_pregunta=pregunta.id)
+                pregunta_json["user_op"] = RespuestaEnviadaText.objects.get_by_intento_pregunta(id_intento=intento_obj.id,id_pregunta=pregunta.id)
                 if pregunta_json["user_op"] is not None:
-                    pregunta_json["user_op"] = pregunta_json["user_op"].Respuesta
+                    pregunta_json["user_op"] = pregunta_json["user_op"].respuesta
             questions.append(pregunta_json)
 
         message_json = {}
         message_json["titulo"] = cuestionario.titulo
-        message_json["nota"] = nota_obj.nota
+        message_json["nota"] = intento_obj.nota
         message_json["questions"] = questions
 
         quiz_string = message_json
@@ -214,10 +219,10 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         """
         cuestionario = Cuestionario.objects.get_by_id(id_cuestionario=pk)
 
-        alumnos = User.objects.get_users_from_test(id_asignatura=cuestionario.idAsignatura.id,id_cuestionario=pk)
+        alumnos = User.objects.get_users_from_test(id_asignatura=cuestionario.asignatura.id,id_cuestionario=pk)
         notas = []
         for alumno in alumnos:
-            nota = "No presentado" if alumno["notas__nota"] is None else alumno["notas__nota"]
+            nota = "No presentado" if alumno["intento__nota"] is None else alumno["intento__nota"]
             notas.append({"id": alumno['id'], "nombre": alumno['first_name'], "apellidos": alumno['last_name'], "nota": nota})
         return Response({"notas": notas})
 
@@ -282,6 +287,8 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         date_time_apertura = datetime.strptime(fecha_apertura, "%y/%m/%d %H:%M:%S")
         fecha_cierre = yamlplscomeon["cuestionario"]["fecha_cierre"]
         date_time_cierre = datetime.strptime(fecha_cierre, "%y/%m/%d %H:%M:%S")
+        fecha_visible = yamlplscomeon["cuestionario"]["fecha_visible"]
+        date_time_visible = datetime.strptime(fecha_visible, "%y/%m/%d %H:%M:%S")
         title = yamlplscomeon["cuestionario"]["titulo"]
         nombre_asig = yamlplscomeon["cuestionario"]["asignatura"]
         profesor = request.user
@@ -299,12 +306,14 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         cuestionario = Cuestionario.objects.create_cuestionarios(
             titulo=title,
             secuencial=sec,
-            idAsignatura=asignatura,
-            idProfesor=profesor,
+            idAsignatura=asignatura.id,
+            idProfesor=profesor.id,
             duracion=durat,
             password=passw,
             fecha_cierre=date_time_cierre,
             fecha_apertura=date_time_apertura,
+            fecha_visible=date_time_visible
+
         )
         try:
             cuestionario.save()
@@ -335,8 +344,8 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 nQuestion=i,
                 puntosAcierto=preg["punt_positiva"],
                 puntosFallo=preg["punt_negativa"],
-                idCuestionario=cuestionario,
-                idPregunta=pregunta,
+                idCuestionario=cuestionario.id,
+                idPregunta=pregunta.id,
             )
             pertenece.save()
 
@@ -353,11 +362,8 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 titulo=preg["titulo"],
                 id_pregunta=pregunta.id)
                 
-                try:
-                    preguntaTest.save()
-                except Exception as e:
-                    print(e)
-                
+                preguntaTest.save()
+                    
                 opciones = preg["opciones"]
                 for index , opc in enumerate(opciones): 
                     opcion = OpcionTest.objects.create_opciones_test(opcion=opc, idPregunta=pregunta.id)
@@ -367,7 +373,6 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                             preguntaTest.respuesta_id = opcion.id
                             preguntaTest.save()
                     except Exception as e:
-                        print(e)
                         print("La pregunta ya existia")
 
             elif preg["tipo"] == "text":

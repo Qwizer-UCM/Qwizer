@@ -49,7 +49,7 @@ class UserManager(BaseUserManager):
                 Q(cursa__asignatura_id=id_asignatura) | Q(imparte__asignatura_id=id_asignatura),
                 Q(intento__cuestionario_id=id_cuestionario) | Q(intento__cuestionario_id__isnull=True),
             )
-            .values("id", "first_name", "last_name", "notas__nota")
+            .values("id", "first_name", "last_name", "intento__nota")
         )
 
     def get_students(self):
@@ -122,7 +122,7 @@ class CuestionariosManager(models.Manager):
     def get_queryset(self):
         return CuestionariosQuerySet(model=self.model, using=self._db)
 
-    def create_cuestionarios(self, titulo, secuencial, idAsignatura, idProfesor, duracion, password, fecha_cierre, fecha_apertura, commit=False, **extra_fields):
+    def create_cuestionarios(self, titulo, secuencial, idAsignatura, idProfesor, duracion, password, fecha_cierre, fecha_apertura, fecha_visible, commit=False, **extra_fields):
         obj = self.model(
             titulo=titulo,
             secuencial=secuencial,
@@ -132,6 +132,7 @@ class CuestionariosManager(models.Manager):
             password=password,
             fecha_cierre=fecha_cierre,
             fecha_apertura=fecha_apertura,
+            fecha_visible=fecha_visible,
             **extra_fields
         )
         if commit:
@@ -256,8 +257,8 @@ class RespuestasEnviadasTestManager(models.Manager):
         return obj
 
     # TODO first es un apaño
-    def get_by_cuestionario_alumno_pregunta(self, id_cuestionario, id_alumno, id_pregunta):
-        return self.get_queryset().filter(cuestionario_id=id_cuestionario, alumno_id=id_alumno, pregunta_id=id_pregunta).first()
+    def get_by_intento_pregunta(self, id_intento, id_pregunta):
+        return self.get_queryset().filter(intento_id=id_intento, pregunta_id=id_pregunta).first()
 
 
 class RespuestasEnviadasTextManager(models.Manager):
@@ -267,8 +268,8 @@ class RespuestasEnviadasTextManager(models.Manager):
             obj.save()
         return obj
 
-    def get_by_cuestionario_alumno_pregunta(self, id_cuestionario, id_alumno, id_pregunta):
-        return self.get_queryset().filter(cuestionario_id=id_cuestionario, alumno_id=id_alumno, pregunta_id=id_pregunta).first()
+    def get_by_intento_pregunta(self, id_intento, id_pregunta):
+        return self.get_queryset().filter(intento_id=id_intento, pregunta_id=id_pregunta).first()
 
 
 class RespuestasEnviadasManager(models.Manager):
@@ -284,5 +285,5 @@ class RespuestasEnviadasManager(models.Manager):
             obj.save()
         return obj
 
-    def get_by_cuestionario_alumno_pregunta(self, id_cuestionario, id_alumno, id_pregunta):
-        return self.get_queryset().filter(cuestionario_id=id_cuestionario, alumno_id=id_alumno, pregunta_id=id_pregunta).first()
+    def get_by_intento_pregunta(self, id_intento, id_pregunta):
+            return self.get_queryset().filter(intento_id=id_intento, pregunta_id=id_pregunta).first()
