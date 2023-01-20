@@ -3,10 +3,7 @@
 import os
 import sys
 
-
-def main():
-    """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'qwizer_be.settings')
+def execute_command():
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -16,6 +13,23 @@ def main():
             "forget to activate a virtual environment?"
         ) from exc
     execute_from_command_line(sys.argv)
+
+def main():
+    """Run administrative tasks."""
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'qwizer_be.settings')
+
+    if len(sys.argv)==2 and sys.argv[1] == "test":
+        from coverage import Coverage
+        cov = Coverage()
+        cov.erase()
+        cov.start()
+        execute_command()
+        cov.stop()
+        cov.save()
+        cov.report()
+        cov.xml_report()
+    else:
+        execute_command()
 
 
 if __name__ == '__main__':

@@ -1,0 +1,4 @@
+email,first_name,last_name,password,role
+alumno1@ucm.es,alumno,1,1,student
+alumno2@ucm.es,alumno,2,2,student
+profesor@ucm.es,profesor,,3,teacher

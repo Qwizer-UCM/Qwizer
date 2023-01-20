@@ -13,7 +13,6 @@ pyyaml = "==6.0"
 mysqlclient = "==2.1.1"
 django-extensions = "*"
 djoser = "*"
-drf-yasg = "*"
 pip = "*"
 install = "*"
 django-environ = "*"
@@ -25,6 +24,8 @@ ipython = "*"
 black = "*"
 django-import-export = "*"
 gunicorn = "*"
+coverage = "*"
+drf-spectacular = {extras = ["sidecar"], version = "*"}
 
 [requires]
-python_version = "3.10"
+python_version = "3.11"

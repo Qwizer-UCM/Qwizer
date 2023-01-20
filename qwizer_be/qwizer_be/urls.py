@@ -14,39 +14,24 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path, include
-
-from rest_framework import permissions
-from rest_framework.routers import re_path
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
+from drf_spectacular.views import SpectacularJSONAPIView, SpectacularRedocView, SpectacularSwaggerView, SpectacularYAMLAPIView
 
 
 # TODO Swagger sirve para autodocumentar la api accediendo a /swagger
 # ademas de poder exportarlo a postman y poder probar la api facilmente
 # en producción deberia quitarse
 
-
-SchemaView = get_schema_view(
-   openapi.Info(
-      title="Qwizer API",
-      default_version='v1',
-      description="",
-      terms_of_service="",
-      contact=openapi.Contact(email=""),
-      license=openapi.License(name="BSD License"),
-   ),
-   public=True,
-   permission_classes=[permissions.AllowAny],
-)
-
 urlpatterns = [
-   re_path(r'^swagger(?P<format>\.json|\.yaml)$', SchemaView.without_ui(cache_timeout=0), name='schema-json'),
-   re_path(r'^swagger/$', SchemaView.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-   re_path(r'^redoc/$', SchemaView.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-]
+    # YOUR PATTERNS
+    path('swagger.json', SpectacularJSONAPIView.as_view(), name='schema-swagger-json'),
+    path('swagger.yml', SpectacularYAMLAPIView.as_view(), name='schema-swagger-yml'),
 
+    # Optional UI:
+    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema-swagger-json'), name='swagger-ui'),
+    path('redoc/', SpectacularRedocView.as_view(url_name='schema-swagger-json'), name='redoc'),
+
+]
 
 urlpatterns += [
     path("api/", include("api.urls")),

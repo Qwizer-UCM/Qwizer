@@ -13,7 +13,7 @@ from .views import (
 router = routers.DefaultRouter(trailing_slash=False)
 
 # TODO pendiente poner permission_classes
-#router.register('qr',qr.QRViewSet,'qr')
+router.register('qr',qr.QRViewSet,'qr')
 router.register('question',question.QuestionViewSet,'question')
 router.register('subject',subject.SubjectViewSet,'subject')
 router.register('test',test.TestsViewSet,'test')

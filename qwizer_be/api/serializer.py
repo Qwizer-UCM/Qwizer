@@ -7,7 +7,8 @@ from .models import Cuestionario, OpcionTest, Pregunta,PreguntaTest,PreguntaText
 class OpcionesTestSerializer(serializers.ModelSerializer):
     class Meta:
         model = OpcionTest
-        exclude = ["pregunta"]
+        fields = "__all__"  
+
 
 class PreguntasSerializer(serializers.ModelSerializer):
 

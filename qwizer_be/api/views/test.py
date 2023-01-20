@@ -275,6 +275,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
         try:
             yamlplscomeon = yaml.load(request.data["fichero_yaml"], Loader=yaml.FullLoader)
+            print(yamlplscomeon)
         except yaml.YAMLError:
             content = {
                 "inserted": "false",
