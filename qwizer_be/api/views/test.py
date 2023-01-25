@@ -274,7 +274,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             return Response(content)
 
         try:
-            yamlplscomeon = yaml.load(request.data["fichero_yaml"], Loader=yaml.FullLoader)
+            yamlplscomeon = yaml.safe_load(request.data["fichero_yaml"])
             print(yamlplscomeon)
         except yaml.YAMLError:
             content = {
