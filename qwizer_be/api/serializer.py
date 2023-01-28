@@ -1,6 +1,8 @@
 from rest_framework import serializers
+
+from api import serializer
 from .utils.cifrado import encrypt_tests
-from .models import Cuestionario, OpcionTest, Pregunta,PreguntaTest,PreguntaText, RespuestaEnviadaTest, RespuestaEnviadaText
+from .models import Cuestionario, InstanciaOpcionTest, InstanciaPregunta, OpcionTest, Pregunta, PreguntaCuestionario,PreguntaTest,PreguntaText, InstanciaPreguntaTest, InstanciaPreguntaText
 
 #TODO mejor indicar los campos concretos en vez de __all__
 
@@ -9,9 +11,12 @@ class OpcionesTestSerializer(serializers.ModelSerializer):
         model = OpcionTest
         fields = "__all__"  
 
+class PreguntaCuestionarioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PreguntaCuestionario
+        fields = "__all__"
 
 class PreguntasSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Pregunta
         fields = "__all__"
@@ -35,9 +40,38 @@ class PreguntasTestSerializer(serializers.ModelSerializer):
 class PreguntasTextSerializer(serializers.ModelSerializer):
     tipoPregunta = serializers.CharField(default="text")
 
-
     class Meta:
         model = PreguntaText
+        fields = "__all__"
+
+
+class InstanciaOpcionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InstanciaOpcionTest
+        fields = "__all__"
+
+class InstanciaPreguntaSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = InstanciaPregunta
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        pregunta = None
+        if hasattr(instance, "instanciapreguntatest"):
+            pregunta = InstanciaPreguntaTestSerializer(instance=instance.instanciapreguntatest).data
+        if hasattr(instance, "instanciapreguntatext"):
+            pregunta = InstanciaPreguntaTextSerializer(instance=instance.instanciapreguntatext).data
+        return pregunta
+
+class InstanciaPreguntaTestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InstanciaPreguntaTest
+        fields = "__all__"
+
+class InstanciaPreguntaTextSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InstanciaPreguntaText
         fields = "__all__"
 
 class EncryptedTestsSerializer(serializers.ModelSerializer):
@@ -67,11 +101,11 @@ class EncryptedTestsSerializer(serializers.ModelSerializer):
 
 class RespuestasEnviadasTestSerializer(serializers.ModelSerializer):
     class Meta:
-        model = RespuestaEnviadaTest
+        model = InstanciaPreguntaTest
         fields = "__all__"
 class RespuestasEnviadasTextSerializer(serializers.ModelSerializer):
     class Meta:
-        model = RespuestaEnviadaText
+        model = InstanciaPreguntaText
         fields = "__all__"
 
 class RespuestasSerializer(serializers.Serializer):

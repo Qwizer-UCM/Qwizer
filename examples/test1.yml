@@ -18,7 +18,11 @@ cuestionario:
     - tipo: "test"
       pregunta: "El problema de la mochila usa el esquema de :"
       titulo: "Titulo 3"
-      opciones: ["Divide y Vencerás","Vuelta atrás"]
+      opciones: 
+        - op: "Divide y Vencerás"
+          fijar: False
+        - op: "Vuelta atrás"
+          fijar: False
       op_correcta: 1 #id de opcion correcta
       punt_positiva: 1.0    #puntos que suma
       punt_negativa: 0.3 #puntos que resta
@@ -26,7 +30,15 @@ cuestionario:
     - tipo: "test"
       pregunta: "Indica qué TAD no es lineal:"
       titulo: "Titulo 2"
-      opciones: ["Cola", "Pila","Árbol","Lista"]
+      opciones: 
+        - op: "Cola"
+          fijar: False
+        - op: "Pila"
+          fijar: False
+        - op: "Árbol"
+          fijar: False
+        - op: "Lista"
+          fijar: False
       op_correcta: 2 #id de opcion correcta 5,37
       punt_positiva: 1.0    #puntos que suma
       punt_negativa: 0.3 #puntos que resta
@@ -34,14 +46,22 @@ cuestionario:
     - tipo: "test"
       pregunta: "El problema de las n-reinas usa el esquema de :"
       titulo: "Titulo 4"
-      opciones: ["Vuelta atrás","Divide y Vencerás"]
+      opciones: 
+        - op: "Vuelta atrás"
+          fijar: False
+        - op: "Divide y Vencerás"
+          fijar: False
       op_correcta: 0 #id de opcion correcta
       punt_positiva: 0.5    #puntos que suma
       punt_negativa: 0.3 #puntos que resta
     - tipo: "test"
       pregunta: "El TAD Cola se puede implementar con un array estático circular"
       titulo: "Titulo 5"
-      opciones: ["Verdadero", "Falso"]
+      opciones: 
+        - op: "Verdadero"
+          fijar: False
+        - op: "Falso"
+          fijar: False
       op_correcta: 0 #id de opcion correcta
       punt_positiva: 0.5    #puntos que suma
       punt_negativa: 0.3 #puntos que resta

@@ -58,8 +58,8 @@ class UserManager(BaseUserManager):
 
 # TODO redefinir aqui metodos necesarios, getById, getBy...
 class OpcionesTestManager(models.Manager):
-    def create_opciones_test(self, opcion, idPregunta, commit=False, **extra_fields):
-        obj = self.model(opcion=opcion, pregunta_id=idPregunta, **extra_fields)
+    def create_opciones_test(self, opcion, idPregunta, orden, fijar, commit=False, **extra_fields):
+        obj = self.model(opcion=opcion, pregunta_id=idPregunta,orden=orden, fijar=fijar, **extra_fields)
         if commit:
             obj.save()
         return obj
@@ -122,7 +122,7 @@ class CuestionariosManager(models.Manager):
     def get_queryset(self):
         return CuestionariosQuerySet(model=self.model, using=self._db)
 
-    def create_cuestionarios(self, titulo, secuencial, idAsignatura, idProfesor, duracion, password, fecha_cierre, fecha_apertura, fecha_visible, commit=False, **extra_fields):
+    def create_cuestionarios(self, titulo, secuencial, idAsignatura, idProfesor, duracion, password, fecha_cierre, fecha_apertura, fecha_visible, aleatorizar=None, commit=False, **extra_fields):
         obj = self.model(
             titulo=titulo,
             secuencial=secuencial,
@@ -135,6 +135,8 @@ class CuestionariosManager(models.Manager):
             fecha_visible=fecha_visible,
             **extra_fields
         )
+        if aleatorizar is not None:
+            obj.aleatorizar = aleatorizar
         if commit:
             obj.save()
         return obj
@@ -150,8 +152,8 @@ class CuestionariosManager(models.Manager):
 
 
 class PreguntaCuestionarioManager(models.Manager):
-    def create_pregunta_cuestionario(self, nQuestion, puntosAcierto, puntosFallo, idCuestionario, idPregunta, commit=False, **extra_fields):
-        obj = self.model(nPregunta=nQuestion, puntosAcierto=puntosAcierto, puntosFallo=puntosFallo, cuestionario_id=idCuestionario, pregunta_id=idPregunta, **extra_fields)
+    def create_pregunta_cuestionario(self, puntosAcierto, puntosFallo, idCuestionario, idPregunta,orden, fijar, commit=False, **extra_fields):
+        obj = self.model(puntosAcierto=puntosAcierto, puntosFallo=puntosFallo, cuestionario_id=idCuestionario, pregunta_id=idPregunta, orden=orden, fijar=fijar, **extra_fields)
         if commit:
             obj.save()
         return obj
@@ -161,7 +163,6 @@ class PreguntaCuestionarioManager(models.Manager):
 
     def get_by_cuestionario(self, id_cuestionario):
         return self.get_queryset().filter(cuestionario_id=id_cuestionario)
-
 
 class AsignaturaManager(models.Manager):
     # TODO no se crean
@@ -248,42 +249,48 @@ class IntentoManager(models.Manager):
     def count_corregidos(self, cuestionarios, id_alumno):
         return self.get_queryset().filter(cuestionario__in=cuestionarios, usuario_id=id_alumno).count()
 
+class InstanciaPreguntaManager(models.Manager):
+    def create_instancia(self, id_intento, id_pregunta,orden, commit=False, **extra_fields):
+        obj = self.model(intento_id=id_intento, pregunta_id=id_pregunta,orden=orden, **extra_fields)
+        if commit:
+            obj.save()
+        return obj
 
-class RespuestasEnviadasTestManager(models.Manager):
-    def create_respuesta(self, idIntento, idPregunta, idRespuesta, commit=False, **extra_fields):
-        obj = self.model(intento_id=idIntento, pregunta_id=idPregunta, respuesta_id=idRespuesta, **extra_fields)
+    def get_by_intento_pregunta(self, id_intento, id_pregunta):
+        return self.get_queryset().filter(intento_id=id_intento, pregunta_id=id_pregunta).first()
+
+
+class InstanciaPreguntaTestManager(InstanciaPreguntaManager):
+    def create_instancia(self, id_intento, id_pregunta, orden, commit=False, id_respuesta=None,**extra_fields):
+        obj = super().create_instancia(id_intento=id_intento, id_pregunta=id_pregunta,orden=orden)
+        obj.respuesta_id=id_respuesta
         if commit:
             obj.save()
         return obj
 
     # TODO first es un apaño
-    def get_by_intento_pregunta(self, id_intento, id_pregunta):
-        return self.get_queryset().filter(intento_id=id_intento, pregunta_id=id_pregunta).first()
+    # def get_by_intento_pregunta(self, id_intento, id_pregunta):
+    #     return self.get_queryset().filter(intento_id=id_intento, pregunta_id=id_pregunta).first()
 
 
-class RespuestasEnviadasTextManager(models.Manager):
-    def create_respuesta(self, idIntento, idPregunta, Respuesta, commit=False, **extra_fields):
-        obj = self.model(intento_id=idIntento, pregunta_id=idPregunta, respuesta=Respuesta, **extra_fields)
+class InstanciaPreguntaTextManager(InstanciaPreguntaManager):
+    def create_instancia(self, id_intento, id_pregunta, orden, commit=False,respuesta=None, **extra_fields):
+        obj = super().create_instancia(id_intento=id_intento, id_pregunta=id_pregunta,orden=orden)
+        obj.respuesta=respuesta
         if commit:
             obj.save()
         return obj
 
-    def get_by_intento_pregunta(self, id_intento, id_pregunta):
-        return self.get_queryset().filter(intento_id=id_intento, pregunta_id=id_pregunta).first()
+    # TODO Herencia :)
+    # def get_by_intento_pregunta(self, id_intento, id_pregunta):
+    #     return self.get_queryset().filter(intento_id=id_intento, pregunta_id=id_pregunta).first()
 
-
-class RespuestasEnviadasManager(models.Manager):
-    # TODO reemplazar instancias por id's
-    def create_respuesta(self, idCuestionario, idAlumno, idPregunta, Respuesta=None, idRespuesta=None, commit=False, **extra_fields):
-        obj = self.model(cuestionario_id=idCuestionario, alumno_id=idAlumno, pregunta_id=idPregunta, **extra_fields)
-        # Son exclusivas entre sí, seguramente hay una mejor manera de hacerlo
-        if Respuesta is not None:
-            obj.Respuesta = Respuesta
-        if idRespuesta is not None:
-            obj.idRespuesta = idRespuesta
+class InstanciaOpcionTestManager(models.Manager):
+    def create_instancia(self, id_instancia, id_opcion, orden, commit=False, **extra_fields):
+        obj = self.model(instancia_id=id_instancia,respuesta_id=id_opcion,orden=orden, **extra_fields)
         if commit:
             obj.save()
         return obj
-
-    def get_by_intento_pregunta(self, id_intento, id_pregunta):
-            return self.get_queryset().filter(intento_id=id_intento, pregunta_id=id_pregunta).first()
+    
+    def get_by_instpregunta_opcion(self,id_instpregunta, id_opcion):
+        return self.get_queryset().get(instancia_id=id_instpregunta,respuesta_id=id_opcion)

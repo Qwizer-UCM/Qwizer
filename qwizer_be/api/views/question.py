@@ -62,7 +62,7 @@ class QuestionViewSet(viewsets.ViewSet):
                 
                 opciones = preg["opciones"]
                 for index , opc in enumerate(opciones): 
-                    opcion = OpcionTest.objects.create_opciones_test(opcion=opc, idPregunta=pregunta.id)
+                    opcion = OpcionTest.objects.create_opciones_test(opcion=opc["op"], idPregunta=pregunta.id,orden=index,fijar=opc["fijar"] if ("fijar" in opc) else False)
                     try:
                         opcion.save()
                         if index == preg["op_correcta"]:

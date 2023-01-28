@@ -12,15 +12,16 @@ from api.manager import (
     CuestionariosManager,
     CursaManager,
     ImparteManager,
+    InstanciaOpcionTestManager,
     IntentoManager,
     OpcionesTestManager,
     PreguntaCuestionarioManager,
     PreguntasManager,
     PreguntasTestManager,
     PreguntasTextManager,
-    RespuestasEnviadasManager,
-    RespuestasEnviadasTestManager,
-    RespuestasEnviadasTextManager,
+    InstanciaPreguntaManager,
+    InstanciaPreguntaTestManager,
+    InstanciaPreguntaTextManager,
     UserManager,
 )
 
@@ -93,6 +94,8 @@ class OpcionTest(models.Model):
     objects = OpcionesTestManager()
     pregunta = models.ForeignKey("PreguntaTest", related_name="opciones_test", on_delete=models.CASCADE)
     opcion = models.CharField(blank=True, max_length=254, verbose_name="opcion")
+    orden = models.PositiveSmallIntegerField()
+    fijar = models.BooleanField(default=False)
 
     # TODO no estoy seguro de que sea lo ideal pero nos permite refactorizar con facilidad
     # https://docs.djangoproject.com/en/4.1/ref/models/instances/
@@ -109,7 +112,7 @@ class OpcionTest(models.Model):
 
 class Pregunta(models.Model):
     objects = PreguntasManager()
-    pregunta = models.CharField(blank=True, max_length=254, verbose_name="pregunta")
+    pregunta = models.CharField(blank=True, max_length=254, verbose_name="enunciado")
     asignatura = models.ForeignKey("Asignatura", on_delete=models.CASCADE)
     titulo = models.CharField(blank=True, max_length=254, verbose_name="titulo")
 
@@ -118,10 +121,6 @@ class Pregunta(models.Model):
 
     class Meta:
         ordering = ["pregunta"]
-        unique_together = [
-            "pregunta",
-            "asignatura",
-        ]  # No pueden haber preguntas iguales para una asignatura
 
 class PreguntaTest(Pregunta):
     objects = PreguntasTestManager()
@@ -143,6 +142,7 @@ class Cuestionario(models.Model):
     fecha_apertura = models.DateTimeField(blank=False, verbose_name="fecha_apertura")
     fecha_cierre = models.DateTimeField(blank=False, verbose_name="fecha_cierre")
     preguntas = models.ManyToManyField(Pregunta, through="PreguntaCuestionario")
+    aleatorizar = models.BooleanField(default=False)
 
     def __str__(self):
         return self.titulo
@@ -159,9 +159,10 @@ class PreguntaCuestionario(models.Model):
     objects = PreguntaCuestionarioManager()
     pregunta = models.ForeignKey(Pregunta, related_name="preguntas", on_delete=models.CASCADE)
     cuestionario = models.ForeignKey(Cuestionario, on_delete=models.CASCADE)
-    nPregunta = models.IntegerField()
     puntosAcierto = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name="puntosAcierto")
     puntosFallo = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name="puntosFallo")
+    orden = models.PositiveSmallIntegerField()
+    fijar = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.pregunta) + "/" + str(self.cuestionario)
@@ -175,7 +176,7 @@ class PreguntaCuestionario(models.Model):
 
 class Asignatura(models.Model):
     objects = AsignaturaManager()
-    nombreAsignatura = models.CharField(blank=True, max_length=254, verbose_name="nombreAsignatura")
+    nombreAsignatura = models.CharField(blank=True, max_length=254, verbose_name="nombreAsignatura", unique=True)
 
     def __str__(self):
         return self.nombreAsignatura
@@ -201,7 +202,6 @@ class Cursa(models.Model):
     class Meta:
         unique_together = ["alumno", "asignatura"]
 
-
 class Intento(models.Model):
     objects = IntentoManager()
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -211,6 +211,16 @@ class Intento(models.Model):
     hash_offline = models.CharField(blank=True, max_length=254, verbose_name="hash_offline")
     fecha_inicio = models.DateTimeField(null=True,blank=False, verbose_name="fecha_inicio")
     fecha_fin = models.DateTimeField(null=True,blank=False, verbose_name="fecha_fin")
+
+    class Estado(models.TextChoices):
+        PENDIENTE = 'PEN', _('Pendiente')
+        ENTREGADO = 'ENT', _('Entregado')
+
+    estado = models.CharField(
+        max_length=3,
+        choices=Estado.choices,
+        default=Estado.PENDIENTE,
+    )
 
     class Meta:
         unique_together = ("usuario","cuestionario")
@@ -222,13 +232,13 @@ class Intento(models.Model):
 # Aún haciendolo asi no lo veo muy claro para luego en las vistas no hacer distincion entre las instancias
 
 
-class RespuestaEnviada(models.Model):
-    objects = RespuestasEnviadasManager()
+class InstanciaPregunta(models.Model):
+    objects = InstanciaPreguntaManager()
     intento = models.ForeignKey(Intento, on_delete=models.CASCADE)
     pregunta = models.ForeignKey(Pregunta, on_delete=models.CASCADE)
+    orden = models.PositiveSmallIntegerField()
 
     class Meta:
-        abstract = True
         ordering = ["pregunta"]
 
     @classmethod
@@ -250,13 +260,17 @@ class RespuestaEnviada(models.Model):
             return -pregunta_info.puntosFallo
 
 
-class RespuestaEnviadaTest(RespuestaEnviada):  # No debería ser on delete cascade
-    objects = RespuestasEnviadasTestManager()
-    respuesta = models.ForeignKey(OpcionTest, on_delete=models.CASCADE)
+class InstanciaPreguntaTest(InstanciaPregunta):  # No debería ser on delete cascade
+    objects = InstanciaPreguntaTestManager()
+    respuesta = models.ForeignKey(OpcionTest, on_delete=models.CASCADE,null=True, blank=True)
 
 
-class RespuestaEnviadaText(RespuestaEnviada):
-    objects = RespuestasEnviadasTextManager()
-    respuesta = models.CharField(blank=True, max_length=254, verbose_name="respuesta")
+class InstanciaPreguntaText(InstanciaPregunta):
+    objects = InstanciaPreguntaTextManager()
+    respuesta = models.CharField(null=True, blank=True, max_length=254, verbose_name="respuesta")
 
-
+class InstanciaOpcionTest(models.Model):
+    objects = InstanciaOpcionTestManager()
+    instancia = models.ForeignKey(InstanciaPreguntaTest, on_delete=models.CASCADE)
+    respuesta = models.ForeignKey(OpcionTest, on_delete=models.CASCADE, null=True, blank=True)
+    orden = models.PositiveSmallIntegerField()

@@ -35,12 +35,7 @@ def decrypt(message, in_iv, in_key):
     """
     key = binascii.a2b_hex(in_key)
     iv = binascii.a2b_hex(in_iv)
-    aes = AES.new(key, AES.MODE_CFB, iv)
+    aes = AES.new(key, AES.MODE_CFB, iv, segment_size=128)
 
     decrypted = aes.decrypt(binascii.a2b_base64(message).rstrip())
-    decoded = "Nope"
-    try:
-        decoded = unpad(decrypted, BLOCK_SIZE).decode()
-    except:
-        pass
-    return decoded
+    return unpad(decrypted, BLOCK_SIZE).decode()
