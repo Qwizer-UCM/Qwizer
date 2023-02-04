@@ -152,8 +152,10 @@ class CuestionariosManager(models.Manager):
 
 
 class PreguntaCuestionarioManager(models.Manager):
-    def create_pregunta_cuestionario(self, puntosAcierto, puntosFallo, idCuestionario, idPregunta,orden, fijar, commit=False, **extra_fields):
+    def create_pregunta_cuestionario(self, puntosAcierto, puntosFallo, idCuestionario, idPregunta,orden, fijar,aleatorizar=None, commit=False, **extra_fields):
         obj = self.model(puntosAcierto=puntosAcierto, puntosFallo=puntosFallo, cuestionario_id=idCuestionario, pregunta_id=idPregunta, orden=orden, fijar=fijar, **extra_fields)
+        if aleatorizar is not None:
+            obj.aleatorizar = aleatorizar        
         if commit:
             obj.save()
         return obj

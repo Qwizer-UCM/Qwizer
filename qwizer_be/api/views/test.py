@@ -54,7 +54,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         res = PreguntasSerializer(cuestionario.preguntas.all(), many=True).data
         for preg in res:
             pertenece = PreguntaCuestionarioSerializer(PreguntaCuestionario.objects.get_by_pregunta_cuestionario(id_pregunta=preg["id"], id_cuestionario=cuestionario.id)).data
-            preg["fijar"], preg["orden"] = pertenece["fijar"], pertenece["orden"]
+            preg["fijar"], preg["orden"], preg["aleatorizar"] = pertenece["fijar"], pertenece["orden"], pertenece["aleatorizar"]
 
         if exists:
             # Recuperar orden de las preguntas
@@ -74,10 +74,10 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 for i, elem in shuffle(res):
                     res[i] = elem
                     res[i]["orden"] = i
-                    if elem["tipoPregunta"] == "test":
+                    if elem["tipoPregunta"] == "test" and elem["aleatorizar"]:
                         for j, opc in shuffle(res[i]["opciones_test"]):
-                            res[i] = elem
-                            res[i]["orden"] = i
+                            res[i]["opciones_test"][j] = opc
+                            res[i]["opciones_test"][j]["orden"] = j
             else:
                 res = sorted(res, key=lambda d: d["orden"]) #TODO ordenar en back o front?
             # Guardar el orden aleatorio para el alumno
@@ -163,6 +163,8 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 idPregunta=Pregunta.objects.get_by_id(id_pregunta=pregunta["id"]).id,
                 orden=i,
                 fijar=pregunta["fijar"] if ("fijar" in pregunta) else False,
+                aleatorizar = pregunta["aleatorizar"] if ("aleatorizar" in pregunta) else False
+                
             )
             pertenece.save()
 
@@ -192,6 +194,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 opcion = OpcionTest.objects.get_by_id(id_opciones=respuesta["answr"])
                 respuesta_enviada = InstanciaPreguntaTest.objects.get_by_intento_pregunta(intento.id, pregunta.id)
                 respuesta_enviada.respuesta = opcion
+                respuesta_enviada.save()
 
             if respuesta["type"] == "text":
                 respuesta_enviada = InstanciaPreguntaText.objects.get_by_intento_pregunta(intento.id, pregunta.id)
@@ -394,6 +397,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 idPregunta=pregunta.id,
                 orden=i,
                 fijar=preg["fijar"] if ("fijar" in preg) else False,
+                aleatorizar = preg["aleatorizar"] if ("aleatorizar" in preg) else False
             )
             pertenece.save()
 

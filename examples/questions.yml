@@ -3,7 +3,15 @@ preguntas:
   - tipo: "test"
     pregunta: "Madrid es la capital de..."
     titulo: "Titulo temporal1"
-    opciones: ["España", "Argentina", "Oceano Pacifico"]
+    opciones: 
+        - op: "España"
+          fijar: False
+        - op: "Argentina"
+          fijar: False
+        - op: "Oceano Pacifico"
+          fijar: False
+        - op: "Ninguna de las anteriores"
+          fijar: True
     op_correcta: 0 #id de opcion correcta
 
   - tipo: "text"

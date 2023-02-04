@@ -36,7 +36,7 @@ class StudentsViewSet(viewsets.ViewSet):
         if str(request.user.role) != User.STUDENT:
             usuarios_asignatura = Cursa.objects.get_by_asignatura(id_asignatura=pk)
             alumnos = []
-            for cursa in usuarios_asignatura:  # TODO cambiar los atributos en los modelos no es un idAlumno es el alumno como tal
+            for cursa in usuarios_asignatura:  
                 alumnos.append({"id": cursa.alumno.id, "nombre": cursa.alumno.first_name, "apellidos": cursa.alumno.last_name})
 
             content["alumnos"] = alumnos
@@ -52,9 +52,9 @@ class StudentsViewSet(viewsets.ViewSet):
         GET /estudiantes/{id_asignatura}/disponibles
         """
         content = {}
-        if str(request.user.role) != User.TEACHER:
+        if str(request.user.role) != User.STUDENT:
             # TODO asegurarse de que es correcta la query
-            usuarios_asignatura = User.objects.filter(role="student").exclude(esalumno__alumno_id=F("id"), esalumno__asignatura_id=pk)
+            usuarios_asignatura = User.objects.filter(role="student").exclude(cursa__alumno_id=F("id"), cursa__asignatura_id=pk)
             alumnos = []
 
             for alumno in usuarios_asignatura:

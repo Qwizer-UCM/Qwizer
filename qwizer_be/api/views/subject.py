@@ -46,7 +46,7 @@ class SubjectViewSet(viewsets.ViewSet):
         """
         Devuelve todas las preguntas de una asignatura para el banco de preguntas
         """
-        if str(request.user.role) == "student":
+        if str(request.user.role) == User.STUDENT:
             content = {
                 "inserted": "false",
                 "message": "Error:  debes de ser administrador o profesor.",
@@ -148,7 +148,7 @@ class SubjectViewSet(viewsets.ViewSet):
         DELETE /asignatura/{pk}/enroll
         """
         print(request.data)
-        if str(request.user.role) != "student":
+        if str(request.user.role) != User.STUDENT:
             correct = True
             alumnos_fallidos = []
             alumnos = request.data["alumnos"]

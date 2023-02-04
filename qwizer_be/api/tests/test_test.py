@@ -43,6 +43,7 @@ class Test(APITestCase):
                         "op_correcta": 1,
                         "punt_positiva": 1.0,
                         "punt_negativa": 0.3,
+                        "aleatorizar": True
                     },
                     {
                         "tipo": "test",
