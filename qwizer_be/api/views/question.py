@@ -90,7 +90,6 @@ class QuestionViewSet(viewsets.ViewSet):
         if str(request.user.role) == User.STUDENT:
             content = {"message": "Error: Para actualizar una pregunta debes ser un profesor."}
             return Response(content)
-        print(request.data["preguntaActualizada"])
         updated_question = request.data["preguntaActualizada"]
 
         pregunta = Pregunta.objects.get_by_id(id_pregunta=pk)  #TODO cambiar al servicio

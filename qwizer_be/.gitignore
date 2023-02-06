@@ -3,3 +3,6 @@
 __pycache__/
 
 .env
+.coverage
+coverage.xml
+htmlcov/

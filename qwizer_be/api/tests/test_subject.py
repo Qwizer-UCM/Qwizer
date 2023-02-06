@@ -20,8 +20,6 @@ class Subject(APITestCase):
         self.assertEqual(len(data["asignaturas"]), Asignatura.objects.all().count())  
 
     def test_subject_cuestionarios(self):
-        asig = Asignatura.objects.create_asignaturas(nombreAsignatura="Test", commit=True)
-        
         Cuestionario.objects.create_cuestionarios(titulo="Titulo", secuencial=0,idProfesor=self.user.id, password="a",duracion=10, fecha_cierre="2022-11-08 22:33:00.000 +0100", fecha_apertura="2022-11-09 22:33:00.000 +0100", fecha_visible="2022-11-08 22:33:00.000 +0100", idAsignatura=self.asig.id, commit=True)
 
         url_cuestionarios = reverse("subject-cuestionarios", args=[self.asig.id])

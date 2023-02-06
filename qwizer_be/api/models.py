@@ -192,6 +192,7 @@ class Imparte(models.Model):
     asignatura = models.ForeignKey(Asignatura, on_delete=models.CASCADE)
 
     class Meta:
+        verbose_name_plural = "Imparte"
         unique_together = ["profesor", "asignatura"]
 
 
@@ -249,7 +250,7 @@ class InstanciaPregunta(models.Model):
         opcion_usuario, opcion_correcta = None, None
 
         if respuesta["type"] == "test":
-            opcion_usuario = int(respuesta["answr"])
+            opcion_usuario = int(respuesta["answr"] or -1)
             opcion_correcta = pregunta_info.pregunta.preguntatest.respuesta.id
         elif respuesta["type"] == "text":
             opcion_usuario = respuesta["answr"].lower().replace(" ", "")

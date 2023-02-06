@@ -2,22 +2,35 @@ import random
 from datetime import datetime
 
 import yaml
-from api.models import (Asignatura, Cuestionario, InstanciaPreguntaTest,
-                        InstanciaPreguntaText, Intento, OpcionTest, Pregunta,
-                        PreguntaCuestionario, PreguntaTest, PreguntaText, User)
-from api.utils.cifrado import decrypt, encrypt_tests
+from api.models import Asignatura, Cuestionario, InstanciaPreguntaTest, InstanciaPreguntaText, Intento, OpcionTest, Pregunta, PreguntaCuestionario, PreguntaTest, PreguntaText, User
+from api.utils.cifrado import encrypt_tests
 from django.utils.timezone import make_aware
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from ..models import (Asignatura, Cuestionario, InstanciaOpcionTest,
-                      InstanciaPregunta, InstanciaPreguntaTest,
-                      InstanciaPreguntaText, Intento, OpcionTest, Pregunta,
-                      PreguntaCuestionario, User)
-from ..serializer import (EncryptedTestsSerializer, InstanciaOpcionSerializer,
-                          InstanciaPreguntaSerializer,
-                          PreguntaCuestionarioSerializer, PreguntasSerializer)
+from ..models import (
+    Asignatura,
+    Cuestionario,
+    Imparte,
+    InstanciaOpcionTest,
+    InstanciaPregunta,
+    InstanciaPreguntaTest,
+    InstanciaPreguntaText,
+    Intento,
+    OpcionTest,
+    Pregunta,
+    PreguntaCuestionario,
+    User,
+)
+from ..serializer import (
+    CuestionarioSerializer,
+    EncryptedTestsSerializer,
+    InstanciaOpcionSerializer,
+    InstanciaPreguntaSerializer,
+    PreguntaCuestionarioSerializer,
+    PreguntasSerializer,
+)
 
 
 def shuffle(res):
@@ -32,6 +45,7 @@ def shuffle(res):
 
 
 TIME_FORMAT = "%d/%m/%Y, %H:%M:%S"  # TODO fichero de constantes?
+
 # TODO No se han indicado permisos todavia
 class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Cuestionario.objects.all()
@@ -39,12 +53,6 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     permission_classes = []
 
     def retrieve(self, request, pk):
-        try:
-            intento = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=pk, id_alumno=request.user.id)  # TODO se puede crear metodo para exists
-            exists = True
-        except:
-            exists = False
-
         try:
             cuestionario = Cuestionario.objects.get_by_id(id_cuestionario=pk)
         except:
@@ -56,21 +64,32 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             pertenece = PreguntaCuestionarioSerializer(PreguntaCuestionario.objects.get_by_pregunta_cuestionario(id_pregunta=preg["id"], id_cuestionario=cuestionario.id)).data
             preg["fijar"], preg["orden"], preg["aleatorizar"] = pertenece["fijar"], pertenece["orden"], pertenece["aleatorizar"]
 
-        if exists:
+
+        # Comprobar si es la primera vez que el alumno pide el cuestionario para crearle su propio orden de preguntas
+        try:
+            intento = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=pk, id_alumno=request.user.id)  # TODO se puede crear metodo para exists
+        except Intento.DoesNotExist:
+            intento = None
+
+        if intento:
             # Recuperar orden de las preguntas
-            res_copy = res.copy()
-            for i, preg in enumerate(res_copy):
+            for preg in res.copy():
                 override = InstanciaPreguntaSerializer(InstanciaPregunta.objects.get_by_intento_pregunta(id_intento=intento.id, id_pregunta=preg["id"])).data
                 preg["orden"] = override["orden"]
                 res[preg["orden"]] = preg
                 if preg["tipoPregunta"] == "test":
-                    for opc in preg["opciones_test"]:
+                    for opc in preg["opciones_test"].copy():
                         opc_override = InstanciaOpcionSerializer(InstanciaOpcionTest.objects.get_by_instpregunta_opcion(id_instpregunta=override["id"], id_opcion=opc["id"])).data
                         opc["orden"] = opc_override["orden"]
                         res[preg["orden"]]["opciones_test"][opc["orden"]] = opc
         else:
+            # TODO arreglar en algun momento
+            #Ordenar lista segun campo orden
+            for preg in res.copy():
+                res[preg["orden"]] = preg
+
+            # Aleatorizar las preguntas, reordenar elementos no fijos
             if cuestionario.aleatorizar:
-                # Aleatorizar las preguntas
                 for i, elem in shuffle(res):
                     res[i] = elem
                     res[i]["orden"] = i
@@ -78,20 +97,20 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                         for j, opc in shuffle(res[i]["opciones_test"]):
                             res[i]["opciones_test"][j] = opc
                             res[i]["opciones_test"][j]["orden"] = j
-            else:
-                res = sorted(res, key=lambda d: d["orden"]) #TODO ordenar en back o front?
+
             # Guardar el orden aleatorio para el alumno
             intento = Intento.objects.create_intento(idAlumno=request.user.id, idCuestionario=cuestionario.id, commit=True)
-            for i, preg in enumerate(res):
+            for preg in res:
                 if preg["tipoPregunta"] == "test":
                     inst = InstanciaPreguntaTest.objects.create_instancia(id_intento=intento.id, id_pregunta=preg["id"], id_respuesta=None, orden=preg["orden"], commit=True)
-                    for j, opc in enumerate(preg["opciones_test"]):
+                    for opc in preg["opciones_test"]:
                         InstanciaOpcionTest.objects.create_instancia(id_instancia=inst.id, id_opcion=opc["id"], orden=opc["orden"], commit=True)
                 if preg["tipoPregunta"] == "text":
                     InstanciaPreguntaText.objects.create_instancia(id_intento=intento.id, id_pregunta=preg["id"], respuesta=None, orden=preg["orden"], commit=True)
 
         # Encriptar tests
-        quiz_encrypt = {}
+        # Añadir atributos del cuestionario
+        quiz_encrypt = {**CuestionarioSerializer(cuestionario).data}
         encrypted = encrypt_tests(res, cuestionario.password)
         quiz_encrypt["iv"] = encrypted["iv"]
         quiz_encrypt["password"] = encrypted["password"]
@@ -104,11 +123,12 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
     def create(self, request):
         if str(request.user.role) == User.STUDENT:
-            content = {
-                "inserted": "false",
-                "message": "Error: Para poder crear tests debes de ser administrador o profesor.",
-            }
-            return Response(content)
+            return Response(
+                {
+                    "inserted": "false",
+                    "message": "Error: Para poder crear tests debes de ser administrador o profesor.",
+                }
+            )
 
         profesor = request.user
 
@@ -118,24 +138,16 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         id_asignatura = cuestionario_data["testSubject"]
         sec = cuestionario_data["secuencial"]
         durat = cuestionario_data["testDuration"]
-
-        fecha_apertura = cuestionario_data["fechaApertura"]
-        date_time_apertura = make_aware(datetime.fromtimestamp(fecha_apertura / 1000))
-
-        fecha_cierre = cuestionario_data["fechaCierre"]
-        date_time_cierre = make_aware(datetime.fromtimestamp(fecha_cierre / 1000))
-
-        fecha_visible = cuestionario_data["fechaVisible"]
-        date_time_visible = make_aware(datetime.fromtimestamp(fecha_visible / 1000))
-
+        date_time_apertura = make_aware(datetime.fromtimestamp(cuestionario_data["fechaApertura"] / 1000))
+        date_time_cierre = make_aware(datetime.fromtimestamp(cuestionario_data["fechaCierre"] / 1000))
+        date_time_visible = make_aware(datetime.fromtimestamp(cuestionario_data["fechaVisible"] / 1000))
         lista_preguntas = cuestionario_data["questionList"]
         aleatorizar = cuestionario_data["aleatorizar"] if ("aleatorizar" in cuestionario_data) else False
 
         try:
             asignatura = Asignatura.objects.get_by_id(id_asignatura=id_asignatura)
         except:
-            content = {"inserted": "false", "message": "Error: La asignatura no existe!"}
-            return Response(content)
+            return Response({"inserted": "false", "message": "Error: La asignatura no existe!"})
 
         try:
             cuestionario = Cuestionario.objects.create_cuestionarios(
@@ -152,8 +164,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             )
             cuestionario.save()
         except:
-            content = {"inserted": "false", "message": "Error: El cuestionario ya existe"}
-            return Response(content)
+            return Response({"inserted": "false", "message": "Error: El cuestionario ya existe"})
 
         for i, pregunta in enumerate(lista_preguntas):
             pertenece = PreguntaCuestionario.objects.create_pregunta_cuestionario(
@@ -163,31 +174,33 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 idPregunta=Pregunta.objects.get_by_id(id_pregunta=pregunta["id"]).id,
                 orden=i,
                 fijar=pregunta["fijar"] if ("fijar" in pregunta) else False,
-                aleatorizar = pregunta["aleatorizar"] if ("aleatorizar" in pregunta) else False
-                
+                aleatorizar=pregunta["aleatorizar"] if ("aleatorizar" in pregunta) else False,
             )
             pertenece.save()
 
-        content = {
-            "inserted": "true",
-            "message": "El cuestionario se ha insertado correctamente",
-        }
-
-        return Response(content)
+        return Response(
+            {
+                "inserted": "true",
+                "message": "El cuestionario se ha insertado correctamente",
+            }
+        )
 
     @action(detail=True, methods=["POST"])
     def enviar(self, request, pk):  # pylint: disable=method-hidden,invalid-name
         """
-        POST /response -> POST /tests/1/response
+        POST /enviar -> POST /tests/1/enviar
         """
         respuestas = request.data["respuestas"]
+        hash_enviado = request.data["hash"]
         id_cuestionario = pk
         alumno = request.user
-        intento = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=id_cuestionario, id_alumno=alumno.id)
+        try:
+            intento = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=id_cuestionario, id_alumno=alumno.id)
+        except Intento.DoesNotExist:
+            return Response(data="No se pueden enviar respuestas sin haber comenzado el intento.", status=status.HTTP_400_BAD_REQUEST)
 
         nota = 0
         for key, respuesta in respuestas.items():
-            print(respuesta)
             pregunta = Pregunta.objects.get_by_id(id_pregunta=respuesta["id"])
 
             if respuesta["type"] == "test" and str(respuesta["answr"]).isdigit():
@@ -204,6 +217,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             nota = nota + InstanciaPregunta.calcular_nota(respuesta, id_cuestionario)
 
         intento.nota = nota
+        intento.hash = hash_enviado
         intento.estado = Intento.Estado.ENTREGADO
         intento.save()
         return Response({"nota": nota})
@@ -218,21 +232,19 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
         cuestionario = Cuestionario.objects.get_by_id(id_cuestionario=pk)
         pertenecen = PreguntaCuestionario.objects.get_by_cuestionario(id_cuestionario=cuestionario.id)
-        intento_obj = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=pk, id_alumno=id_alumno)
+        try:
+            intento_obj = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=pk, id_alumno=id_alumno)
+        except:
+            return Response(data="El usuario no ha realizado ningun intento", status=status.HTTP_400_BAD_REQUEST)
 
         questions = []
         for pertenece in pertenecen:
             pregunta = pertenece.pregunta
-            pregunta_json = {}
-            pregunta_json["id"] = pregunta.id
-            pregunta_json["question"] = pregunta.pregunta
+            pregunta_json = {"id": pregunta.id, "question": pregunta.pregunta}
             if hasattr(pregunta, "preguntatest"):
                 pregunta_json["type"] = "test"
-                opciones_lista = []
                 opciones = OpcionTest.objects.get_by_pregunta(id_pregunta=pregunta.id)
-                for opcion in opciones:
-                    opciones_lista.append({"id": opcion.id, "op": opcion.opcion})
-                pregunta_json["options"] = opciones_lista
+                pregunta_json["options"] = [{"id": opcion.id, "op": opcion.opcion} for opcion in opciones]
                 pregunta_json["correct_op"] = PreguntaTest.objects.get_by_id(id_pregunta=pregunta.id).respuesta.id
                 # TODO esto es un apaño para qe funcione hay que reescribirlo todo
                 pregunta_json["user_op"] = InstanciaPreguntaTest.objects.get_by_intento_pregunta(id_intento=intento_obj.id, id_pregunta=pregunta.id)
@@ -246,18 +258,13 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                     pregunta_json["user_op"] = pregunta_json["user_op"].respuesta
             questions.append(pregunta_json)
 
-        message_json = {}
-        message_json["titulo"] = cuestionario.titulo
-        message_json["nota"] = intento_obj.nota
-        message_json["questions"] = questions
-
-        quiz_string = message_json
-
-        content = {
-            "corrected_test": quiz_string,
-        }
-        print(content)
-        return Response(content)
+        return Response(
+            {
+                "titulo": cuestionario.titulo,
+                "nota": intento_obj.nota,
+                "questions": questions,
+            }
+        )
 
     @action(detail=True, methods=["GET"])
     def notas(self, request, pk):
@@ -297,7 +304,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             nota_cuestionario = nota.nota
         except:
             corregido = 0
-        print(fecha_cierre.strftime(TIME_FORMAT), fecha_cierre)
+
         return Response(
             {
                 "duracion": duracion,
@@ -318,68 +325,83 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         POST /upload -> POST /tests/upload
         """
         if str(request.user.role) == User.STUDENT:
-            content = {
-                "inserted": "false",
-                "message": "Error: Para poder crear tests debes de ser administrador o profesor.",
-            }
-            return Response(content, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {
+                    "inserted": "false",
+                    "message": "Error: Para poder crear tests debes de ser administrador o profesor.",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        try:
+            Imparte.objects.get_by_profesor(id_profesor=request.user.id)
+        except Imparte.DoesNotExist:
+            return Response(
+                {
+                    "inserted": "false",
+                    "message": "Error: Es necesario impartir la asignatura para crear tests.",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         try:
             yaml_cuestionario = yaml.safe_load(request.data["fichero_yaml"])
         except yaml.YAMLError:
-            content = {
-                "inserted": "false",
-                "message": "Error: El cuestionario está mal formado. Por favor, revisa que lo hayas escrito bien.",
-            }
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "inserted": "false",
+                    "message": "Error: El cuestionario está mal formado. Por favor, revisa que lo hayas escrito bien.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         # 1. Generamos el test
-        fecha_apertura = yaml_cuestionario["cuestionario"]["fecha_apertura"]
         passw = yaml_cuestionario["cuestionario"]["password"]
-        date_time_apertura = make_aware(datetime.strptime(fecha_apertura, "%y/%m/%d %H:%M:%S"))
-        fecha_cierre = yaml_cuestionario["cuestionario"]["fecha_cierre"]
-        date_time_cierre = make_aware(datetime.strptime(fecha_cierre, "%y/%m/%d %H:%M:%S"))
-        fecha_visible = yaml_cuestionario["cuestionario"]["fecha_visible"]
-        date_time_visible = make_aware(datetime.strptime(fecha_visible, "%y/%m/%d %H:%M:%S"))
+        date_time_apertura = make_aware(datetime.strptime(yaml_cuestionario["cuestionario"]["fecha_apertura"], "%y/%m/%d %H:%M:%S"))
+        date_time_cierre = make_aware(datetime.strptime(yaml_cuestionario["cuestionario"]["fecha_cierre"], "%y/%m/%d %H:%M:%S"))
+        date_time_visible = make_aware(datetime.strptime(yaml_cuestionario["cuestionario"]["fecha_visible"], "%y/%m/%d %H:%M:%S"))
         title = yaml_cuestionario["cuestionario"]["titulo"]
         nombre_asig = yaml_cuestionario["cuestionario"]["asignatura"]
-        profesor = request.user
         sec = yaml_cuestionario["cuestionario"]["secuencial"]
         durat = yaml_cuestionario["cuestionario"]["duracion"]
         aleatorizar = yaml_cuestionario["cuestionario"]["aleatorizar"] if ("aleatorizar" in yaml_cuestionario["cuestionario"]) else False
+        profesor = request.user
 
         try:
             asignatura = Asignatura.objects.get_by_asignatura(nombre_asignatura=nombre_asig)
-        except Exception as e:
-            content = {
-                "inserted": "false",
-                "message": f"Error: La asignatura {nombre_asig} no existe!",
-            }
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+        except Asignatura.DoesNotExist:
+            return Response(
+                {
+                    "inserted": "false",
+                    "message": f"Error: La asignatura {nombre_asig} no existe!",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        cuestionario = Cuestionario.objects.create_cuestionarios(
-            titulo=title,
-            secuencial=sec,
-            idAsignatura=asignatura.id,
-            idProfesor=profesor.id,
-            duracion=durat,
-            password=passw,
-            fecha_cierre=date_time_cierre,
-            fecha_apertura=date_time_apertura,
-            fecha_visible=date_time_visible,
-            aleatorizar=aleatorizar,
-        )
         try:
+            cuestionario = Cuestionario.objects.create_cuestionarios(
+                titulo=title,
+                secuencial=sec,
+                idAsignatura=asignatura.id,
+                idProfesor=profesor.id,
+                duracion=durat,
+                password=passw,
+                fecha_cierre=date_time_cierre,
+                fecha_apertura=date_time_apertura,
+                fecha_visible=date_time_visible,
+                aleatorizar=aleatorizar,
+            )
             cuestionario.save()
         except:
-            content = {
-                "inserted": "false",
-                "message": "Error: El cuestionario ya existe",
-            }
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "inserted": "false",
+                    "message": "Error: El cuestionario ya existe",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        preguntas = yaml_cuestionario["cuestionario"]["preguntas"]
-
-        for i, preg in enumerate(preguntas):
+        for i, preg in enumerate(yaml_cuestionario["cuestionario"]["preguntas"]):
             try:
                 pregunta = Pregunta.objects.create_preguntas(
                     pregunta=preg["pregunta"],
@@ -387,7 +409,8 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                     titulo=preg["titulo"],
                 )
                 pregunta.save()
-            except Exception as e:
+                # TODO esto pa k eeh
+            except Exception:
                 continue
 
             pertenece = PreguntaCuestionario.objects.create_pregunta_cuestionario(
@@ -397,7 +420,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 idPregunta=pregunta.id,
                 orden=i,
                 fijar=preg["fijar"] if ("fijar" in preg) else False,
-                aleatorizar = preg["aleatorizar"] if ("aleatorizar" in preg) else False
+                aleatorizar=preg["aleatorizar"] if ("aleatorizar" in preg) else False,
             )
             pertenece.save()
 
@@ -408,10 +431,8 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             )
             # Guardamos las opciones
             if preg["tipo"] == "test":
-
-                preguntaTest = PreguntaTest.objects.create_pregunta_test(pregunta=preg["pregunta"], idAsignatura=asignatura.id, titulo=preg["titulo"], id_pregunta=pregunta.id)
-
-                preguntaTest.save()
+                pregunta_test = PreguntaTest.objects.create_pregunta_test(pregunta=preg["pregunta"], idAsignatura=asignatura.id, titulo=preg["titulo"], id_pregunta=pregunta.id)
+                pregunta_test.save()
 
                 opciones = preg["opciones"]
                 for index, opc in enumerate(opciones):
@@ -419,19 +440,20 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                     try:
                         opcion.save()
                         if index == preg["op_correcta"]:
-                            preguntaTest.respuesta_id = opcion.id
-                            preguntaTest.save()
-                    except Exception as e:
+                            pregunta_test.respuesta_id = opcion.id
+                            pregunta_test.save()
+                    except Exception:
                         print("La pregunta ya existia")
 
             elif preg["tipo"] == "text":
-                preguntaText = PreguntaText.objects.create_pregunta_text(
+                pregunta_text = PreguntaText.objects.create_pregunta_text(
                     pregunta=preg["pregunta"], idAsignatura=asignatura.id, titulo=preg["titulo"], id_pregunta=pregunta.id, respuesta=preg["opciones"]
                 )
-                preguntaText.save()
+                pregunta_text.save()
 
-        content = {
-            "inserted": "true",
-            "message": "El cuestionario se ha insertado correctamente",
-        }
-        return Response(content)
+        return Response(
+            {
+                "inserted": "true",
+                "message": "El cuestionario se ha insertado correctamente",
+            }
+        )

@@ -28,6 +28,7 @@ def main():
         cov.save()
         cov.report()
         cov.xml_report()
+        cov.html_report()
     else:
         execute_command()
 

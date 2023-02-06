@@ -55,7 +55,6 @@ class SubjectViewSet(viewsets.ViewSet):
 
         lista_preguntas = Pregunta.objects.get_by_asignatura(id_asignatura=pk)
         preguntas = []
-        print(lista_preguntas)
         for pregunta in lista_preguntas:
             pregunta_json = {}
             pregunta_json["id"] = pregunta.id
@@ -80,7 +79,6 @@ class SubjectViewSet(viewsets.ViewSet):
 
         message_json = {}
         message_json["preguntas"] = preguntas
-        print(message_json)
 
         return Response(message_json)
 

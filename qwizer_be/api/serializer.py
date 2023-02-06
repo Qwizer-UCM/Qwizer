@@ -74,6 +74,11 @@ class InstanciaPreguntaTextSerializer(serializers.ModelSerializer):
         model = InstanciaPreguntaText
         fields = "__all__"
 
+class CuestionarioSerializer(serializers.ModelSerializer):
+  class Meta:
+        model = Cuestionario
+        fields = "__all__"
+        
 class EncryptedTestsSerializer(serializers.ModelSerializer):
     preguntas = PreguntasSerializer(many=True)
 

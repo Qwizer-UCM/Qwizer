@@ -14,10 +14,14 @@ class QRViewSet(viewsets.ViewSet):
             id_cuestionario = request.data["idCuestionario"]
             req_hash = request.data["hash"]
 
-            intento = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=id_cuestionario,id_alumno=id_usuario)
-            intento.hash_offline=req_hash
-            intento.save(update_fields=['hash_offline']) # TODO posible excepcion  
-            return Response({"inserted":True,"message":"¡El hash se ha insertado correctamente!"})
+            try:
+                intento = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=id_cuestionario,id_alumno=id_usuario)
+                intento.hash_offline=req_hash
+                intento.save(update_fields=['hash_offline']) # TODO posible excepcion  
+                return Response({"inserted":True,"message":"¡El hash se ha insertado correctamente!"})
+            except Intento.DoesNotExist:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+
         else:
             return Response({"inserted":False,"message":"¡Un alumno no puede hacer esto!"})
 
@@ -33,7 +37,7 @@ class QRViewSet(viewsets.ViewSet):
             intento = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=id_cuestionario, id_alumno=id_usuario)
 
             if intento.estado == Intento.Estado.ENTREGADO:
-                content["corrected"] = intento.nota != 0
+                content["corrected"] = intento.nota != 0 # TODO se puede sacar 0, cambiar
                 content["hashSubida"] = intento.hash
                 content["hashQr"] = intento.hash_offline
                 content["qrSent"] = bool(intento.hash_offline)
