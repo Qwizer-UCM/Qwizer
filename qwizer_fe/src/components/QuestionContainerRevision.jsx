@@ -10,18 +10,14 @@ import NotFound404 from './common/NotFound404';
 
 const QuestionContainerRevision = () => {
   const params = useParams();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const { data: testCorregido, error } = useFetch(Tests.getCorrectedTest, {
-    transform:  (d) => d.corrected_test,
     params: { idAlumno: Number(params.idAlumno), idCuestionario: Number(params.id) ?? '' },
   });
   const [indPregunta, setindPregunta] = useState(0);
 
   const pregunta = testCorregido?.questions[indPregunta];
-
-  const renderBackToSubject = () => <button className='btn btn-secondary' type='button' onClick={() => {navigate(-1)}}>Finalizar Revisión</button>
-
   if (testCorregido && !error && pregunta) {
     return (
       <div className="index-body container-fluid" id="questions">
@@ -37,10 +33,9 @@ const QuestionContainerRevision = () => {
         <div className="p-4 row">
           <div className="col-md-9 col-sm-12 order-last order-md-first" id="question">
             <div className="card">
-              <div className='card-body'>
+              <div className="card-body">
                 <div key={pregunta.id}>
                   <h2 className="p-2 m-2 card">
-                    {' '}
                     {indPregunta + 1}
                     {`.-${pregunta.question}`}
                   </h2>
@@ -51,17 +46,21 @@ const QuestionContainerRevision = () => {
           </div>
 
           <div className="p-2 col-md-3 col-sm-12 order-first order-md-last" id="question-nav">
-            <QuestionNav navigationHandler={setindPregunta} listaPreguntas={testCorregido.questions} selectedIdx={indPregunta}/>
+            <QuestionNav setIndex={setindPregunta} listaPreguntas={testCorregido.questions} selectedIdx={indPregunta} />
           </div>
         </div>
         <div className="p-4 row">
-          <div className="col text-center">{renderBackToSubject()}</div>
+          <div className="col text-center">
+            <button className="btn btn-secondary" type="button" onClick={() => navigate(-1)}>
+              Finalizar Revisión
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
-  return <NotFound404/>
+  return <NotFound404 />;
 };
 
 export default QuestionContainerRevision;

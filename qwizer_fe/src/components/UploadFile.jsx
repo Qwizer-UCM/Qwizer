@@ -24,7 +24,7 @@ const UploadFile = () => {
             }
           })
           .catch((error) => {
-            setErrorModal({ show: true, message: 'ERROR' });
+            setErrorModal({ show: true, message: error.response.data?.message ?? "Error" });
             console.log(error);
           });
       };

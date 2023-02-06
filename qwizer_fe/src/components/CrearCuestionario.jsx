@@ -8,6 +8,7 @@ import TestQuestion from './TestQuestion';
 import TextQuestion from './TextQuestion';
 import { Subjects, Tests } from '../services/API'
 import useFetch from '../hooks/useFetch';
+import { routes } from '../constants';
 
 const columns = [
   {
@@ -145,7 +146,7 @@ const CrearCuestionario = () => {
     };
 
     Tests.createQuiz({ cuestionario }).then(() => {
-      navigate('/');
+      navigate(routes.INICIO);
       alert('Cuestionario creado correctamente');
     });
   };

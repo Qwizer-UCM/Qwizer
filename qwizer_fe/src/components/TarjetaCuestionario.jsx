@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import Modal from './common/modals/Modal';
 import { Tests } from '../services/API';
 import useFetch from '../hooks/useFetch';
+import { routes } from '../constants';
 
+// TODO refactorizar, demasiado dificil de leer
 // TODO que un cuestionario este bloqueado deberia comprobarse en el lado servidor
 const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) => {
   const navigate = useNavigate();
@@ -63,13 +65,13 @@ const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) =>
             )}
 
             {downloaded && !corregido && (
-              <button type="button" className="btn btn-primary me-2" onClick={() => (bloqueado ? showModal() : navigate(`/test/${idCuestionario}`))}>
+              <button type="button" className="btn btn-primary me-2" onClick={() => (bloqueado ? showModal() : navigate(routes.PATH_TEST(idCuestionario)))}>
                 Realizar
               </button>
             )}
 
             {!offline && (corregido || role === 'teacher') && (
-              <button type="button" className="btn btn-primary me-2" onClick={() => (role === 'teacher' ? navigate(`/revisionNotas/${idCuestionario}`) : navigate(`/revision/${idCuestionario}`))}>
+              <button type="button" className="btn btn-primary me-2" onClick={() => (role === 'teacher' ? navigate(routes.PATH_REVISION_NOTAS_CUESTIONARIO(idCuestionario)) : navigate(routes.PATH_REVISION(idCuestionario)))}>
                 Revisar
               </button>
             )}
