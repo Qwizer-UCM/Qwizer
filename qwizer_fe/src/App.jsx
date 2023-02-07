@@ -14,7 +14,7 @@ import RegisterContainer from './components/RegisterContainer';
 import QrContainer from './components/QrContainer';
 import InsercionManual from './components/InsercionManual';
 
-import CrearCuestionario from './components/CrearCuestionario';
+import CrearCuestionario from './components/CrearCuestionario/CrearCuestionario';
 import RevisionNotasContainer from './components/RevisionNotasContainer';
 
 import AvailableOffline from './components/AvailableOffline';
