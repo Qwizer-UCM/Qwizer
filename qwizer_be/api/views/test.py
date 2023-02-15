@@ -248,14 +248,18 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 pregunta_json["correct_op"] = PreguntaTest.objects.get_by_id(id_pregunta=pregunta.id).respuesta.id
                 # TODO esto es un apaño para qe funcione hay que reescribirlo todo
                 pregunta_json["user_op"] = InstanciaPreguntaTest.objects.get_by_intento_pregunta(id_intento=intento_obj.id, id_pregunta=pregunta.id)
-                if pregunta_json["user_op"] is not None:
+                if pregunta_json["user_op"].respuesta is not None:
                     pregunta_json["user_op"] = pregunta_json["user_op"].respuesta.id
+                else:
+                    pregunta_json["user_op"] = None
             if hasattr(pregunta, "preguntatext"):
                 pregunta_json["type"] = "text"
                 pregunta_json["correct_op"] = PreguntaText.objects.get_by_id(id_pregunta=pregunta.id).respuesta
                 pregunta_json["user_op"] = InstanciaPreguntaText.objects.get_by_intento_pregunta(id_intento=intento_obj.id, id_pregunta=pregunta.id)
                 if pregunta_json["user_op"] is not None:
                     pregunta_json["user_op"] = pregunta_json["user_op"].respuesta
+                else:
+                    pregunta_json["user_op"] = None
             questions.append(pregunta_json)
 
         return Response(
