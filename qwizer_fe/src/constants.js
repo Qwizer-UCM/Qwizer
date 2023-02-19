@@ -27,4 +27,5 @@ export const routes = {
   QR_INSERT: path.PATH_QR_INSERT(':userId',':test', ':hash', ':resp'),
   LOGIN: '/login',
   NOT_FOUND: '/404',
+  NOTAS: '/notas',
 };

@@ -11,12 +11,12 @@ import NotFound404 from './common/NotFound404';
 const QuestionContainerRevision = () => {
   const params = useParams();
   const navigate = useNavigate();
-
+  
   const { data: testCorregido, error } = useFetch(Tests.getCorrectedTest, {
     params: { idAlumno: Number(params.idAlumno), idCuestionario: Number(params.id) ?? '' },
   });
   const [indPregunta, setindPregunta] = useState(0);
-
+  
   const pregunta = testCorregido?.questions[indPregunta];
   if (testCorregido && !error && pregunta) {
     return (

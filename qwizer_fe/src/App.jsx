@@ -6,7 +6,7 @@ import LoginComponent from './components/LoginComponent';
 import NavBar from './components/common/NavBar';
 
 import BancoPreguntas from './components/BancoPreguntas';
-import UploadFile from './components/UploadFile';
+import UploadFile from './components/UploadTest';
 import UploadQuestions from './components/UploadQuestions';
 import CuestionariosContainer from './components/CuestionariosContainer';
 import RegisterContainer from './components/RegisterContainer';
@@ -25,6 +25,7 @@ import QuestionContainerNoRevision from './components/QuestionContainerNoRevisio
 import QuestionContainerRevision from './components/QuestionContainerRevision';
 import useOnline from './hooks/useOnline';
 import { routes } from './constants';
+import Notas from './components/Notas';
 
 const App = () => {
   const { user, isLogged, isLoading, login, logout } = useAuth();
@@ -57,6 +58,8 @@ const App = () => {
             <Route path={routes.REVISION_NOTAS_CUESTIONARIO} element={<RevisionNotasContainer />} />
             <Route path={routes.REVISION_NOTAS_ALUMNO} element={<QuestionContainerRevision />} />
             <Route path={routes.REGISTRO} element={<RegisterContainer />} />
+            <Route path={routes.NOTAS} element={<Notas />} />
+
           </Route>
           <Route path={routes.QR} element={<QrContainer userId={user.userId} />} />
           <Route path={routes.QR_INSERT} element={<InsercionManual userId={user.userId} />} />

@@ -51,6 +51,12 @@ const NavBar = ({ role, username, logout, isOffline }) => (
                       </Link>
                     </ul>
                   </li>
+                  <li className="nav-item">
+                    <Link to={routes.NOTAS} className="nav-link active">
+                      Notas
+                      <span className="sr-only" />
+                    </Link>
+                  </li>
                 </>
               )}
               <li className="nav-item active">

@@ -12,6 +12,7 @@ from .models import (
     Asignatura,
     Imparte,
     Intento,
+    Pregunta,
     # Cuestionarios,
     # EsAlumno,
     # Notas,
@@ -96,6 +97,7 @@ admin.site.register(User, UserAdmin)
 admin.site.register(Asignatura)    # TODO no hay otra manera de crear asignaturas!!!
 admin.site.register(Imparte,ImparteAdmin)
 admin.site.register(Intento, IntentoAdmin)
+admin.site.register(Pregunta)
 
 
 admin.site.unregister(Group)
