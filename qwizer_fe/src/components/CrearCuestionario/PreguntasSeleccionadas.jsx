@@ -31,21 +31,6 @@ const PreguntasSeleccionadas = ({ selectedList, setSelectedList }) => {
         setSelectedList(selectListInfo);
     }
 
-    const fijarOrdenPregunta = (id, fijar) => {
-        const selectListInfo = [...selectedList]
-        const pregModificado = selectListInfo.find(preg => preg.id === id)
-        pregModificado.fijar = fijar
-
-        setSelectedList(selectListInfo);
-    }
-
-    const aleatorizarOpcionesTest = (id, aleatorizar) => {
-        const selectListInfo = [...selectedList]
-        const pregModificado = selectListInfo.find(preg => preg.id === id)
-        pregModificado.aleatorizar = aleatorizar
-
-        setSelectedList(selectListInfo);
-    }
 
     return selectedList.length !== 0 ? (
         <div className="card m-3 rounded">
@@ -66,18 +51,7 @@ const PreguntasSeleccionadas = ({ selectedList, setSelectedList }) => {
                                 <label className="col-md-2 col-sm-auto col-form-label" htmlFor="addPunt">Puntuación negativa: &nbsp;</label>
                                 <input id="addPunt" className="col-md-8 col-sm-auto m-input" type="number" min="0" step="any" onChange={(e) => modificarPuntuacion(pregunta.id, false, Number(e.target.value))} />
                             </div>
-                            <div className="row m-1 justify-content-center align-items-center">
-                                <label className="col-md-2 col-sm-auto col-form-label" htmlFor="substractPunt">Orden: &nbsp;</label>
-                                <input id="orden" className="col-md-8 col-sm-auto m-input" type="number" min="0" step="any" onChange={(e) => ordenPregunta(pregunta.id, Number(e.target.value))} />
-                            </div>
-                            <div className="row m-1 justify-content-center align-items-center">
-                                <label className="col-md-2 col-sm-auto col-form-label" htmlFor="fijar">Fijar: &nbsp;</label>
-                                <input id="fijar" className="col-md-8 col-sm-auto m-input" type="checkbox" onChange={(e) => fijarOrdenPregunta(pregunta.id, e.target.checked)} />
-                            </div>
-                            {pregunta.type === "test" && <div className="row m-1 justify-content-center align-items-center">
-                                <label className="col-md-2 col-sm-auto col-form-label" htmlFor="aleat">Aleatorizar opciones: &nbsp;</label>
-                                <input id="aleat" className="col-md-8 col-sm-auto m-input" type="checkbox" onChange={(e) => aleatorizarOpcionesTest(pregunta.id, e.target.checked)} />
-                            </div>}
+                            
 
                         </div>
                         <div className="d-flex justify-content-center">

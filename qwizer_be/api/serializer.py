@@ -75,7 +75,7 @@ class InstanciaPreguntaTextSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class CuestionarioSerializer(serializers.ModelSerializer):
-  class Meta:
+    class Meta:
         model = Cuestionario
         fields = "__all__"
         

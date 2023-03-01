@@ -34,7 +34,7 @@ const NavBar = ({ role, username, logout, isOffline }) => (
                     <ul className="dropdown-menu" style={{ margin: 0 }}>
                       <li>
                         <Link to={routes.SUBIR_PREGUNTAS} className="dropdown-item">
-                          Subir Preguntas
+                          Subir preguntas
                           <span className="sr-only" />
                         </Link>
                       </li>
@@ -42,11 +42,11 @@ const NavBar = ({ role, username, logout, isOffline }) => (
                         Subir test <span className="sr-only" />
                       </Link>
                       <Link to={routes.CREAR_CUESTIONARIO} className="dropdown-item">
-                        Crear Cuestionario
+                        Crear cuestionario
                         <span className="sr-only" />
                       </Link>
                       <Link to={routes.BANCO_PREGUNTAS} className="dropdown-item">
-                        Banco de Preguntas
+                        Banco de preguntas
                         <span className="sr-only" />
                       </Link>
                     </ul>

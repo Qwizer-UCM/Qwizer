@@ -6,7 +6,7 @@ import LoginComponent from './components/LoginComponent';
 import NavBar from './components/common/NavBar';
 
 import BancoPreguntas from './components/BancoPreguntas';
-import UploadFile from './components/UploadTest';
+import UploadTest from './components/UploadTest';
 import UploadQuestions from './components/UploadQuestions';
 import CuestionariosContainer from './components/CuestionariosContainer';
 import RegisterContainer from './components/RegisterContainer';
@@ -52,7 +52,7 @@ const App = () => {
           {/* FIXME importante arreglar el back devuelve las notas sin comprobar el rol */}
           <Route element={<ProtectedRoutes isAllowed={isOnline && user.role.includes('teacher')} />}>
             <Route path={routes.BANCO_PREGUNTAS} element={<BancoPreguntas />} />
-            <Route path={routes.SUBIR_CUESTIONARIO} element={<UploadFile />} />
+            <Route path={routes.SUBIR_CUESTIONARIO} element={<UploadTest />} />
             <Route path={routes.SUBIR_PREGUNTAS} element={<UploadQuestions />} />
             <Route path={routes.CREAR_CUESTIONARIO} element={<CrearCuestionario />} />
             <Route path={routes.REVISION_NOTAS_CUESTIONARIO} element={<RevisionNotasContainer />} />

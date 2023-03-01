@@ -1,67 +1,87 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Modal from './common/modals/Modal';
 import { Tests } from '../services/API';
 
-const UploadFile = () => {
-  const [file, setFile] = useState('');
-  const [errorModal, setErrorModal] = useState({ show: false, message: '' });
-  const [successModal, setSuccessModal] = useState({ show: false, message: '' });
+const UploadTest = () => {
+    const wrapper = useRef(null)
+    const [file, setFile] = useState('');
+    const [errorModal, setErrorModal] = useState({ show: false, message: '' });
+    const [successModal, setSuccessModal] = useState({ show: false, message: '' });
 
-  const uploadFile = () => {
-    if (file.name !== '') {
-      const reader = new FileReader();
-      reader.readAsText(file, 'utf-8');
-      reader.onload = (e) => {
-        const ficheroYAML = e.target.result;
 
-        Tests.upload({ ficheroYAML })
-          .then(({ data }) => {
-            setFile('');
-            if (data.inserted === 'false') {
-              setErrorModal({ show: true, message: data.message });
-            } else {
-              setSuccessModal({ show: true, message: data.message });
-            }
-          })
-          .catch((error) => {
-            setErrorModal({ show: true, message: error.response.data?.message ?? "Error" });
-            console.log(error);
-          });
-      };
-    }
-  };
+    const uploadFile = () => {
+        if (file.name !== '') {
+            const reader = new FileReader();
+            reader.readAsText(file, 'utf-8');
+            reader.onload = (e) => {
+                const ficheroYAML = e.target.result;
 
-  return (
-    <div className="upload-body">
-      <div className="card upload-section">
-        <div className="card-header header bg-blue-grey">
-          <h2>Sube tu cuestionario en formato : YAML</h2>
-        </div>
-        <div className=" card-body upload-inner-body">
-          <h4>
-            <label htmlFor="myfile">Selecciona un archivo:</label>
-          </h4>
-          <div className="input-group">
-            <div>
-              <input type="file" className="form-control" aria-describedby="inputGroupFileAddon01" onChange={(e) => setFile(e.target.files[0])} id="myfile" name="myfile" />
-              <label className="form-label" htmlFor="myfile">
-                {file.name}
-              </label>
+                Tests.upload({ ficheroYAML })
+                    .then(({ data }) => {
+                        setFile('');
+                        if (data.inserted === 'false') {
+                            setErrorModal({ show: true, message: data.message });
+                        } else {
+                            setSuccessModal({ show: true, message: data.message });
+                        }
+                    })
+                    .catch((error) => {
+                        setErrorModal({ show: true, message: error.response.data?.message ?? "Error" });
+                        console.log(error);
+                    });
+            };
+        }
+    };
+
+    const onDragEnter = () => wrapper.current.classList.add('dragover')
+
+    const onDragLeave = () => wrapper.current.classList.remove('dragover')
+
+    const onDrop = () => wrapper.current.classList.remove('dragover')
+
+    const handleDeleteFile = () => setFile('')
+
+    return (
+        <div className="upload-body">
+            <div className="card">
+                <div className="card-header header bg-blue-grey">
+                    <h2>Sube tu cuestionario en formato : YAML</h2>
+                </div>
+                <div className="card-body drag-and-drop-component"
+                    ref={wrapper}
+                    onDragEnter={onDragEnter}
+                    onDragLeave={onDragLeave}
+                    onDrop={onDrop}>
+                    <div className='text-center'>
+                        <span className='material-icons' style={{ fontSize: "120px", width: "100px" }}>cloud_upload</span>
+                        <p className='drag-and-drop-component-text'>Arrastre y suelte aqui su fichero con las preguntas</p>
+                    </div>
+                    <input type="file" onChange={(e) => setFile(e.target.files[0])} id="myfile" name="myfile" />
+
+                </div>
+
+                <div className="upload-message-section">
+                    {file !== '' && (
+                        <div className='text-center'>
+                            <div className='file-preview'>
+
+                                <p className='file-preview-file'>
+                                    <span className='material-icons' style={{ fontSize: "40px", width: "50px", marginRight: "20px" }}>description</span>
+                                    {file.name.length > 15 ? `${file.name.substr(0, 15)} ...` : file.name}
+                                    <span className="material-icons file-preview-del" onClick={handleDeleteFile}>delete</span>
+                                </p>
+                            </div>
+                            <button type="button" className="mb-2 btn btn-success" onClick={uploadFile}>
+                                Subir Cuestionario
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
-          </div>
-          <div className="upload-message-section">
-            {file !== '' && (
-              <button type="button" className="btn btn-success btn-submit" onClick={uploadFile}>
-                Subir Cuestionario
-              </button>
-            )}
-          </div>
+            <Modal options={errorModal} onHide={setErrorModal} type='danger' />
+            <Modal options={successModal} onHide={setSuccessModal} type='success' />
         </div>
-      </div>
-      <Modal options={errorModal} onHide={setErrorModal} type='danger'/>
-      <Modal options={successModal} onHide={setSuccessModal} type='success'/>
-    </div>
-  );
+    );
 };
 
-export default UploadFile;
+export default UploadTest;

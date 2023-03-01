@@ -104,12 +104,13 @@ const RegisterContainer = () => {
 
             />
           <div className="d-flex justify-content-center">
-            <button type="button" className="btn btn-danger" onClick={borrarAlumnos}>
-              Borrar alumnos
-            </button>
-            <button type="button" className="ms-1 btn btn-primary" onClick={() => {setRegisterModal({show: true})}}>
+            <button type="button" className="btn btn-primary" onClick={() => {setRegisterModal({show: true})}}>
               Registrar alumnos
             </button>
+            { alumnosSeleccionados.length !== 0 && 
+            <button type="button" id='deleteButton' className="ms-1 btn btn-danger" onClick={borrarAlumnos}>
+              Borrar alumnos
+            </button>}
           </div>
         </div>
       </div>

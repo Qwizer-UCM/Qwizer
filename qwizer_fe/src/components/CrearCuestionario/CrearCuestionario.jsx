@@ -31,14 +31,13 @@ const CrearCuestionario = () => {
 
   const addSelectedQuestion = (preguntas) => {
     const listaPregSelec = [...selectedList];
-    preguntas.forEach((pregunta, index) => {
+    preguntas.forEach((pregunta) => {
       if (!listaPregSelec.some(preg => preg.id === pregunta.id)) {
         const preguntaElegida = {
           ...pregunta.objeto,
           punt_positiva: 0,
           punt_negativa: 0,
           fijar: false,
-          orden: index,
           aleatorizar: false
         }
         listaPregSelec.push(preguntaElegida);
@@ -225,7 +224,7 @@ const CrearCuestionario = () => {
             </h2>
             <div id="collapseFive" className="accordion-collapse collapse" aria-labelledby="tituloResumen" data-bs-parent="#accordionCuestionario">
               <div className="accordion-body">
-                <ResumenCuestionario selectedList={selectedList} testName={testName} />
+                <ResumenCuestionario selectedList={selectedList} setSelectedList={setSelectedList} testName={testName} />
               </div>
             </div>
           </div>

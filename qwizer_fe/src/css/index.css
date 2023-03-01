@@ -1,3 +1,5 @@
+
+
 .index-body{
     background: #E9E9E9;
     min-height: 100vh;
@@ -14,7 +16,7 @@
     -webkit-border-radius: 2px;
     -moz-border-radius: 2px;
     -ms-border-radius: 2px;
-    border-radius: 2px;
+    border-radius: 10px;
     display: flow-root !important;
 }
 
@@ -32,10 +34,7 @@
 }
 
 .card-content{
-    padding-right: 10px;
-    padding-top: 10px;
-    padding-left: 10px;
-    padding-bottom: 10px;
+    padding: 10px;
 }
 
 .button-section{
@@ -56,7 +55,7 @@
     background: #E9E9E9;
     min-height: 95vh;
     height: 100%;
-    justify-content: center;
+    padding: 30px;
     display:flex;
     justify-content: center;
     align-items: center;
@@ -115,4 +114,130 @@
     text-align: center;
     margin-top: 20px !important;
 }
+
+.drag-and-drop-component {
+    margin: 20px;
+    position: relative;
+    height: 200px;
+    border: 2px dashed #4267b2;
+    border-radius: 20px;
+    background-color:  #f5f8ff;
+    font-family: 'Open Sans';
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.drag-and-drop-component input {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.drag-and-drop-component:hover,
+.drag-and-drop-component.dragover{
+    opacity: 0.6;
+}
+
+.drag-and-drop-component-text{
+    text-align: center;
+    color: #ccc;
+    font-weight: 600;
+    padding: 10px;
+}
+
+.file-preview {
+    margin-top: 30px;
+}
+
+.file-preview p {
+    font-weight: 500;
+    margin: 20px;
+}
+
+
+.file-preview-file {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    background-color: #f5f8ff;
+    padding: 15px;
+    border-radius: 20px;
+}
+
+.file-preview-del {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 10px;
+    top: 20%;
+    cursor: pointer;
+}
+
+.summary-quiz{
+    text-align: center;
+}
+
+.summary-questions {
+    border: 1px dotted #4267b2;
+    margin: 0;
+    list-style-type: none;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-questions li {
+    font-size: 1rem;
+    color: #333;
+    box-shadow: 0px 2px 4px #4a4c4e;
+    border-radius: 5px;
+    padding: 3px;
+    background-color: #f5f8ff;
+    margin: 5px;
+    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+
+.pregOrder, .pregPunt{
+    background-color: #ccc;
+    width: 5%;
+    padding: 5px;
+}
+
+.pregPunt {
+    margin-right: 10px;
+    background-color: white !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.deletePreg {
+    cursor: pointer !important;
+}
+
+.summary-questions li:focus{
+    outline: none;
+    border: 2px solid #333;
+}
+
+
+
+
+
+
 

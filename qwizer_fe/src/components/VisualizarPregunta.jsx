@@ -14,11 +14,7 @@ export default function VisualizarPregunta({ data, createQuiz, deleteQuestion, u
       {data.type === 'text' && <TextQuestion mode="visualize" infoPreg={data} />}
       <div className="d-flex justify-content-center">
         {createQuiz ? (
-          <div/> //TODO cambiar esto
-          // <button type="button" className="btn btn-success m-1" onClick={() => addQuestion(data)}>
-          //   {' '}
-          //   Añadir Pregunta{' '}
-          // </button>
+          <div/>
         ) : (
           <>
             <button type="button" className="btn btn-danger m-1" onClick={() => deleteQuestion(data.id)}>
