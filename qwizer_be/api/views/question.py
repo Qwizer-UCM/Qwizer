@@ -1,13 +1,61 @@
-import yaml
-from api.models import Asignatura, OpcionTest, Pregunta, PreguntaTest, PreguntaText, User
-from rest_framework import viewsets
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-import xml.etree.ElementTree as ET
 import re
+import xml.etree.ElementTree as ET
+
+import yaml
+from api.models import (
+    Asignatura,
+    OpcionTest,
+    Pregunta,
+    PreguntaTest,
+    PreguntaText,
+    User,
+)
+from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiParameter,
+    OpenApiResponse,
+    extend_schema,
+    extend_schema_view,
+)
+from rest_framework import viewsets
+from rest_framework.response import Response
 
 
+@extend_schema_view(
+    create=extend_schema(
+        summary="Crear preguntas a partir de un fichero csv o xml",
+        request={
+            "multipart/form-data": {"type": "object", "properties": {"file": {"type": "string", "format": "binary"}}},
+        },
+        responses={
+            200: OpenApiResponse(
+                response={"type": "object", "properties": {"inserted": {"type": "string"}, "message": {"type": "string"}}},
+                examples=[
+                    OpenApiExample(
+                        "QR_INSERTED",
+                        value={"inserted": True, "message": "¡El hash se ha insertado correctamente!"},
+                        status_codes=[200],
+                        response_only=True,
+                    )
+                ],
+            ),
+        },
+    ),
+    update=extend_schema(
+        summary="Actualizar una pregunta",
+        parameters=[
+            OpenApiParameter(name="id", type=int, location=OpenApiParameter.PATH, description="Id de la pregunta"),
+        ],
+        responses={200: OpenApiResponse(response={"type": "object", "properties": {"message": {"type": "string"}}})},
+    ),
+    destroy=extend_schema(
+        summary="Borrar una pregunta",
+        parameters=[
+            OpenApiParameter(name="id", type=int, location=OpenApiParameter.PATH, description="Id de la pregunta"),
+        ],
+        responses={200: OpenApiResponse(response={"type": "object", "properties": {"message": {"type": "string"}}})},
+    ),
+)
 class QuestionViewSet(viewsets.ViewSet):
     permission_classes = []
 

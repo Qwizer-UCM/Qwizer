@@ -1,5 +1,6 @@
 import random
 from datetime import datetime
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 import yaml
 from api.models import Asignatura, Cuestionario, InstanciaPreguntaTest, InstanciaPreguntaText, Intento, OpcionTest, Pregunta, PreguntaCuestionario, PreguntaTest, PreguntaText, User
@@ -46,12 +47,39 @@ def shuffle(res):
 
 TIME_FORMAT = "%d/%m/%Y, %H:%M:%S"  # TODO fichero de constantes?
 
+
+
+# TODO faltan schemas
+@extend_schema_view(
+    retrieve=extend_schema(
+        summary="Descargar cuestionario",
+    ),
+    create=extend_schema(
+        summary="Crear cuestionario",
+    ),
+    enviar=extend_schema(
+        summary="Responder a un cuestionario",
+    ),
+    nota=extend_schema(
+        summary="Nota de un cuestionario de un estudiante",
+        description="También se devuelven las respuestas del usuario",
+    ),
+    notas=extend_schema(
+        summary="Lista de notas de todos los alumnos de un cuestionario",
+    ),
+    info=extend_schema(
+        summary="Información de un cuestionario para un alumno",
+    ),
+    subir=extend_schema(
+        summary="Creación de un cuestionario a partir de un yaml",
+    )
+)
 # TODO No se han indicado permisos todavia
 class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Cuestionario.objects.all()
     serializer_class = EncryptedTestsSerializer
     permission_classes = []
-
+    # TODO cambiar a POST
     def retrieve(self, request, pk):
         try:
             cuestionario = Cuestionario.objects.get_by_id(id_cuestionario=pk)
@@ -281,10 +309,10 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         cuestionario = Cuestionario.objects.get_by_id(id_cuestionario=pk)
 
         alumnos = User.objects.get_users_from_test(id_asignatura=cuestionario.asignatura.id, id_cuestionario=pk)
-        notas = []
+        notas = {}
         for alumno in alumnos:
             nota = "No presentado" if alumno["intento__nota"] is None else alumno["intento__nota"]
-            notas.append({"id": alumno["id"], "nombre": alumno["first_name"], "apellidos": alumno["last_name"], "nota": nota})
+            notas[alumno["email"]] = ({"id": alumno["id"], "nombre": alumno["first_name"], "apellidos": alumno["last_name"], "nota": nota})
         return Response({"notas": notas})
 
     @action(detail=True, methods=["GET"])

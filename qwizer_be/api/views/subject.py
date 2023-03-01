@@ -1,21 +1,172 @@
-from api.models import (
-    Asignatura,
-    Cuestionario,
-    Cursa,
-    Imparte,
-    Intento,
-    OpcionTest,
-    Pregunta,
-    User,
-    PreguntaTest,
-    PreguntaText
-)
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
+from api.models import Asignatura, Cuestionario, Cursa, Imparte, Intento, OpcionTest, Pregunta, User, PreguntaTest, PreguntaText
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 
+@extend_schema_view(
+    list=extend_schema(
+        summary="Lista de asignaturas",
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {"asignaturas": {"type": "array", "items": {"type": "object", "properties": {"id": {"type": "string"}, "asignatura": {"type": "string"}}}}},
+                },
+            ),
+        },
+    ),
+    cuestionarios=extend_schema(
+        summary="Lista de cuestionarios de una asignatura",
+        parameters=[
+            OpenApiParameter(name="id", type=int, location=OpenApiParameter.PATH, description="Id de la asignatura"),
+        ],
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "cuestionarios": {"type": "array", "items": {"type": "object", "properties": {"id": {"type": "string"}, "titulo": {"type": "string"}}}},
+                        "nombre": {"type": "string"},
+                    },
+                }
+            )
+        },
+    ),
+    preguntas=extend_schema(
+        summary="Lista de preguntas de una asignatura",
+        parameters=[
+            OpenApiParameter(name="id", type=int, location=OpenApiParameter.PATH, description="Id de la asignatura"),
+        ],
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "preguntas": {
+                            "type": "array",
+                            "items": {
+                                "oneOf": [
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {"type": "integer"},
+                                            "question": {"type": "string"},
+                                            "title": {"type": "string"},
+                                            "type": {"type": "string", "enum": ["text"]},
+                                            "correct_op": {"type": "string"},
+                                        },
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {"type": "integer"},
+                                            "question": {"type": "string"},
+                                            "title": {"type": "string"},
+                                            "type": {"type": "string", "enum": ["test"]},
+                                            "options": {"type": "array", "items": {"type": "object", "properties": {"id": {"type": "string"}, "op": {"type": "integer"}}}},
+                                            "correct_op": {"type": "integer"},
+                                        },
+                                    },
+                                ]
+                            },
+                        },
+                    },
+                }
+            )
+        },
+    ),
+    me=extend_schema(
+        summary="Estado de los cuestionarios de un usuario",
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "asignaturas": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer"},
+                                    "nombre": {"type": "string"},
+                                    "cuestionarios": {
+                                        "type": "object",
+                                        "properties": {"nCuestionarios": {"type": "integer"}, "nCorregidos": {"type": "integer"}, "nPendientes": {"type": "integer"}},
+                                    },
+                                },
+                            },
+                        }
+                    },
+                }
+            )
+        },
+    ),
+    enroll=extend_schema(
+        summary="Matricular una lista de estudiantes",
+        parameters=[
+            OpenApiParameter(name="id", type=int, location=OpenApiParameter.PATH, description="Id de la asignatura"),
+        ],
+        request={
+            200: {
+                # TODO no funciona con array
+                "type": "object",
+                "properties": {"alumnos": {"type": "object", "properties": {"id": {"type": "integer"}, "nombre": {"type": "string"}, "apellidos": {"type": "string"}}}},
+            }
+        },
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "insertados": {"type": "integer"},
+                        "errors": {
+                            "type": "array",
+                            "items": {
+                                "alumnos": {
+                                    "type": "string",
+                                }
+                            },
+                        },
+                    },
+                }
+            )
+        },
+    ),
+    delete_enroll=extend_schema(
+        summary="Desmatricular una lista de estudiantes",
+        parameters=[
+            OpenApiParameter(name="id", type=int, location=OpenApiParameter.PATH, description="Id de la asignatura"),
+        ],
+        request={
+            200: {
+                # TODO no funciona con array
+                "type": "object",
+                "properties": {"alumnos": {"type": "object", "properties": {"id": {"type": "integer"}, "nombre": {"type": "string"}, "apellidos": {"type": "string"}}}},
+            }
+        },
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "borrados": {"type": "integer"},
+                        "errors": {
+                            "type": "array",
+                            "items": {
+                                "alumnos": {
+                                    "type": "string",
+                                }
+                            },
+                        },
+                    },
+                }
+            )
+        },
+    ),
+)
 class SubjectViewSet(viewsets.ViewSet):
     permission_classes = []
 
@@ -35,11 +186,9 @@ class SubjectViewSet(viewsets.ViewSet):
         asignatura = Asignatura.objects.get_by_id(id_asignatura=pk)
 
         cuestionarios = Cuestionario.objects.get_by_asignatura(id_asignatura=pk).order_by_fecha_cierre_desc()
-        id_cuestionarios = []
         for cuestionario in cuestionarios:
-            lista_cuestionarios.append(cuestionario.titulo)
-            id_cuestionarios.append(cuestionario.id)
-        return Response({"cuestionarios": lista_cuestionarios, "idCuestionarios": id_cuestionarios, "nombre": asignatura.nombreAsignatura})
+            lista_cuestionarios.append({"id": cuestionario.id, "titulo": cuestionario.titulo})
+        return Response({"cuestionarios": lista_cuestionarios, "nombre": asignatura.nombreAsignatura})
 
     @action(methods=["GET"], detail=True)
     def preguntas(self, request, pk):
@@ -60,7 +209,7 @@ class SubjectViewSet(viewsets.ViewSet):
             pregunta_json["id"] = pregunta.id
             pregunta_json["question"] = pregunta.pregunta
             pregunta_json["title"] = pregunta.titulo
-            if hasattr(pregunta, "preguntatest"): 
+            if hasattr(pregunta, "preguntatest"):
                 pregunta_json["type"] = "test"
                 opciones_lista = []
                 opciones = OpcionTest.objects.get_by_pregunta(id_pregunta=pregunta.id)
@@ -72,7 +221,7 @@ class SubjectViewSet(viewsets.ViewSet):
                 pregunta_json["options"] = opciones_lista
 
                 pregunta_json["correct_op"] = PreguntaTest.objects.get_by_id(id_pregunta=pregunta.id).respuesta.id
-            if  hasattr(pregunta, "preguntatext"):
+            if hasattr(pregunta, "preguntatext"):
                 pregunta_json["type"] = "text"
                 pregunta_json["correct_op"] = PreguntaText.objects.get_by_id(id_pregunta=pregunta.id).respuesta
             preguntas.append(pregunta_json)
@@ -85,6 +234,7 @@ class SubjectViewSet(viewsets.ViewSet):
     @action(methods=["GET"], detail=False)
     def me(self, request):
         lista_asignaturas = []
+        lista_id_asignaturas = []
         identif = request.user.id
         role = str(request.user.role)
         print(role)

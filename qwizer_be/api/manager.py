@@ -49,7 +49,7 @@ class UserManager(BaseUserManager):
                 Q(cursa__asignatura_id=id_asignatura) | Q(imparte__asignatura_id=id_asignatura),
                 Q(intento__cuestionario_id=id_cuestionario) | Q(intento__cuestionario_id__isnull=True),
             )
-            .values("id", "first_name", "last_name", "intento__nota")
+            .values("id", "first_name", "last_name", "intento__nota","email")
         )
 
     def get_students(self):

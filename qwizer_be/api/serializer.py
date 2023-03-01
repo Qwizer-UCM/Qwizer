@@ -1,6 +1,4 @@
 from rest_framework import serializers
-
-from api import serializer
 from .utils.cifrado import encrypt_tests
 from .models import Cuestionario, InstanciaOpcionTest, InstanciaPregunta, OpcionTest, Pregunta, PreguntaCuestionario,PreguntaTest,PreguntaText, InstanciaPreguntaTest, InstanciaPreguntaText
 
@@ -130,3 +128,9 @@ class RespuestasSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         return instance
+    
+
+class AlumnoSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    nombre = serializers.CharField()
+    apellidos = serializers.CharField()
