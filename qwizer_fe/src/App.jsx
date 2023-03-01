@@ -25,7 +25,7 @@ import QuestionContainerNoRevision from './components/QuestionContainerNoRevisio
 import QuestionContainerRevision from './components/QuestionContainerRevision';
 import useOnline from './hooks/useOnline';
 import { routes } from './constants';
-import Notas from './components/Notas';
+import UploadNotas from './components/UploadNotas';
 
 const App = () => {
   const { user, isLogged, isLoading, login, logout } = useAuth();
@@ -58,7 +58,7 @@ const App = () => {
             <Route path={routes.REVISION_NOTAS_CUESTIONARIO} element={<RevisionNotasContainer />} />
             <Route path={routes.REVISION_NOTAS_ALUMNO} element={<QuestionContainerRevision />} />
             <Route path={routes.REGISTRO} element={<RegisterContainer />} />
-            <Route path={routes.NOTAS} element={<Notas />} />
+            <Route path={routes.NOTAS} element={<UploadNotas />} />
 
           </Route>
           <Route path={routes.QR} element={<QrContainer userId={user.userId} />} />

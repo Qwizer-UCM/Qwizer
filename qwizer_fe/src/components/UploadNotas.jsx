@@ -3,7 +3,7 @@ import useFetch from '../hooks/useFetch';
 import { Subjects, Tests } from '../services/API';
 import Modal from './common/modals/Modal';
 
-const Notas = () => {
+const UploadNotas = () => {
   const { data, isLoading } = useFetch(Subjects.getFromStudentOrTeacher);
   const [selectedOption, setSelectedOption] = useState('-1');
   const [selectedSubject, setSelectedSubject] = useState('-1');
@@ -139,4 +139,4 @@ const Notas = () => {
   );
 };
 
-export default Notas;
+export default UploadNotas;
