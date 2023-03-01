@@ -84,10 +84,10 @@ const columns = [
 
 const RevisionNotasContainer = () => {
   const params = useParams();
-  const { data: dataNotas, error } = useFetch(Tests.getQuizGrades, {
+  const { data: dataNotas, error, isLoading } = useFetch(Tests.getQuizGrades, {
     params: { idCuestionario: params.id },
     transform: ({ notas }) =>
-      notas.map((nota) => ({
+      Object.values(notas).map((nota) => ({
         id: nota.id,
         idCuestionario: params.id,
         nombre: nota.nombre,
@@ -95,6 +95,8 @@ const RevisionNotasContainer = () => {
         nota: nota.nota,
       })),
   });
+
+  if(isLoading) return null;
 
   if (dataNotas && !error) {
     return (
