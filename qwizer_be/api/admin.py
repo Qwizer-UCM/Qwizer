@@ -10,6 +10,7 @@ from import_export import resources
 # Register your models here.
 from .models import (
     Asignatura,
+    Cuestionario,
     Imparte,
     Intento,
     Pregunta,
@@ -98,6 +99,8 @@ admin.site.register(Asignatura)    # TODO no hay otra manera de crear asignatura
 admin.site.register(Imparte,ImparteAdmin)
 admin.site.register(Intento, IntentoAdmin)
 admin.site.register(Pregunta)
+admin.site.register(Cuestionario)
+
 
 
 admin.site.unregister(Group)

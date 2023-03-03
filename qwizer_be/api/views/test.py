@@ -126,8 +126,8 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             # Serializar las preguntas
             res = []
             for inst in InstanciaPregunta.objects.get_by_intento(id_intento=intento.id):
-                pertenece = inst.pregunta
-                inst_serialzed = PreguntasSerializer(inst.pregunta.pregunta).data
+                pertenece = inst.seleccion
+                inst_serialzed = PreguntasSerializer(inst.pregunta).data
                 inst_serialzed["fijar"], inst_serialzed["orden"], inst_serialzed["aleatorizar"] = pertenece.fijar, pertenece.orden, pertenece.aleatorizar
                 res.append(inst_serialzed)
 
@@ -147,13 +147,14 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 if inst.tipo == SeleccionPregunta.Tipo.PREGALEATORIA:
                     lista = OpcionPreguntaAleatoria.objects.get_by_pregunta_aleatoria(id_pregunta_aleatoria=inst.id)
                     print(lista)
-                    id_elegida = random.choice([i.id for i in lista])
-                    pregunta_elegida = Pregunta.objects.get_by_id(id_elegida)
+                    id_elegida = random.choice([i.pregunta.id for i in lista])
+                    pregunta_elegida = Pregunta.objects.get_by_id(id_pregunta=id_elegida)
                     pregunta = pregunta_elegida
                 else:
                     pregunta = inst.pregunta
                 preg = PreguntasSerializer(pregunta).data
                 preg["fijar"], preg["orden"], preg["aleatorizar"] = inst.fijar, inst.orden, inst.aleatorizar
+                preg["id_seleccion"] = inst.id
                 res.append(preg)
 
 
@@ -176,11 +177,11 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             intento = Intento.objects.create_intento(idAlumno=request.user.id, idCuestionario=cuestionario.id, commit=True)
             for preg in res:
                 if preg["tipoPregunta"] == "test":
-                    inst = InstanciaPreguntaTest.objects.create_instancia(id_intento=intento.id, id_pregunta=preg["id"], id_respuesta=None, orden=preg["orden"], commit=True)
+                    inst = InstanciaPreguntaTest.objects.create_instancia(id_seleccion=preg["id_seleccion"],id_intento=intento.id, id_pregunta=preg["id"], id_respuesta=None, orden=preg["orden"], commit=True)
                     for opc in preg["opciones_test"]:
                         InstanciaOpcionTest.objects.create_instancia(id_instancia=inst.id, id_opcion=opc["id"], orden=opc["orden"], commit=True)
                 if preg["tipoPregunta"] == "text":
-                    InstanciaPreguntaText.objects.create_instancia(id_intento=intento.id, id_pregunta=preg["id"], respuesta=None, orden=preg["orden"], commit=True)
+                    InstanciaPreguntaText.objects.create_instancia(id_seleccion=preg["id_seleccion"],id_intento=intento.id, id_pregunta=preg["id"], respuesta=None, orden=preg["orden"], commit=True)
                 
 
         # Encriptar tests
@@ -295,18 +296,36 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         for key, respuesta in respuestas.items():
             pregunta = Pregunta.objects.get_by_id(id_pregunta=respuesta["id"])
 
-            if respuesta["type"] == "test" and str(respuesta["answr"]).isdigit():
-                opcion = OpcionTest.objects.get_by_id(id_opciones=respuesta["answr"])
+            if respuesta["type"] == "test":
                 respuesta_enviada = InstanciaPreguntaTest.objects.get_by_intento_pregunta(intento.id, pregunta.id)
+                try:
+                    opcion = OpcionTest.objects.get_by_id(id_opciones=respuesta["answr"])
+                except:
+                    opcion = None
                 respuesta_enviada.respuesta = opcion
                 respuesta_enviada.save()
+
+                opcion_usuario = int(respuesta["answr"] or -1)
+                opcion_correcta = pregunta.preguntatest.respuesta.id
+
+                if opcion_usuario == opcion_correcta:
+                    nota = nota + respuesta_enviada.seleccion.puntosAcierto
+                else:
+                    nota = nota - respuesta_enviada.seleccion.puntosFallo
 
             if respuesta["type"] == "text":
                 respuesta_enviada = InstanciaPreguntaText.objects.get_by_intento_pregunta(intento.id, pregunta.id)
                 respuesta_enviada.respuesta = respuesta["answr"]
                 respuesta_enviada.save()
 
-            nota = nota + InstanciaPregunta.calcular_nota(respuesta, id_cuestionario)
+                opcion_usuario = respuesta["answr"].lower().replace(" ", "")
+                opcion_correcta = pregunta.preguntatext.respuesta.lower().replace(" ", "")
+
+                if opcion_usuario == opcion_correcta:
+                    nota = nota + respuesta_enviada.seleccion.puntosAcierto
+                else:
+                    nota = nota - respuesta_enviada.seleccion.puntosFallo
+
 
         intento.nota = nota
         intento.hash = hash_enviado
@@ -322,16 +341,18 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         if request.user.role != User.TEACHER:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        cuestionario = Cuestionario.objects.get_by_id(id_cuestionario=pk)
-        pertenecen = SeleccionPregunta.objects.get_by_cuestionario(id_cuestionario=cuestionario.id)
         try:
             intento_obj = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=pk, id_alumno=id_alumno)
         except:
             return Response(data="El usuario no ha realizado ningun intento", status=status.HTTP_400_BAD_REQUEST)
+        
+        cuestionario = Cuestionario.objects.get_by_id(id_cuestionario=pk)
+        instancia_preguntas = InstanciaPregunta.objects.get_by_intento(id_intento=intento_obj.id)
 
         questions = []
-        for pertenece in pertenecen:
-            pregunta = pertenece.pregunta
+        for inst in instancia_preguntas:
+            pregunta = inst.pregunta
+            print(inst)
             pregunta_json = {"id": pregunta.id, "question": pregunta.pregunta}
             if hasattr(pregunta, "preguntatest"):
                 pregunta_json["type"] = "test"
@@ -339,7 +360,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 pregunta_json["options"] = [{"id": opcion.id, "op": opcion.opcion} for opcion in opciones]
                 pregunta_json["correct_op"] = PreguntaTest.objects.get_by_id(id_pregunta=pregunta.id).respuesta.id
                 # TODO esto es un apaño para qe funcione hay que reescribirlo todo
-                pregunta_json["user_op"] = InstanciaPreguntaTest.objects.get_by_intento_pregunta(id_intento=intento_obj.id, id_pregunta=pregunta.id)
+                pregunta_json["user_op"] = inst.instanciapreguntatest
                 if pregunta_json["user_op"].respuesta is not None:
                     pregunta_json["user_op"] = pregunta_json["user_op"].respuesta.id
                 else:
@@ -347,7 +368,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             if hasattr(pregunta, "preguntatext"):
                 pregunta_json["type"] = "text"
                 pregunta_json["correct_op"] = PreguntaText.objects.get_by_id(id_pregunta=pregunta.id).respuesta
-                pregunta_json["user_op"] = InstanciaPreguntaText.objects.get_by_intento_pregunta(id_intento=intento_obj.id, id_pregunta=pregunta.id)
+                pregunta_json["user_op"] = inst.instanciapreguntatext
                 if pregunta_json["user_op"] is not None:
                     pregunta_json["user_op"] = pregunta_json["user_op"].respuesta
                 else:
@@ -529,7 +550,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                     if "ref" in pregSeleccionada:
                         try:
                             preguntaSelec = Pregunta.objects.get_by_id(id_pregunta=pregSeleccionada["ref"]) 
-                            OpcionPreguntaAleatoria.objects.create_opcion_pregunta_aleatoria(id_pregunta=preguntaSelec.id, id_pregunta_aleatoria=pertenece.id)
+                            OpcionPreguntaAleatoria.objects.create_opcion_pregunta_aleatoria(id_pregunta=preguntaSelec.id, id_pregunta_aleatoria=pertenece.id,commit=True)
                         except Exception:
                             return Response(
                                 {
@@ -540,7 +561,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                                 )
                     else:
                         preguntaNueva = save_question(pregYaml,pregunta,asignatura)
-                        OpcionPreguntaAleatoria.objects.create_opcion_pregunta_aleatoria(id_pregunta=preguntaNueva.id, id_pregunta_aleatoria=pertenece.id)                        
+                        OpcionPreguntaAleatoria.objects.create_opcion_pregunta_aleatoria(id_pregunta=preguntaNueva.id, id_pregunta_aleatoria=pertenece.id,commit=True)                        
             if pertenece.tipo == SeleccionPregunta.Tipo.PREGBANCO:
                 save_question(pregYaml,pregunta,asignatura)
 

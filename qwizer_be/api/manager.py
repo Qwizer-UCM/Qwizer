@@ -264,8 +264,8 @@ class IntentoManager(models.Manager):
         return self.get_queryset().filter(cuestionario__in=cuestionarios, usuario_id=id_alumno).count()
 
 class InstanciaPreguntaManager(models.Manager):
-    def create_instancia(self, id_intento, id_pregunta,orden, commit=False, **extra_fields):
-        obj = self.model(intento_id=id_intento, pregunta_id=id_pregunta,orden=orden, **extra_fields)
+    def create_instancia(self, id_intento, id_pregunta,orden,id_seleccion, commit=False, **extra_fields):
+        obj = self.model(intento_id=id_intento, pregunta_id=id_pregunta,orden=orden,seleccion_id=id_seleccion, **extra_fields)
         if commit:
             obj.save()
         return obj
@@ -278,8 +278,8 @@ class InstanciaPreguntaManager(models.Manager):
 
 
 class InstanciaPreguntaTestManager(InstanciaPreguntaManager):
-    def create_instancia(self, id_intento, id_pregunta, orden, commit=False, id_respuesta=None,**extra_fields):
-        obj = super().create_instancia(id_intento=id_intento, id_pregunta=id_pregunta,orden=orden)
+    def create_instancia(self, id_intento, id_pregunta, orden,id_seleccion, commit=False, id_respuesta=None,**extra_fields):
+        obj = super().create_instancia(id_intento=id_intento, id_pregunta=id_pregunta,orden=orden,id_seleccion=id_seleccion)
         obj.respuesta_id=id_respuesta
         if commit:
             obj.save()
@@ -291,8 +291,8 @@ class InstanciaPreguntaTestManager(InstanciaPreguntaManager):
 
 
 class InstanciaPreguntaTextManager(InstanciaPreguntaManager):
-    def create_instancia(self, id_intento, id_pregunta, orden, commit=False,respuesta=None, **extra_fields):
-        obj = super().create_instancia(id_intento=id_intento, id_pregunta=id_pregunta,orden=orden)
+    def create_instancia(self, id_intento, id_pregunta, orden, id_seleccion,commit=False,respuesta=None, **extra_fields):
+        obj = super().create_instancia(id_intento=id_intento, id_pregunta=id_pregunta,orden=orden,id_seleccion=id_seleccion)
         obj.respuesta=respuesta
         if commit:
             obj.save()

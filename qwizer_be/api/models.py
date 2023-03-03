@@ -251,30 +251,12 @@ class Intento(models.Model):
 class InstanciaPregunta(models.Model):
     objects = InstanciaPreguntaManager()
     intento = models.ForeignKey(Intento, on_delete=models.CASCADE)
-    pregunta = models.ForeignKey(SeleccionPregunta, on_delete=models.CASCADE)
+    seleccion = models.ForeignKey(SeleccionPregunta, on_delete=models.CASCADE)
+    pregunta = models.ForeignKey(Pregunta, on_delete=models.CASCADE)
     orden = models.PositiveSmallIntegerField()
 
     class Meta:
         ordering = ["pregunta"]
-
-    @classmethod
-    def calcular_nota(cls, respuesta, id_cuestionario):
-        # TODO alguna manera mejor de calcular nota?
-        pregunta_info = SeleccionPregunta.objects.get_by_pregunta_cuestionario(id_pregunta=respuesta["id"], id_cuestionario=id_cuestionario)
-        opcion_usuario, opcion_correcta = None, None
-
-        if respuesta["type"] == "test":
-            opcion_usuario = int(respuesta["answr"] or -1)
-            opcion_correcta = pregunta_info.pregunta.preguntatest.respuesta.id
-        elif respuesta["type"] == "text":
-            opcion_usuario = respuesta["answr"].lower().replace(" ", "")
-            opcion_correcta = pregunta_info.pregunta.preguntatext.respuesta.lower().replace(" ", "")
-
-        if opcion_usuario == opcion_correcta:
-            return pregunta_info.puntosAcierto
-        else:
-            return -pregunta_info.puntosFallo
-
 
 class InstanciaPreguntaTest(InstanciaPregunta):  # No debería ser on delete cascade
     objects = InstanciaPreguntaTestManager()

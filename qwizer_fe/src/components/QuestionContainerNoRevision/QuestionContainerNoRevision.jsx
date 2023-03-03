@@ -79,7 +79,7 @@ const QuestionContainerNoRevision = ({ role }) => {
     });
     // Introducir respuestas alumno
     const respuestas = JSON.parse(localStorage.getItem('answers'))?.[paramsId];
-    if (respuestas.respuestas) {
+    if (respuestas?.respuestas) {
       for (const [id, pregunta] of Object.entries(respuestas.respuestas)) {
         answList.respuestas[id] = { id, type: pregunta.type, answr: pregunta.type === 'test' ? Number(pregunta.answr) : pregunta.answr };
       }

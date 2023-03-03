@@ -12,11 +12,13 @@ const QuestionContainerRevision = () => {
   const params = useParams();
   const navigate = useNavigate();
   
-  const { data: testCorregido, error } = useFetch(Tests.getCorrectedTest, {
+  const { data: testCorregido, error, isLoading} = useFetch(Tests.getCorrectedTest, {
     params: { idAlumno: Number(params.idAlumno), idCuestionario: Number(params.id) ?? '' },
   });
   const [indPregunta, setindPregunta] = useState(0);
   
+  if(isLoading) return null;
+
   const pregunta = testCorregido?.questions[indPregunta];
   if (testCorregido && !error && pregunta) {
     return (
