@@ -15,6 +15,10 @@ export default defineConfig(({ mode }) => {
       host: env.REACT_HOST,
       port: env.REACT_PORT,
     },
+    preview: {
+      host: env.REACT_HOST,
+      port: env.REACT_PORT,
+    },
     envPrefix: 'REACT_',
     plugins: [
       react(),

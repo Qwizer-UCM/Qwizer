@@ -12,10 +12,5 @@ RUN pipenv install --system
 COPY ./qwizer_be/.env ./.env
 COPY ./qwizer_be ./
 
-# ENTRYPOINT ["python", "manage.py"]
-# CMD ["runserver", "0.0.0.0:8000"]
-CMD python manage.py migrate --no-input && \
-    python startup.py && \
-    python manage.py collectstatic --no-input && \
-    gunicorn -b 0.0.0.0:8000 qwizer_be.wsgi
-    #python manage.py runserver 0.0.0.0:8000
+COPY ./qwizer_be/start.sh ./
+RUN chmod +x ./start.sh 

@@ -1,4 +1,14 @@
+# Índice
+
+- [Qwizer](#qwizer)
+- [Ejecución con docker](#ejecución-con-docker)
+- [Ejecución manual](#ejecución-manual)
+  - [Djagno](#django)
+  - [React](#react)
+- [Links de interés](#links-de-interés)
+
 # Qwizer
+
  TFG : Aplicación web progresiva para la realización de cuestionarios
  
  Qwizer es una aplicación web cuya finalidad es permitir a un alumno realizar cuestionarios. Lo que destaca de esta aplicación web con respecto a otras de este tipo, como Moodle, es que esta es progresiva, es decir, funciona incluso cuando no hay conexión a internet; aunque la funcionalidad esta limitada a realizar cuestionarios de manera *offline*. Cuando el usuario realice un cuestionario de manera *offline*, se le generará un código QR de sus respuestas, el cual deberá mostrar al profesor. Una vez el usuario vuelva a tener conexión a internet, las respuestas del cuestionario se enviará automáticamente. Se pueden distinguir tres grupos de usuarios para la aplicación:
@@ -9,46 +19,40 @@
 
 La aplicación tiene un diseño adaptativo, lo que permite que se visualice bien, tanto en pantallas de ordenadores, como en la de dispositivos móviles.
 
+# Ejecución con docker
 
-# **Instrucciones de uso:**
+   Seguir las instrucciones descritas en [Qwizer & Docker Compose](.docker/README.md)
 
-Es importante que hagas los pasos en este orden, puesto que si intentas ejecutar Django antes que la base de datos obtendrás un error.
+# Ejecución manual
 
-## Base de datos:
-Para crear la base de datos nosotros utilizamos la herramienta [laragon](https://laragon-org.translate.goog/?_x_tr_sl=en&_x_tr_tl=es&_x_tr_hl=es&_x_tr_pto=sc). Una vez instalada y ejecutada debemos darle a `Start all`. Tras esto le daremos al botón Database y como campos seleccionaremos:
+Requisitos.
+
+```
+- Base de datos PostgreSQL 15.2
+- Python 3.11
+- Node 18.7.0
 ```
 
-- Nombre de la sesión: Qwizer-db
-- Tipo de red: MariaDb or MySQL (TCP/IP)
-- Libraby: libmariadb.dll
-- Nombre del host/ip: 127.0.0.1
-- Usuario: root
-- Contraseña: (nada)
-- Puerto: 3306
-```
+## Django
 
-Tras esto le daremos a abrir y se abrirá una nueva pantalla. En el lado izquierdo debemos pulsar click derecho y crear una nueva base de datos con el nombre `qwizer-db`. Con esto ya tendremos creada la base de datos, y las tablas se generan mediante django.
+Para poder usar django necesitarás tener python instalado e instalar pipenv con el siguiente comando `pip install pipenv`. A continuación habria que instalar las librerias necesarias con `pipenv install`.
 
+Después se podróa arrancar el sevidor mediante el comando `python manage.py runserver`. Este comando debe de ser lanzado desde la carpeta `qwizer-be` del proyecto.
 
-## Django:
-Para poder usar django necesitarás tener python instalado (versión 3.9 recomendada) y django instalado `python -m pip install Django`. Además necesitarás algunos módulos más:
-`pip install django-cors-headers`,
- `pip install djangorestframework`,
- `pip install django-createuser`,
- `pip install pycryptodome`,
- `pip install PyYAML`,
- `pip install mysqlclient`.
-Después arrancar el sevidor mediante el comando `python manage.py runserver`. Este comando debe de ser lanzado desde la carpeta `qwizer-be` del proyecto. 
+**IMPORTANTE**: Si es el primer arranque, antes de ejecutar  `python manage.py runserver`  debes ejecutar `python manage.py makemigrations` y `python manage.py migrate`. Con esto se generarán las tablas en la base de datos que creaste con anterioridad.
 
-**IMPORTANTE**: Si es el primer arranque, antes de ejecutar  `python manage.py runserver`  debes de ir a la carpeta `qwizer-be/api/migrations` y **borrar su contenido salvo el archivo __init__.py**. Tras esto debes ejecutar `python manage.py makemigrations` y `python manage.py migrate`. Con esto se generarán las tablas en la base de datos que creaste con anterioridad.
+**Creación de un usuario:** En la consola de python, antes de arrancar el servidor, ejecuta `python manage.py createsuperuser`. Los posibles roles son: `teacher, student`. También se pueden crear usuarios mediante el uso de la API, mediante la dirección `http://localhost:8000/api/register`.  En este caso sí que será necesario ejecutar el servidor.
 
-**Creación de un usuario:** En la consola de python, antes de arrancar el servidor, ejecuta `python manage.py createsuperuser`. Los posibles roles son: `teacher, student`. También se pueden crear usuarios mediante el uso de la API, mediante la dirección `http://localhost:8000/api/register`.  En este caso sí que será necesario ejecutar el servidor. Un ejemplo de la entrada esperada se encuentra en el archivo `qwizer-be/api/views.py`
+## React
 
-**Uso del panel de administración de Django:** Para poder añadir asignaturas a la base de datos se puede hacer uso del panel de administración de Django. Este panel se encuentra en la dirección `http://localhost:8000/admin/`. 
+En primer lugar necesitarás instalar [Node.js](https://nodejs.org/es/). Tras ello deberás ir a la carpeta` ./qwizer-fe ` y ejecutar `npm install`.
+Tras ejecutar la instalación deberás usar los comandos `npm run build` y `npm run preview`.
 
-## React:
-En primer lugar necesitarás instalar [Node.js](https://nodejs.org/es/). Tras ello deberás ir a la carpeta` ./qwizer-fe ` y ejecutar `npm install`. 
-Tras ejecutar la instalación deberás usar los comandos `npm run build` y `serve -s build`. Es posible que necesites instalar algunos módulos más. En ese caso lee la consola y se te indicarán.
+# Links de interés
+
+1. Página web de qwizer: <https://localhost>
+2. Panel de administración de django: <https://localhost/admin>
+3. Documentación de la api: <https://localhost/swagger> o <https://localhost/redoc> 
 
 # **Funcionalidades:**
 
