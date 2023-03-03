@@ -3,7 +3,7 @@ from datetime import datetime
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
 import yaml
-from api.models import Asignatura, Cuestionario, InstanciaPreguntaTest, InstanciaPreguntaText, Intento, OpcionTest, Pregunta, PreguntaCuestionario, PreguntaTest, PreguntaText, User
+from api.models import Asignatura, Cuestionario, InstanciaPreguntaTest, InstanciaPreguntaText, Intento, OpcionTest, Pregunta, SeleccionPregunta, PreguntaTest, PreguntaText, User
 from api.utils.cifrado import encrypt_tests
 from django.utils.timezone import make_aware
 from rest_framework import mixins, status, viewsets
@@ -21,7 +21,8 @@ from ..models import (
     Intento,
     OpcionTest,
     Pregunta,
-    PreguntaCuestionario,
+    SeleccionPregunta,
+    OpcionPreguntaAleatoria,
     User,
 )
 from ..serializer import (
@@ -29,7 +30,7 @@ from ..serializer import (
     EncryptedTestsSerializer,
     InstanciaOpcionSerializer,
     InstanciaPreguntaSerializer,
-    PreguntaCuestionarioSerializer,
+    SeleccionPreguntaSerializer,
     PreguntasSerializer,
 )
 
@@ -47,6 +48,34 @@ def shuffle(res):
 
 TIME_FORMAT = "%d/%m/%Y, %H:%M:%S"  # TODO fichero de constantes?
 
+def save_question(pregYaml, pregunta, asignatura):
+    
+    if pregunta is None:
+        pregunta = Pregunta.objects.create_preguntas(idAsignatura=asignatura.id, titulo=pregYaml["titulo"], pregunta=pregYaml["pregunta"])
+
+    # Guardamos las opciones
+    if pregYaml["tipo"] == "test":
+        pregunta_test = PreguntaTest.objects.create_pregunta_test(pregunta=pregYaml["pregunta"], idAsignatura=asignatura.id, titulo=pregYaml["titulo"], id_pregunta=pregunta.id)
+        pregunta_test.save()
+
+        opciones = pregYaml["opciones"]
+        for index, opc in enumerate(opciones):
+            opcion = OpcionTest.objects.create_opciones_test(opcion=opc["op"], idPregunta=pregunta.id, orden=index, fijar=opc["fijar"] if ("fijar" in opc) else False)
+            try:
+                opcion.save()
+                if index == pregYaml["op_correcta"]:
+                    pregunta_test.respuesta_id = opcion.id
+                    pregunta_test.save()
+            except Exception:
+                print("La pregunta ya existia")
+
+    elif pregYaml["tipo"] == "text":
+        pregunta_text = PreguntaText.objects.create_pregunta_text(
+            pregunta=pregYaml["pregunta"], idAsignatura=asignatura.id, titulo=pregYaml["titulo"], id_pregunta=pregunta.id, respuesta=pregYaml["opciones"]
+        )
+        pregunta_text.save()    
+
+    return pregunta
 
 
 # TODO faltan schemas
@@ -86,12 +115,6 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        # Serializar las preguntas
-        res = PreguntasSerializer(cuestionario.preguntas.all(), many=True).data
-        for preg in res:
-            pertenece = PreguntaCuestionarioSerializer(PreguntaCuestionario.objects.get_by_pregunta_cuestionario(id_pregunta=preg["id"], id_cuestionario=cuestionario.id)).data
-            preg["fijar"], preg["orden"], preg["aleatorizar"] = pertenece["fijar"], pertenece["orden"], pertenece["aleatorizar"]
-
 
         # Comprobar si es la primera vez que el alumno pide el cuestionario para crearle su propio orden de preguntas
         try:
@@ -100,6 +123,14 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             intento = None
 
         if intento:
+            # Serializar las preguntas
+            res = []
+            for inst in InstanciaPregunta.objects.get_by_intento(id_intento=intento.id):
+                pertenece = inst.pregunta
+                inst_serialzed = PreguntasSerializer(inst.pregunta.pregunta).data
+                inst_serialzed["fijar"], inst_serialzed["orden"], inst_serialzed["aleatorizar"] = pertenece.fijar, pertenece.orden, pertenece.aleatorizar
+                res.append(inst_serialzed)
+
             # Recuperar orden de las preguntas
             for preg in res.copy():
                 override = InstanciaPreguntaSerializer(InstanciaPregunta.objects.get_by_intento_pregunta(id_intento=intento.id, id_pregunta=preg["id"])).data
@@ -111,6 +142,21 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                         opc["orden"] = opc_override["orden"]
                         res[preg["orden"]]["opciones_test"][opc["orden"]] = opc
         else:
+            res = []
+            for inst in SeleccionPregunta.objects.get_by_cuestionario(id_cuestionario=cuestionario.id):
+                if inst.tipo == SeleccionPregunta.Tipo.PREGALEATORIA:
+                    lista = OpcionPreguntaAleatoria.objects.get_by_pregunta_aleatoria(id_pregunta_aleatoria=inst.id)
+                    print(lista)
+                    id_elegida = random.choice([i.id for i in lista])
+                    pregunta_elegida = Pregunta.objects.get_by_id(id_elegida)
+                    pregunta = pregunta_elegida
+                else:
+                    pregunta = inst.pregunta
+                preg = PreguntasSerializer(pregunta).data
+                preg["fijar"], preg["orden"], preg["aleatorizar"] = inst.fijar, inst.orden, inst.aleatorizar
+                res.append(preg)
+
+
             # TODO arreglar en algun momento
             #Ordenar lista segun campo orden
             for preg in res.copy():
@@ -135,6 +181,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                         InstanciaOpcionTest.objects.create_instancia(id_instancia=inst.id, id_opcion=opc["id"], orden=opc["orden"], commit=True)
                 if preg["tipoPregunta"] == "text":
                     InstanciaPreguntaText.objects.create_instancia(id_intento=intento.id, id_pregunta=preg["id"], respuesta=None, orden=preg["orden"], commit=True)
+                
 
         # Encriptar tests
         # Añadir atributos del cuestionario
@@ -194,17 +241,34 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         except:
             return Response({"inserted": "false", "message": "Error: El cuestionario ya existe"})
 
+        keys_preg = {
+            "aleatoria": SeleccionPregunta.Tipo.PREGALEATORIA,
+            "test": SeleccionPregunta.Tipo.PREGBANCO,
+            "text": SeleccionPregunta.Tipo.PREGBANCO
+        }
         for i, pregunta in enumerate(lista_preguntas):
-            pertenece = PreguntaCuestionario.objects.create_pregunta_cuestionario(
+            tipo_seleccionada = keys_preg[pregunta["tipo"]] if pregunta["tipo"] in keys_preg else None # TODO tratamiento de excepciones 
+            if tipo_seleccionada is None:
+                continue
+            pertenece = SeleccionPregunta.objects.create_seleccion_pregunta(
                 puntosAcierto=pregunta["punt_positiva"],
                 puntosFallo=pregunta["punt_negativa"],
                 idCuestionario=cuestionario.id,
-                idPregunta=Pregunta.objects.get_by_id(id_pregunta=pregunta["id"]).id,
+                idPregunta=pregunta["id"] if pregunta["tipo"] != "aleatoria" else None,
                 orden=i,
                 fijar=pregunta["fijar"] if ("fijar" in pregunta) else False,
                 aleatorizar=pregunta["aleatorizar"] if ("aleatorizar" in pregunta) else False,
+                tipo=tipo_seleccionada
             )
             pertenece.save()
+
+            if tipo_seleccionada == SeleccionPregunta.Tipo.PREGALEATORIA:
+                for preg in pregunta["preguntas_elegidas"]:
+                    opcion_preg_aleatoria = OpcionPreguntaAleatoria.objects.create_opcion_pregunta_aleatoria(
+                        id_pregunta = preg,
+                        id_pregunta_aleatoria = pertenece.id
+                    )
+                    opcion_preg_aleatoria.save()
 
         return Response(
             {
@@ -259,7 +323,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         cuestionario = Cuestionario.objects.get_by_id(id_cuestionario=pk)
-        pertenecen = PreguntaCuestionario.objects.get_by_cuestionario(id_cuestionario=cuestionario.id)
+        pertenecen = SeleccionPregunta.objects.get_by_cuestionario(id_cuestionario=cuestionario.id)
         try:
             intento_obj = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=pk, id_alumno=id_alumno)
         except:
@@ -350,6 +414,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 "nota": nota_cuestionario,
             }
         )
+    
 
     @action(detail=False, methods=["POST"])
     def subir(self, request):
@@ -433,55 +498,51 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        for i, preg in enumerate(yaml_cuestionario["cuestionario"]["preguntas"]):
+        for i, pregYaml in enumerate(yaml_cuestionario["cuestionario"]["preguntas"]):
+            pregunta = None
             try:
-                pregunta = Pregunta.objects.create_preguntas(
-                    pregunta=preg["pregunta"],
-                    idAsignatura=asignatura.id,
-                    titulo=preg["titulo"],
-                )
-                pregunta.save()
+                if pregYaml["tipo"] != "aleatoria":
+                    pregunta = Pregunta.objects.create_preguntas(
+                        pregunta=pregYaml["pregunta"],
+                        idAsignatura=asignatura.id,
+                        titulo=pregYaml["titulo"],
+                    )
+                    pregunta.save()
                 # TODO esto pa k eeh
             except Exception:
-                continue
+                pregunta = Pregunta.objects.get_by_asignatura_pregunta_titulo(pregunta=pregYaml["pregunta"], id_asignatura=asignatura.id, titulo=pregYaml["titulo"])
 
-            pertenece = PreguntaCuestionario.objects.create_pregunta_cuestionario(
-                puntosAcierto=preg["punt_positiva"],
-                puntosFallo=preg["punt_negativa"],
+            pertenece = SeleccionPregunta.objects.create_seleccion_pregunta(
+                puntosAcierto=pregYaml["punt_positiva"],
+                puntosFallo=pregYaml["punt_negativa"],
                 idCuestionario=cuestionario.id,
-                idPregunta=pregunta.id,
+                idPregunta=pregunta.id if pregYaml["tipo"] != "aleatoria" else None,
                 orden=i,
-                fijar=preg["fijar"] if ("fijar" in preg) else False,
-                aleatorizar=preg["aleatorizar"] if ("aleatorizar" in preg) else False,
+                fijar=pregYaml["fijar"] if ("fijar" in pregYaml) else False,
+                aleatorizar=pregYaml["aleatorizar"] if ("aleatorizar" in pregYaml) else False,
+                tipo = SeleccionPregunta.Tipo.PREGALEATORIA if (pregYaml["tipo"] == "aleatoria") else SeleccionPregunta.Tipo.PREGBANCO 
             )
             pertenece.save()
 
-            pregunta = Pregunta.objects.get_by_asignatura_pregunta_titulo(
-                pregunta=preg["pregunta"],
-                id_asignatura=asignatura.id,
-                titulo=preg["titulo"],
-            )
-            # Guardamos las opciones
-            if preg["tipo"] == "test":
-                pregunta_test = PreguntaTest.objects.create_pregunta_test(pregunta=preg["pregunta"], idAsignatura=asignatura.id, titulo=preg["titulo"], id_pregunta=pregunta.id)
-                pregunta_test.save()
-
-                opciones = preg["opciones"]
-                for index, opc in enumerate(opciones):
-                    opcion = OpcionTest.objects.create_opciones_test(opcion=opc["op"], idPregunta=pregunta.id, orden=index, fijar=opc["fijar"] if ("fijar" in opc) else False)
-                    try:
-                        opcion.save()
-                        if index == preg["op_correcta"]:
-                            pregunta_test.respuesta_id = opcion.id
-                            pregunta_test.save()
-                    except Exception:
-                        print("La pregunta ya existia")
-
-            elif preg["tipo"] == "text":
-                pregunta_text = PreguntaText.objects.create_pregunta_text(
-                    pregunta=preg["pregunta"], idAsignatura=asignatura.id, titulo=preg["titulo"], id_pregunta=pregunta.id, respuesta=preg["opciones"]
-                )
-                pregunta_text.save()
+            if pertenece.tipo == SeleccionPregunta.Tipo.PREGALEATORIA:
+                for pregSeleccionada in pregYaml["preguntas_elegidas"]:
+                    if "ref" in pregSeleccionada:
+                        try:
+                            preguntaSelec = Pregunta.objects.get_by_id(id_pregunta=pregSeleccionada["ref"]) 
+                            OpcionPreguntaAleatoria.objects.create_opcion_pregunta_aleatoria(id_pregunta=preguntaSelec.id, id_pregunta_aleatoria=pertenece.id)
+                        except Exception:
+                            return Response(
+                                {
+                                "inserted": "false",
+                                "message": "Error: La pregunta seleccionada no existe",
+                                },
+                                status=status.HTTP_400_BAD_REQUEST,
+                                )
+                    else:
+                        preguntaNueva = save_question(pregYaml,pregunta,asignatura)
+                        OpcionPreguntaAleatoria.objects.create_opcion_pregunta_aleatoria(id_pregunta=preguntaNueva.id, id_pregunta_aleatoria=pertenece.id)                        
+            if pertenece.tipo == SeleccionPregunta.Tipo.PREGBANCO:
+                save_question(pregYaml,pregunta,asignatura)
 
         return Response(
             {

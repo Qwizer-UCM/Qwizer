@@ -151,20 +151,32 @@ class CuestionariosManager(models.Manager):
         return self.get_queryset().order_by_fecha_cierre_desc()
 
 
-class PreguntaCuestionarioManager(models.Manager):
-    def create_pregunta_cuestionario(self, puntosAcierto, puntosFallo, idCuestionario, idPregunta,orden, fijar,aleatorizar=None, commit=False, **extra_fields):
-        obj = self.model(puntosAcierto=puntosAcierto, puntosFallo=puntosFallo, cuestionario_id=idCuestionario, pregunta_id=idPregunta, orden=orden, fijar=fijar, **extra_fields)
+#TODO comprobar que para PregAleatoria funciona
+class SeleccionPreguntaManager(models.Manager):
+    def create_seleccion_pregunta(self, tipo, puntosAcierto, puntosFallo, idCuestionario , orden, fijar,aleatorizar=None, idPregunta=None, commit=False, **extra_fields):
+        obj = self.model(puntosAcierto=puntosAcierto, puntosFallo=puntosFallo,tipo=tipo, cuestionario_id=idCuestionario, pregunta_id=idPregunta, orden=orden, fijar=fijar, **extra_fields)
         if aleatorizar is not None:
             obj.aleatorizar = aleatorizar        
         if commit:
             obj.save()
         return obj
 
-    def get_by_pregunta_cuestionario(self, id_pregunta, id_cuestionario):
-        return self.get_queryset().get(pregunta_id=id_pregunta, cuestionario_id=id_cuestionario)
+    # def get_by_seleccion_cuestionario(self, id_pregunta, id_cuestionario):
+    #     return self.get_queryset().get(pregunta_id=id_pregunta, cuestionario_id=id_cuestionario)
 
     def get_by_cuestionario(self, id_cuestionario):
         return self.get_queryset().filter(cuestionario_id=id_cuestionario)
+    
+
+class OpcionPreguntaAleatoriaManager(models.Manager):
+    def create_opcion_pregunta_aleatoria(self, id_pregunta, id_pregunta_aleatoria, commit=False, **extra_fields):
+        obj = self.model(pregunta_id=id_pregunta, pregunta_aleatoria_id = id_pregunta_aleatoria, **extra_fields)
+        if commit:
+            obj.save()
+        return obj
+    
+    def get_by_pregunta_aleatoria(self,id_pregunta_aleatoria):
+        return self.get_queryset().filter(pregunta_aleatoria_id = id_pregunta_aleatoria)
 
 class AsignaturaManager(models.Manager):
     # TODO no se crean
@@ -260,6 +272,9 @@ class InstanciaPreguntaManager(models.Manager):
 
     def get_by_intento_pregunta(self, id_intento, id_pregunta):
         return self.get_queryset().filter(intento_id=id_intento, pregunta_id=id_pregunta).first()
+
+    def get_by_intento(self, id_intento):
+        return self.get_queryset().filter(intento_id=id_intento)
 
 
 class InstanciaPreguntaTestManager(InstanciaPreguntaManager):

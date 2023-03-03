@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from django.urls import reverse
 import yaml
-from api.models import Asignatura, Cuestionario, Intento, Pregunta, PreguntaCuestionario, User
+from api.models import Asignatura, Cuestionario, Intento, Pregunta, SeleccionPregunta, User
 from api.utils.cifrado import decrypt
 from django.utils.timezone import make_aware
 

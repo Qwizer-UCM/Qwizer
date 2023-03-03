@@ -15,7 +15,8 @@ from api.manager import (
     InstanciaOpcionTestManager,
     IntentoManager,
     OpcionesTestManager,
-    PreguntaCuestionarioManager,
+    SeleccionPreguntaManager,
+    OpcionPreguntaAleatoriaManager,
     PreguntasManager,
     PreguntasTestManager,
     PreguntasTextManager,
@@ -141,7 +142,6 @@ class Cuestionario(models.Model):
     fecha_visible = models.DateTimeField(blank=False, verbose_name="fecha_visible")
     fecha_apertura = models.DateTimeField(blank=False, verbose_name="fecha_apertura")
     fecha_cierre = models.DateTimeField(blank=False, verbose_name="fecha_cierre")
-    preguntas = models.ManyToManyField(Pregunta, through="PreguntaCuestionario")
     aleatorizar = models.BooleanField(default=False)
 
     def __str__(self):
@@ -155,9 +155,9 @@ class Cuestionario(models.Model):
         )  # No puede haber dos cuestionarios con el mismo nombre para una asignatura
 
 
-class PreguntaCuestionario(models.Model):
-    objects = PreguntaCuestionarioManager()
-    pregunta = models.ForeignKey(Pregunta, related_name="preguntas", on_delete=models.CASCADE)
+class SeleccionPregunta(models.Model):
+    objects = SeleccionPreguntaManager()
+    pregunta = models.ForeignKey(Pregunta, related_name="preguntas", on_delete=models.CASCADE, default=None, null=True)
     cuestionario = models.ForeignKey(Cuestionario, on_delete=models.CASCADE)
     puntosAcierto = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name="puntosAcierto")
     puntosFallo = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name="puntosFallo")
@@ -165,15 +165,29 @@ class PreguntaCuestionario(models.Model):
     fijar = models.BooleanField(default=False)
     aleatorizar = models.BooleanField(default=False)
 
+    class Tipo(models.TextChoices):
+        PREGBANCO = 'PRB', _('PreguntaBanco')
+        PREGALEATORIA = 'PRA', _('PreguntaAleatoria')
+
+    tipo = models.CharField(
+        max_length=3,
+        choices=Tipo.choices
+    )
+
     def __str__(self):
         return str(self.pregunta) + "/" + str(self.cuestionario)
 
     class Meta:
-        ordering = ["pregunta"]
-        unique_together = (
-            "pregunta",
-            "cuestionario"
-        )
+        ordering = ["cuestionario"]
+
+# TODO NAMING 
+class OpcionPreguntaAleatoria(models.Model):
+    objects = OpcionPreguntaAleatoriaManager()
+    pregunta_aleatoria = models.ForeignKey(SeleccionPregunta, related_name="opciones_preguntas", on_delete=models.CASCADE)
+    pregunta = models.ForeignKey(Pregunta, related_name="preguntas_opciones", on_delete=models.CASCADE)
+
+
+
 
 class Asignatura(models.Model):
     objects = AsignaturaManager()
@@ -237,7 +251,7 @@ class Intento(models.Model):
 class InstanciaPregunta(models.Model):
     objects = InstanciaPreguntaManager()
     intento = models.ForeignKey(Intento, on_delete=models.CASCADE)
-    pregunta = models.ForeignKey(Pregunta, on_delete=models.CASCADE)
+    pregunta = models.ForeignKey(SeleccionPregunta, on_delete=models.CASCADE)
     orden = models.PositiveSmallIntegerField()
 
     class Meta:
@@ -246,7 +260,7 @@ class InstanciaPregunta(models.Model):
     @classmethod
     def calcular_nota(cls, respuesta, id_cuestionario):
         # TODO alguna manera mejor de calcular nota?
-        pregunta_info = PreguntaCuestionario.objects.get_by_pregunta_cuestionario(id_pregunta=respuesta["id"], id_cuestionario=id_cuestionario)
+        pregunta_info = SeleccionPregunta.objects.get_by_pregunta_cuestionario(id_pregunta=respuesta["id"], id_cuestionario=id_cuestionario)
         opcion_usuario, opcion_correcta = None, None
 
         if respuesta["type"] == "test":

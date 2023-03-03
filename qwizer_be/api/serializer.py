@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .utils.cifrado import encrypt_tests
-from .models import Cuestionario, InstanciaOpcionTest, InstanciaPregunta, OpcionTest, Pregunta, PreguntaCuestionario,PreguntaTest,PreguntaText, InstanciaPreguntaTest, InstanciaPreguntaText
+from .models import Cuestionario, InstanciaOpcionTest, InstanciaPregunta, OpcionTest, Pregunta, SeleccionPregunta,PreguntaTest,PreguntaText, InstanciaPreguntaTest, InstanciaPreguntaText
 
 #TODO mejor indicar los campos concretos en vez de __all__
 
@@ -9,9 +9,9 @@ class OpcionesTestSerializer(serializers.ModelSerializer):
         model = OpcionTest
         fields = "__all__"  
 
-class PreguntaCuestionarioSerializer(serializers.ModelSerializer):
+class SeleccionPreguntaSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PreguntaCuestionario
+        model = SeleccionPregunta
         fields = "__all__"
 
 class PreguntasSerializer(serializers.ModelSerializer):
