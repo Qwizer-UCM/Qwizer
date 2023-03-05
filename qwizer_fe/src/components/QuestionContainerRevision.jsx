@@ -8,12 +8,14 @@ import { Tests } from '../services/API';
 import useFetch from '../hooks/useFetch';
 import NotFound404 from './common/NotFound404';
 
-const QuestionContainerRevision = () => {
+const QuestionContainerRevision = ({id, role}) => {
   const params = useParams();
   const navigate = useNavigate();
-  
+
+  console.log(id)
+
   const { data: testCorregido, error, isLoading} = useFetch(Tests.getCorrectedTest, {
-    params: { idAlumno: Number(params.idAlumno), idCuestionario: Number(params.id) ?? '' },
+    params: { idAlumno: role === "teacher" ? Number(params.idAlumno) : id , idCuestionario: Number(params.id) ?? '' },
   });
   const [indPregunta, setindPregunta] = useState(0);
   

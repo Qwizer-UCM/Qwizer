@@ -338,8 +338,8 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         """TODO ruta un poco extraña pensar alternativa
         GET /tests/{id_cuestionario}/nota/{id_alumno}
         """
-        if request.user.role != User.TEACHER:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        # if request.user.role != User.TEACHER:
+        #     return Response(status=status.HTTP_403_FORBIDDEN)
 
         try:
             intento_obj = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=pk, id_alumno=id_alumno)

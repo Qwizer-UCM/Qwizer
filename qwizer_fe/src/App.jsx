@@ -33,6 +33,7 @@ const App = () => {
 
   if (isLoading) return null;
 
+
   // TODO en el navbar se podrian marcar como desactivados los links asi se evita el posible flicker del navbar si se pierde la conexión varias veces
   return (
     <Suspense fallback={<span>Loading...</span>}>
@@ -48,7 +49,7 @@ const App = () => {
           <Route path={routes.CUESTIONARIO} element={<CuestionariosContainer role={user.role} />} />
           <Route path={routes.OFFLINE} element={isOnline ? <AvailableOffline role={user.role} /> : <Navigate to={routes.NOT_FOUND} />} />
           <Route path={routes.TEST} element={<QuestionContainerNoRevision role={user.role} />} />
-          <Route path={routes.REVISION} element={<QuestionContainerRevision />} />
+          <Route path={routes.REVISION} element={<QuestionContainerRevision id={user.id} role={user.role}/>} />
           {/* FIXME importante arreglar el back devuelve las notas sin comprobar el rol */}
           <Route element={<ProtectedRoutes isAllowed={isOnline && user.role.includes('teacher')} />}>
             <Route path={routes.BANCO_PREGUNTAS} element={<BancoPreguntas />} />

@@ -37,11 +37,12 @@ Requisitos.
 
 Para poder usar django necesitarás tener python instalado e instalar pipenv con el siguiente comando `pip install pipenv`. A continuación habria que instalar las librerias necesarias con `pipenv install`.
 
-Después se podróa arrancar el sevidor mediante el comando `python manage.py runserver`. Este comando debe de ser lanzado desde la carpeta `qwizer-be` del proyecto.
+Después se podrá arrancar el sevidor mediante el comando `python manage.py runserver`. Este comando debe de ser lanzado desde la carpeta `qwizer-be` del proyecto. **CUIDADO** de no hacerlo desde otra carpeta porque si no nos descargará todas las dependencias necesarias para ejecutar la aplicación.
 
 **IMPORTANTE**: Si es el primer arranque, antes de ejecutar  `python manage.py runserver`  debes ejecutar `python manage.py makemigrations` y `python manage.py migrate`. Con esto se generarán las tablas en la base de datos que creaste con anterioridad.
 
 **Creación de un usuario:** En la consola de python, antes de arrancar el servidor, ejecuta `python manage.py createsuperuser`. Los posibles roles son: `teacher, student`. También se pueden crear usuarios mediante el uso de la API, mediante la dirección `http://localhost:8000/api/register`.  En este caso sí que será necesario ejecutar el servidor.
+Además si lo desea puede hacer uso del fichero  `startup.py` , ejecutandolo en consola con el comando `python startup.py`, que le generará de manera automática un profesor/admin con el correo  `root@root.com`  y contraseña  `root` .
 
 ## React
 
