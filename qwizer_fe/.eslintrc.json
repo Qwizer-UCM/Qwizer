@@ -39,6 +39,8 @@
         "react/prop-types":"off",
         "no-restricted-syntax" :"off",
         "no-param-reassign": "off",
-        "jsx-a11y/label-has-associated-control":"off"
+        "jsx-a11y/label-has-associated-control":"off",
+        "no-console":"off",
+        "no-alert":"off"
     }
 }

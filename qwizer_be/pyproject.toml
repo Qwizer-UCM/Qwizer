@@ -1,0 +1,43 @@
+[tool.black]
+line-length = 180
+
+[tool.pylint.main]
+
+load-plugins = "pylint_django, pylint_django.checkers.migrations"
+jobs = 0
+persistent = "no"
+
+[tool.pylint.basic]
+
+good-names = ["i", "j", "k", "_", "pk", "x", "y", "me"]
+
+[tool.pylint.pylint_django]
+
+django-settings-module = "qwizer_be.settings"
+
+[tool.pylint.format]
+
+max-line-length = 180
+
+[tool.pylint."messages control"]
+
+disable = [
+    "raw-checker-failed",
+    "bad-inline-option",
+    "locally-disabled",
+    "file-ignored",
+    "suppressed-message",
+    "useless-suppression",
+    "deprecated-pragma",
+    "use-symbolic-message-instead",
+    "missing-module-docstring",
+    "missing-class-docstring",
+    "missing-function-docstring",
+    "fixme",
+    "bare-except",
+    "arguments-differ",
+]
+
+[tool.pylint.miscellaneous]
+
+notes = ["FIXME", "XXX", "TODO"]
