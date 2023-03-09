@@ -235,7 +235,35 @@
     border: 2px solid #333;
 }
 
+.test-question-option input {
+    margin-right: 5px;
+    cursor: pointer;
+}
+.test-question-option {
+    cursor: pointer;
+    display: block;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
 
+.test-question-option:hover{
+    background-color: #ccc;
+}
+
+.test-question-option.correct{
+    background-color: #60d394;
+}
+
+.test-question-option.wrong{
+    background-color: #ee6055;
+    color: white;
+}
+
+.test-question-option.selected{
+    background-color: #ccc;
+}
 
 
 

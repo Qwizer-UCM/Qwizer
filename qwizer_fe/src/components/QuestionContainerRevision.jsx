@@ -12,8 +12,6 @@ const QuestionContainerRevision = ({id, role}) => {
   const params = useParams();
   const navigate = useNavigate();
 
-  console.log(id)
-
   const { data: testCorregido, error, isLoading} = useFetch(Tests.getCorrectedTest, {
     params: { idAlumno: role === "teacher" ? Number(params.idAlumno) : id , idCuestionario: Number(params.id) ?? '' },
   });

@@ -57,7 +57,7 @@ const App = () => {
             <Route path={SUBIR_PREGUNTAS} element={<UploadQuestions />} />
             <Route path={CREAR_CUESTIONARIO} element={<CrearCuestionario />} />
             <Route path={REVISION_NOTAS_CUESTIONARIO} element={<RevisionNotasContainer />} />
-            <Route path={REVISION_NOTAS_ALUMNO} element={<QuestionContainerRevision />} />
+            <Route path={REVISION_NOTAS_ALUMNO} element={<QuestionContainerRevision role={user.role}/>} />
             <Route path={REGISTRO} element={<RegisterContainer />} />
             <Route path={NOTAS} element={<UploadNotas />} />
 

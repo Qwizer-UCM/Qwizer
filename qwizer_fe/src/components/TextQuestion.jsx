@@ -23,7 +23,7 @@ const TextQuestion = ({ respuesta, mode, id, type, infoPreg=null, addAnswerd }) 
       <div className="bg-light rounded">
         <textarea className='form-control' style={{resize:"none"}} rows="9" cols="70" value={infoPreg.user_op} readOnly/>
       </div>
-      <div className="bg-success text-white rounded-pill">Respuesta Correcta: {infoPreg.correct_op}</div>
+      <div className="rounded p-2 mt-2" style={{backgroundColor:"#60d394"}}>Respuesta Correcta: {infoPreg.correct_op}</div>
     </div>
   );
 
