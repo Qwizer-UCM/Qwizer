@@ -24,8 +24,8 @@ import useAuth from './hooks/useAuth';
 import QuestionContainerNoRevision from './components/QuestionContainerNoRevision/QuestionContainerNoRevision';
 import QuestionContainerRevision from './components/QuestionContainerRevision';
 import useOnline from './hooks/useOnline';
-import { routes } from './constants';
 import UploadNotas from './components/UploadNotas';
+import { BANCO_PREGUNTAS, CREAR_CUESTIONARIO, CUESTIONARIO, INICIO, LOGIN, NOTAS, NOT_FOUND, OFFLINE, QR, QR_INSERT, REGISTRO, REVISION, REVISION_NOTAS_ALUMNO, REVISION_NOTAS_CUESTIONARIO, SUBIR_CUESTIONARIO, SUBIR_PREGUNTAS, TEST } from './constants';
 
 const App = () => {
   const { user, isLogged, isLoading, login, logout } = useAuth();
@@ -40,32 +40,32 @@ const App = () => {
       <Routes>
         <Route
           element={
-            <ProtectedRoutes isAllowed={isLogged} redirectPath={routes.LOGIN}>
+            <ProtectedRoutes isAllowed={isLogged} redirectPath={LOGIN}>
               <NavBar username={user.username} role={user.role} logout={logout} isOffline={!isOnline} />
             </ProtectedRoutes>
           }
         >
-          <Route path={routes.INICIO} element={isOnline ? <IndexContainer /> : <AvailableOffline role={user.role} />} />
-          <Route path={routes.CUESTIONARIO} element={<CuestionariosContainer role={user.role} />} />
-          <Route path={routes.OFFLINE} element={isOnline ? <AvailableOffline role={user.role} /> : <Navigate to={routes.NOT_FOUND} />} />
-          <Route path={routes.TEST} element={<QuestionContainerNoRevision role={user.role} />} />
-          <Route path={routes.REVISION} element={<QuestionContainerRevision id={user.id} role={user.role}/>} />
+          <Route path={INICIO} element={isOnline ? <IndexContainer /> : <AvailableOffline role={user.role} />} />
+          <Route path={CUESTIONARIO} element={<CuestionariosContainer role={user.role} />} />
+          <Route path={OFFLINE} element={isOnline ? <AvailableOffline role={user.role} /> : <Navigate to={NOT_FOUND} />} />
+          <Route path={TEST} element={<QuestionContainerNoRevision role={user.role} />} />
+          <Route path={REVISION} element={<QuestionContainerRevision id={user.id} role={user.role}/>} />
           {/* FIXME importante arreglar el back devuelve las notas sin comprobar el rol */}
           <Route element={<ProtectedRoutes isAllowed={isOnline && user.role.includes('teacher')} />}>
-            <Route path={routes.BANCO_PREGUNTAS} element={<BancoPreguntas />} />
-            <Route path={routes.SUBIR_CUESTIONARIO} element={<UploadTest />} />
-            <Route path={routes.SUBIR_PREGUNTAS} element={<UploadQuestions />} />
-            <Route path={routes.CREAR_CUESTIONARIO} element={<CrearCuestionario />} />
-            <Route path={routes.REVISION_NOTAS_CUESTIONARIO} element={<RevisionNotasContainer />} />
-            <Route path={routes.REVISION_NOTAS_ALUMNO} element={<QuestionContainerRevision />} />
-            <Route path={routes.REGISTRO} element={<RegisterContainer />} />
-            <Route path={routes.NOTAS} element={<UploadNotas />} />
+            <Route path={BANCO_PREGUNTAS} element={<BancoPreguntas />} />
+            <Route path={SUBIR_CUESTIONARIO} element={<UploadTest />} />
+            <Route path={SUBIR_PREGUNTAS} element={<UploadQuestions />} />
+            <Route path={CREAR_CUESTIONARIO} element={<CrearCuestionario />} />
+            <Route path={REVISION_NOTAS_CUESTIONARIO} element={<RevisionNotasContainer />} />
+            <Route path={REVISION_NOTAS_ALUMNO} element={<QuestionContainerRevision />} />
+            <Route path={REGISTRO} element={<RegisterContainer />} />
+            <Route path={NOTAS} element={<UploadNotas />} />
 
           </Route>
-          <Route path={routes.QR} element={<QrContainer userId={user.userId} />} />
-          <Route path={routes.QR_INSERT} element={<InsercionManual userId={user.userId} />} />
+          <Route path={QR} element={<QrContainer userId={user.userId} />} />
+          <Route path={QR_INSERT} element={<InsercionManual userId={user.userId} />} />
         </Route>
-        <Route path={routes.LOGIN} element={isOnline && !isLogged ? <LoginComponent login={login} /> : <Navigate to={isOnline ? routes.INICIO : routes.NOT_FOUND} />} />
+        <Route path={LOGIN} element={isOnline && !isLogged ? <LoginComponent login={login} /> : <Navigate to={isOnline ? INICIO : NOT_FOUND} />} />
         <Route path="*" element={<NotFound404 />} />
       </Routes>
     </Suspense>

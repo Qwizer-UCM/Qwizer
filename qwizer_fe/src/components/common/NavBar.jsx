@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
-import { routes } from '../../constants';
+import { BANCO_PREGUNTAS, CREAR_CUESTIONARIO, INICIO, NOTAS, OFFLINE, REGISTRO, SUBIR_CUESTIONARIO, SUBIR_PREGUNTAS } from '../../constants';
 
 const NavBar = ({ role, username, logout, isOffline }) => (
   <nav className="navbar navbar-expand-lg  bg-light">
     <div className="container-fluid">
-      <Link to={routes.INICIO} className="navbar-brand">
+      <Link to={INICIO} className="navbar-brand">
         Qwizer <span className={`material-icons fs-5 align-middle rounded shadow  p-1 ${isOffline ? 'bg-danger' : 'bg-success text-white'}`}>{!isOffline ? 'wifi' : 'wifi_off'}</span>
       </Link>
       <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
@@ -13,7 +13,7 @@ const NavBar = ({ role, username, logout, isOffline }) => (
       <div className="collapse navbar-collapse" id="navbarText">
         <ul className="navbar-nav me-auto">
           <li className="nav-item">
-            <Link to={routes.INICIO} className="nav-link active">
+            <Link to={INICIO} className="nav-link active">
               Inicio <span className="sr-only" />
             </Link>
           </li>
@@ -22,7 +22,7 @@ const NavBar = ({ role, username, logout, isOffline }) => (
               {role === 'teacher' && (
                 <>
                   <li className="nav-item">
-                    <Link to={routes.REGISTRO} className="nav-link active">
+                    <Link to={REGISTRO} className="nav-link active">
                       Añadir alumno
                       <span className="sr-only" />
                     </Link>
@@ -33,26 +33,26 @@ const NavBar = ({ role, username, logout, isOffline }) => (
                     </a>
                     <ul className="dropdown-menu" style={{ margin: 0 }}>
                       <li>
-                        <Link to={routes.SUBIR_PREGUNTAS} className="dropdown-item">
+                        <Link to={SUBIR_PREGUNTAS} className="dropdown-item">
                           Subir preguntas
                           <span className="sr-only" />
                         </Link>
                       </li>
-                      <Link to={routes.SUBIR_CUESTIONARIO} className="dropdown-item">
+                      <Link to={SUBIR_CUESTIONARIO} className="dropdown-item">
                         Subir test <span className="sr-only" />
                       </Link>
-                      <Link to={routes.CREAR_CUESTIONARIO} className="dropdown-item">
+                      <Link to={CREAR_CUESTIONARIO} className="dropdown-item">
                         Crear cuestionario
                         <span className="sr-only" />
                       </Link>
-                      <Link to={routes.BANCO_PREGUNTAS} className="dropdown-item">
+                      <Link to={BANCO_PREGUNTAS} className="dropdown-item">
                         Banco de preguntas
                         <span className="sr-only" />
                       </Link>
                     </ul>
                   </li>
                   <li className="nav-item">
-                    <Link to={routes.NOTAS} className="nav-link active">
+                    <Link to={NOTAS} className="nav-link active">
                       Notas
                       <span className="sr-only" />
                     </Link>
@@ -60,7 +60,7 @@ const NavBar = ({ role, username, logout, isOffline }) => (
                 </>
               )}
               <li className="nav-item active">
-                <Link to={routes.OFFLINE} className="nav-link active">
+                <Link to={OFFLINE} className="nav-link active">
                   Offline
                   <span className="sr-only" />
                 </Link>

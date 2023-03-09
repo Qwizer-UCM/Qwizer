@@ -7,10 +7,10 @@ import QuestionNav from '../QuestionNav';
 import { Tests } from '../../services/API';
 import useFetch from '../../hooks/useFetch';
 import NotFound404 from '../common/NotFound404';
-import { routes } from '../../constants';
 import CuestionarioPassword from './CuestionarioPassword';
 import CuentaAtras from './CuentaAtras';
 import NavButtons from './NavButtons';
+import { INICIO, PATH_QR } from '../../constants';
 
 const QuestionContainerNoRevision = ({ role }) => {
   const navigate = useNavigate();
@@ -61,12 +61,12 @@ const QuestionContainerNoRevision = ({ role }) => {
 
     // TODO por qué no se espera respuesta de esta peticion??
     Tests.sendTest({ respuestas, hash, idCuestionario: paramsId })
-      .then(() => navigate(routes.INICIO, { replace: true }))
+      .then(() => navigate(INICIO, { replace: true }))
       .catch((e) => console.error(e));
 
     if (!navigator.onLine) {
       const respBase64 = Buffer.from(JSON.stringify(respuestas)).toString('base64url');
-      navigate(routes.PATH_QR(paramsId, hash, respBase64), { replace: true });
+      navigate(PATH_QR(paramsId, hash, respBase64), { replace: true });
     }
     localStorage.removeItem('answers');
   };

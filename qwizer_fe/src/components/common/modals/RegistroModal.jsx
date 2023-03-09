@@ -58,7 +58,7 @@ const RegisterModal = ({registerStudents,onHide, options }) => {
                     if (res.insertados) {
                         setSuccessModal({ show: true, message: 'Los alumnos han sido matriculados correctamente.' })
                         getAlumnosNoRegistradosAsignaturas(asignatura)
-                        // registerStudents(asignatura)
+                        registerStudents(asignatura)
 
                     } else {
                         let errormsg = 'Los siguientes alumnos no se han podido matricular de la asignatura: \n'; // TODO cambiar el mensaje de los errores

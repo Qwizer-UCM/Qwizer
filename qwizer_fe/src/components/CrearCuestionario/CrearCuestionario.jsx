@@ -5,7 +5,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import BancoPreguntas from '../BancoPreguntas';
 import { Subjects, Tests } from '../../services/API'
 import useFetch from '../../hooks/useFetch';
-import { routes } from '../../constants';
+import { INICIO } from '../../constants';
 import ResumenCuestionario from './ResumenCuestionario';
 import PreguntasSeleccionadas from './PreguntasSeleccionadas';
 
@@ -80,7 +80,7 @@ const CrearCuestionario = () => {
     };
 
     Tests.createQuiz({ cuestionario }).then(() => {
-      navigate(routes.INICIO);
+      navigate(INICIO);
       alert('Cuestionario creado correctamente');
     });
   };

@@ -4,12 +4,12 @@ import VisualizarNota from './VisualizarNota';
 import { Tests } from '../services/API';
 import useFetch from '../hooks/useFetch';
 import NotFound404 from './common/NotFound404';
-import { routes } from '../constants';
+import { PATH_REVISION_NOTAS_ALUMNO } from '../constants';
 
 const CustomCell = ({ nota, id, idCuestionario }) => {
   const navigate = useNavigate();
   return ( nota !== "No presentado" &&
-    <button type="button" className="btn btn-primary" id={id} onClick={() => navigate(routes.PATH_REVISION_NOTAS_ALUMNO(idCuestionario,id))}>
+    <button type="button" className="btn btn-primary" id={id} onClick={() => navigate(PATH_REVISION_NOTAS_ALUMNO(idCuestionario,id))}>
       Revisar
     </button>
   );
