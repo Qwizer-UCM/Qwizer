@@ -8,6 +8,7 @@ export const PATH_REVISION_NOTAS_ALUMNO = (id, idAlumno) => `/revisionNotas/${id
 export const PATH_QR = (test, hash, resp) => `/scanner/:${test}/:${hash}/:${resp}`;
 export const PATH_QR_INSERT = (userId,test, hash, resp) => `/insercion-manual/:${userId}/:${test}/:${hash}/:${resp}`;
 
+export const MARKDOWN_TEST = '/md';
 export const INICIO = '/';
 export const CUESTIONARIO = '/cuestionarios/:id';
 export const OFFLINE = '/offline';

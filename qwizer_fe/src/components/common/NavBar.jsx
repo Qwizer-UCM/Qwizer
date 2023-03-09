@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BANCO_PREGUNTAS, CREAR_CUESTIONARIO, INICIO, NOTAS, OFFLINE, REGISTRO, SUBIR_CUESTIONARIO, SUBIR_PREGUNTAS } from '../../constants';
+import { BANCO_PREGUNTAS, CREAR_CUESTIONARIO, INICIO, MARKDOWN_TEST, NOTAS, OFFLINE, REGISTRO, SUBIR_CUESTIONARIO, SUBIR_PREGUNTAS } from '../../constants';
 
 const NavBar = ({ role, username, logout, isOffline }) => (
   <nav className="navbar navbar-expand-lg  bg-light">
@@ -62,6 +62,12 @@ const NavBar = ({ role, username, logout, isOffline }) => (
               <li className="nav-item active">
                 <Link to={OFFLINE} className="nav-link active">
                   Offline
+                  <span className="sr-only" />
+                </Link>
+              </li>
+              <li className="nav-item active">
+                <Link to={MARKDOWN_TEST} className="nav-link active">
+                  MARKDOWN Y MATHJAX
                   <span className="sr-only" />
                 </Link>
               </li>
