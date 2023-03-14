@@ -50,8 +50,6 @@ services:
     depends_on:
       db_2:
         condition: service_healthy
-    ports:
-      - '8000:8000'
     environment:
       - DEBUG=False
       - DATABASE_HOST=db_2
@@ -76,7 +74,7 @@ services:
     build: 
       context: ../
       dockerfile: ./.docker/front/Dockerfile
-    command: sh -c "REACT_APP_API_URL='http://127.0.0.1:8000/api' && npm run start" # TODO solo para entorno DEV
+    command: sh -c "REACT_APP_API_URL='http://127.0.0.1:8080/api' && npm run start" # TODO solo para entorno DEV
     environment:
       - REACT_APP_API_URL=/api
       - REACT_PORT=3000 #Vite

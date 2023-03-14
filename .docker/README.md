@@ -10,11 +10,14 @@
 
 2. Web de Qwizer en <https://localhost>.
 3. Panel de administracion de django en <https://localhost/admin>.
-    ```
+
+    ```plaintext
     Usuario: root@root.com
     Contraseña: root
     ```
+
     <sub>* Usuario por defecto si no se cambia el env</sub>
+
 ### Comandos útiles
 
 - `docker compose exec {service} /bin/bash`: Shell bash de un servicio para ejecutar comandos dentro del contenedor.
@@ -25,9 +28,9 @@
 
 - Parar y eliminar los contenedores
 
-    ```bash
-    docker compose down
-    ```
+  ```bash
+  docker compose down
+  ```
 
-    - `--rmi all`: elimina las imagenes
-    - `-v`: elimina los volumenes
+  - `--rmi all`: elimina las imagenes
+  - `-v`: elimina los volumenes

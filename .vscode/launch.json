@@ -14,12 +14,10 @@
             "webRoot": "${workspaceRoot}/qwizer_fe",
         },
         {
-            "env": {
-                "PYTHONPATH": "${workspaceRoot}/qwizer_be"
-            },
             "name": "Python: Django",
             "type": "python",
             "request": "launch",
+            "python": "${workspaceFolder}/qwizer_be/.venv/bin/python",
             "program": "${workspaceFolder}/qwizer_be/manage.py",
             "args": [
                 "runserver_plus",
@@ -30,12 +28,10 @@
             "justMyCode": true
         },
         {
-            "env": {
-                "PYTHONPATH": "${workspaceRoot}/qwizer_be"
-            },
             "name": "Django: Test",
             "type": "python",
             "request": "launch",
+            "python": "${workspaceFolder}/qwizer_be/.venv/bin/python",
             "program": "${workspaceFolder}/qwizer_be/manage.py",
             "args": [
                 "test",

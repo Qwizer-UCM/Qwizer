@@ -111,6 +111,9 @@ DATABASES = {
         "PASSWORD": env.str("DATABASE_PASSWORD"),
         "HOST": env.str("DATABASE_HOST"),
         "PORT": env.int("DATABASE_PORT"),
+        'TEST': {
+            'NAME': f'test_{env.str("DATABASE_NAME")}'
+        },
     }
 }
 
