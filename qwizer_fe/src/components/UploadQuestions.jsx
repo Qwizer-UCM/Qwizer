@@ -5,6 +5,7 @@ import useFetch from '../hooks/useFetch';
 
 const UploadQuestions = () => {
   const [file, setFile] = useState('');
+  const [images, setImages] = useState([])
   const [errorModal, setErrorModal] = useState({ show: false, message: '' });
   const [successModal, setSuccessModal] = useState({ show: false, message: '' });
   const [idAsignatura, setIdAsignatura] = useState('');
@@ -15,6 +16,9 @@ const UploadQuestions = () => {
       const formData = new FormData();
       formData.append('fichero_yaml', file);
       formData.append('idAsignatura', idAsignatura);
+      images.forEach(image => {
+        formData.append('images', image)
+      })
 
       Questions.upload({ formData })
         .then(({ data }) => {
@@ -63,6 +67,9 @@ const UploadQuestions = () => {
                 <label className="form-label" htmlFor="myfile">
                   {file.name}
                 </label>
+
+                <h4>Selecciona las imagenes:</h4>
+                <input type="file" className='form-control' onChange={(e) => setImages([...e.target.files])} id="myfile" name="myfile" multiple />
               </div>
             </div>
 

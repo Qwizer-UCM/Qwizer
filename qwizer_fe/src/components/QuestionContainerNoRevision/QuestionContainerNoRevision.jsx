@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
+import ReactMarkdown from 'react-markdown';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
+import 'katex/dist/katex.min.css'
 import TestQuestion from '../TestQuestion';
 import TextQuestion from '../TextQuestion';
 import QuestionNav from '../QuestionNav';
@@ -124,8 +128,12 @@ const QuestionContainerNoRevision = ({ role }) => {
               <div className="card-body">
                 <div key={pregunta.id}>
                   <h2 className="p-2 m-2">
-                    {indPregunta + 1}
-                    {`.-${pregunta.pregunta}`}
+                    <ReactMarkdown
+                      remarkPlugins={[remarkMath]}
+                      rehypePlugins={[rehypeKatex]}>
+                      {`${indPregunta + 1}.-${pregunta.pregunta}`}
+                    </ReactMarkdown>
+
                   </h2>
                   {pregunta.tipoPregunta === 'test' ? (
                     <TestQuestion

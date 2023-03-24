@@ -1,0 +1,6 @@
+preguntas:
+  - tipo: "text"
+    pregunta: "Tíldes no funcionan con mathjax\n$\\text{ávé}\\frac{3}{4}$\n![Image](Captura364.png)"
+    titulo: "Titulo temporal Markdown"
+    opciones: "Por eso uso katex"
+    

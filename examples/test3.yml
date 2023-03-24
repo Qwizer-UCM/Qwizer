@@ -1,21 +1,15 @@
 cuestionario:
-  titulo: "Tema 10"
+  titulo: "Tema Markdown"
   password: "1234"
   asignatura: "Estructura de datos"
   secuencial: 0 #0 es que no es secuencial, 1 es secuencial
   duracion: 10 #minutos que durara el test
   fecha_apertura: '21/02/20 11:00:00' #Formato esperado: yy:mm:dd hh:mm:ss
-  fecha_cierre: '24/02/24 11:59:59' #Formato esperado: yy:mm:dd hh:mm:ss
+  fecha_cierre: '23/03/24 11:59:59' #Formato esperado: yy:mm:dd hh:mm:ss
   fecha_visible: '21/02/20 11:00:00' #Formato esperado: yy:mm:dd hh:mm:ss
   preguntas:
-    - tipo: "aleatoria"
-      preguntas_elegidas:
-        - ref: "Titulo temporal2"
-        - ref: "Titulo temporal1"
-      punt_positiva: 10.0    #puntos que suma
-      punt_negativa: 0.0 #puntos que resta  
-        
-       
-
-    
-    
+    - tipo: "ref"
+      titulo: "Titulo temporal Markdown"
+      punt_positiva: 10    #puntos que suma
+      punt_negativa: 0.3 #puntos que resta
+      

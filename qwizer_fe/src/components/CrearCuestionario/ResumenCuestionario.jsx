@@ -43,9 +43,9 @@ const handleClickLock = (e, id) => {
         e.target.innerText = (e.target.innerText === "lock_open" ? "lock" : "lock_open")
 }
 
-const ExpandedComponent = ({ data }) => (data.type === "text") ?  // TODO cambiar en un futuro si metemos más tipo de preguntas
-    <TextQuestion mode="visualize" infoPreg={data.info} id={data.id} /> :
-    <TestQuestion mode="visualize" infoPreg={data.info} id={data.id} />
+// const ExpandedComponent = ({ data }) => (data.type === "text") ?  // TODO cambiar en un futuro si metemos más tipo de preguntas
+//     <TextQuestion mode="visualize" infoPreg={data.info} id={data.id} /> :
+//     <TestQuestion mode="visualize" infoPreg={data.info} id={data.id} />
 
 const reorder = (list, startIndex, endIndex) => {
     const result = [...list]

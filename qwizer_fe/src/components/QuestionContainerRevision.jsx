@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
+import 'katex/dist/katex.min.css'
 import TestQuestion from './TestQuestion';
 import TextQuestion from './TextQuestion';
 import QuestionNav from './QuestionNav';
@@ -8,16 +12,16 @@ import { Tests } from '../services/API';
 import useFetch from '../hooks/useFetch';
 import NotFound404 from './common/NotFound404';
 
-const QuestionContainerRevision = ({id, role}) => {
+const QuestionContainerRevision = ({ id, role }) => {
   const params = useParams();
   const navigate = useNavigate();
 
-  const { data: testCorregido, error, isLoading} = useFetch(Tests.getCorrectedTest, {
-    params: { idAlumno: role === "teacher" ? Number(params.idAlumno) : id , idCuestionario: Number(params.id) ?? '' },
+  const { data: testCorregido, error, isLoading } = useFetch(Tests.getCorrectedTest, {
+    params: { idAlumno: role === "teacher" ? Number(params.idAlumno) : id, idCuestionario: Number(params.id) ?? '' },
   });
   const [indPregunta, setindPregunta] = useState(0);
-  
-  if(isLoading) return null;
+
+  if (isLoading) return null;
 
   const pregunta = testCorregido?.questions[indPregunta];
   if (testCorregido && !error && pregunta) {
@@ -37,9 +41,13 @@ const QuestionContainerRevision = ({id, role}) => {
             <div className="card">
               <div className="card-body">
                 <div key={pregunta.id}>
+
                   <h2 className="p-2 m-2 card">
-                    {indPregunta + 1}
-                    {`.-${pregunta.question}`}
+                    <ReactMarkdown
+                      remarkPlugins={[remarkMath]}
+                      rehypePlugins={[rehypeKatex]}>
+                      {`${indPregunta + 1}.-${pregunta.question}`}
+                    </ReactMarkdown>
                   </h2>
                   {pregunta.type === 'test' ? <TestQuestion key={pregunta.id} mode="revision" infoPreg={pregunta} id={pregunta.id} /> : <TextQuestion key={pregunta.id} mode="revision" infoPreg={pregunta} />}
                 </div>

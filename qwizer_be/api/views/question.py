@@ -1,9 +1,11 @@
 import re
 import xml.etree.ElementTree as ET
 
+import base64
 import yaml
 from api.models import (
     Asignatura,
+    Imparte,
     OpcionTest,
     Pregunta,
     PreguntaTest,
@@ -17,8 +19,20 @@ from drf_spectacular.utils import (
     extend_schema,
     extend_schema_view,
 )
-from rest_framework import viewsets
+from rest_framework import viewsets,status
 from rest_framework.response import Response
+from rest_framework.decorators import action
+from django.core.files.storage import FileSystemStorage
+from django.db import transaction, IntegrityError
+
+def comprobar_imagenes(imagenes_form,imagenes_pregunta):
+    if len(imagenes_form) != len(imagenes_pregunta):
+        raise Exception("El número de imágenes subidos no es el correcto")
+    for img in imagenes_form:
+        print(img)
+    for img in imagenes_pregunta:
+        if img[1] not in (str(item) for item in imagenes_form):
+            raise Exception(f"No se ha encontrado la imagen {img[1]} dentro de las imagenes subida")
 
 
 @extend_schema_view(
@@ -59,6 +73,7 @@ from rest_framework.response import Response
 class QuestionViewSet(viewsets.ViewSet):
     permission_classes = []
 
+    @transaction.atomic
     def create(self, request):
         if str(request.user.role) == User.STUDENT:  # TODO controlar con permisos
             content = {
@@ -73,10 +88,24 @@ class QuestionViewSet(viewsets.ViewSet):
         except:
             content = {"inserted": "false", "message": f"Error: La asignatura {id_asignatura} no existe!"}
             return Response(content)
+                        
+        sv_create_question = transaction.savepoint()
+
+        try:
+            Imparte.objects.get_by_profesor_in_asignatura(id_profesor=request.user.id, id_asignatura=asignatura.id)
+        except Imparte.DoesNotExist:
+            return Response(
+                {
+                    "inserted": "false",
+                    "message": "Error: Es necesario impartir la asignatura para crear preguntas del banco.",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         es_yaml = None
         preguntas = None
         fichero = request.FILES["fichero_yaml"]
+        imagenes_form = request.FILES.getlist('images')
         if fichero.name.split(".")[1] == "xml":
             es_yaml = False
             tree = ET.parse(fichero)
@@ -111,6 +140,14 @@ class QuestionViewSet(viewsets.ViewSet):
                 p_respuesta_text = question.find("answer/text").text
 
             try:
+                imagenes_pregunta =  re.findall(r"!\[(.*?)\]\(([\w\/\-\:\._]+?)\)", p_texto)
+                comprobar_imagenes(imagenes_form, imagenes_pregunta)
+                print("Pase la comprobacion")
+                fs = FileSystemStorage()
+                for img in imagenes_form:
+                    name = str(img)
+                    store_name = fs.save(name, img)
+                    # TODO guardar el nombre que le de el FileSystem                
                 pregunta = Pregunta.objects.create_preguntas(
                     pregunta=p_texto,
                     idAsignatura=asignatura.id,
@@ -119,6 +156,7 @@ class QuestionViewSet(viewsets.ViewSet):
                 pregunta.save()
             except Exception as exc:  # TODO hay que controlar mejor excepciones ni sabia que saltaba excepcion
                 print(exc)
+                
                 continue
                 # Guardamos las opciones
             if p_tipo_test:
@@ -126,8 +164,13 @@ class QuestionViewSet(viewsets.ViewSet):
 
                 try:
                     pregunta_test.save()
-                except Exception as e:
-                    print(e)
+                except Exception as excepction:
+                    transaction.savepoint_rollback(sv_create_question)
+                    content = {
+                    "inserted": "false",
+                    "message": "Error: " + excepction,
+                    }
+                    return Response(content)
 
                 opciones = p_opciones
                 for index, opc in enumerate(opciones):
@@ -145,9 +188,13 @@ class QuestionViewSet(viewsets.ViewSet):
                         if p_correcta:
                             pregunta_test.respuesta_id = opcion.id
                             pregunta_test.save()
-                    except Exception as e:
-                        print(e)
-                        print("La pregunta ya existia")
+                    except IntegrityError as excep:
+                        transaction.savepoint_rollback(sv_create_question)
+                        content = {
+                        "inserted": "false",
+                        "message": "Error: La pregunta ya existía" + excep,
+                        }
+                        return Response(content)
 
             elif p_tipo_text:
                 pregunta_text = PreguntaText.objects.create_pregunta_text(
@@ -204,3 +251,24 @@ class QuestionViewSet(viewsets.ViewSet):
             "message": "Pregunta eliminada correctamente",
         }
         return Response(content)
+    
+
+    @action(methods=["POST"], detail=False)
+    def imagen(self, request):
+    
+        imgs = request.FILES.getlist('files')
+        fs = FileSystemStorage()
+        photos = {}
+        format = 'png'
+        for img in imgs:
+            name = str(img)
+            store_name = fs.save(name, img)
+            path = fs.path(store_name)
+            with open(path, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                photos[name] = 'data:image/%s;base64,%s' % (format, encoded_string)
+        return Response(photos)
+
+        # # encoded_string = ''
+        # # encoded_string = base64.b64encode(img)
+        # return Response(str(imgs))
