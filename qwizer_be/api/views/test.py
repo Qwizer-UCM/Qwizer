@@ -8,6 +8,7 @@ from api.utils.cifrado import encrypt_tests
 from django.utils.timezone import make_aware
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from django.db import transaction
 from rest_framework.response import Response
 
 from ..models import (
@@ -438,6 +439,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     
 
     @action(detail=False, methods=["POST"])
+    @transaction.atomic
     def subir(self, request):
         """
         POST /upload -> POST /tests/upload
@@ -447,17 +449,6 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 {
                     "inserted": "false",
                     "message": "Error: Para poder crear tests debes de ser administrador o profesor.",
-                },
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        try:
-            Imparte.objects.get_by_profesor(id_profesor=request.user.id)
-        except Imparte.DoesNotExist:
-            return Response(
-                {
-                    "inserted": "false",
-                    "message": "Error: Es necesario impartir la asignatura para crear tests.",
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
@@ -495,7 +486,17 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
+        try:
+            Imparte.objects.get_by_profesor_in_asignatura(id_profesor=request.user.id, id_asignatura=asignatura.id)
+        except Imparte.DoesNotExist:
+            return Response(
+                {
+                    "inserted": "false",
+                    "message": "Error: Es necesario impartir la asignatura para crear tests.",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )     
+        savepoint = transaction.savepoint()
         try:
             cuestionario = Cuestionario.objects.create_cuestionarios(
                 titulo=title,
@@ -522,16 +523,18 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         for i, pregYaml in enumerate(yaml_cuestionario["cuestionario"]["preguntas"]):
             pregunta = None
             try:
-                if pregYaml["tipo"] != "aleatoria":
+                if pregYaml["tipo"] != "aleatoria" and pregYaml["tipo"] != "ref":
                     pregunta = Pregunta.objects.create_preguntas(
                         pregunta=pregYaml["pregunta"],
                         idAsignatura=asignatura.id,
                         titulo=pregYaml["titulo"],
                     )
                     pregunta.save()
+                elif pregYaml["tipo"] == "ref":
+                    pregunta = Pregunta.objects.get_by_asignatura_titulo(id_asignatura=asignatura.id,titulo=pregYaml["titulo"])
                 # TODO esto pa k eeh
             except Exception:
-                pregunta = Pregunta.objects.get_by_asignatura_pregunta_titulo(pregunta=pregYaml["pregunta"], id_asignatura=asignatura.id, titulo=pregYaml["titulo"])
+                pregunta = Pregunta.objects.get_by_asignatura_pregunta_titulo(pregunta=pregYaml["pregunta"], id_asignatura=asignatura.id, titulo=pregYaml["titulo"]) #TODO DEVOLVER UN ERROR AL USUARIO
 
             pertenece = SeleccionPregunta.objects.create_seleccion_pregunta(
                 puntosAcierto=pregYaml["punt_positiva"],
@@ -541,29 +544,32 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 orden=i,
                 fijar=pregYaml["fijar"] if ("fijar" in pregYaml) else False,
                 aleatorizar=pregYaml["aleatorizar"] if ("aleatorizar" in pregYaml) else False,
-                tipo = SeleccionPregunta.Tipo.PREGALEATORIA if (pregYaml["tipo"] == "aleatoria") else SeleccionPregunta.Tipo.PREGBANCO 
+                tipo = SeleccionPregunta.Tipo.PREGALEATORIA if (pregYaml["tipo"] == "aleatoria") else SeleccionPregunta.Tipo.PREGBANCO
             )
             pertenece.save()
 
-            if pertenece.tipo == SeleccionPregunta.Tipo.PREGALEATORIA:
-                for pregSeleccionada in pregYaml["preguntas_elegidas"]:
-                    if "ref" in pregSeleccionada:
-                        try:
-                            preguntaSelec = Pregunta.objects.get_by_id(id_pregunta=pregSeleccionada["ref"]) 
-                            OpcionPreguntaAleatoria.objects.create_opcion_pregunta_aleatoria(id_pregunta=preguntaSelec.id, id_pregunta_aleatoria=pertenece.id,commit=True)
-                        except Exception:
-                            return Response(
-                                {
-                                "inserted": "false",
-                                "message": "Error: La pregunta seleccionada no existe",
-                                },
-                                status=status.HTTP_400_BAD_REQUEST,
-                                )
-                    else:
-                        preguntaNueva = save_question(pregYaml,pregunta,asignatura)
-                        OpcionPreguntaAleatoria.objects.create_opcion_pregunta_aleatoria(id_pregunta=preguntaNueva.id, id_pregunta_aleatoria=pertenece.id,commit=True)                        
-            if pertenece.tipo == SeleccionPregunta.Tipo.PREGBANCO:
-                save_question(pregYaml,pregunta,asignatura)
+            if pregYaml["tipo"] != "ref": 
+                if pertenece.tipo == SeleccionPregunta.Tipo.PREGALEATORIA:
+                    for preg_seleccionada in pregYaml["preguntas_elegidas"]:
+                        if "ref" in preg_seleccionada:
+                            try:
+                                pregunta_selec = Pregunta.objects.get_by_asignatura_titulo(id_asignatura = asignatura.id,titulo=preg_seleccionada["ref"])
+                                OpcionPreguntaAleatoria.objects.create_opcion_pregunta_aleatoria(id_pregunta=pregunta_selec.id, id_pregunta_aleatoria=pertenece.id,commit=True)
+                            except Exception:
+                                transaction.savepoint_rollback(savepoint)
+                                return Response(
+                                    {
+                                    "inserted": "false",
+                                    "message": "Error: La pregunta seleccionada no existe",
+                                    },
+                                    status=status.HTTP_400_BAD_REQUEST,
+                                    )
+                        else:
+                            pregunta_nueva = save_question(pregYaml,pregunta,asignatura)
+                            OpcionPreguntaAleatoria.objects.create_opcion_pregunta_aleatoria(id_pregunta=pregunta_nueva.id, id_pregunta_aleatoria=pertenece.id,commit=True)
+                if pertenece.tipo == SeleccionPregunta.Tipo.PREGBANCO:
+                    save_question(pregYaml,pregunta,asignatura)
+                
 
         return Response(
             {

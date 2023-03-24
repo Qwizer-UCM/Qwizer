@@ -122,6 +122,10 @@ class Pregunta(models.Model):
 
     class Meta:
         ordering = ["pregunta"]
+        unique_together = (
+            "asignatura",
+            "titulo",
+        )
 
 class PreguntaTest(Pregunta):
     objects = PreguntasTestManager()

@@ -1,6 +1,6 @@
 from drf_spectacular.utils import OpenApiExample, OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from api.models import Asignatura, Cuestionario, Cursa, Imparte, Intento, OpcionTest, Pregunta, User, PreguntaTest, PreguntaText
-from rest_framework import viewsets
+from rest_framework import viewsets,status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -271,6 +271,15 @@ class SubjectViewSet(viewsets.ViewSet):
         POST /asignatura/{pk}/enroll
         """
         if str(request.user.role) != User.STUDENT:
+            try:
+                Imparte.objects.get_by_profesor_in_asignatura(id_profesor=request.user.id, id_asignatura=pk)
+            except Imparte.DoesNotExist:
+                return Response(
+                {
+                    "inserted": "false",
+                    "message": "Error: Es necesario impartir la asignatura para insertar estudiantes en ella.",
+                },
+                status=status.HTTP_403_FORBIDDEN)
             content = {}
             correct = True
             alumnos_fallidos = []
@@ -288,15 +297,23 @@ class SubjectViewSet(viewsets.ViewSet):
             content["errors"] = alumnos_fallidos
             return Response(content)
         else:
-            return Response("")
+            return Response("Forbidden")
 
     @action(methods=["POST"], detail=True)
     def delete_enroll(self, request, pk):
         """
         DELETE /asignatura/{pk}/enroll
         """
-        print(request.data)
         if str(request.user.role) != User.STUDENT:
+            try:
+                Imparte.objects.get_by_profesor_in_asignatura(id_profesor=request.user.id, id_asignatura=pk)
+            except Imparte.DoesNotExist:
+                return Response(
+                {
+                    "inserted": "false",
+                    "message": "Error: Es necesario impartir la asignatura para borrar estudiantes en ella.",
+                },
+                status=status.HTTP_403_FORBIDDEN)
             correct = True
             alumnos_fallidos = []
             alumnos = request.data["alumnos"]

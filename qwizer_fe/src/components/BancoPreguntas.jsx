@@ -49,7 +49,7 @@ const ExpandedComponent = ({ data, selectedAsignatura, createQuiz, getPregAsigna
 };
 
 const BancoPreguntas = ({ createQuiz = false, addMultipleQuestions }) => {
-  const { data: listaAsignaturas } = useFetch(Subjects.getAll); // lista de asignaturas del banco de preguntas
+  const { data: listaAsignaturas } = useFetch(Subjects.getFromStudentOrTeacher, { transform: (res) => res.asignaturas }); // lista de asignaturas del banco de preguntas
   const [preguntas, setPreguntas] = useState([]);
   const [preguntasSeleccionadas, setPreguntasSeleccionadas] = useState([]);
   const title = 'Preguntas de la asignatura';
@@ -119,9 +119,9 @@ const BancoPreguntas = ({ createQuiz = false, addMultipleQuestions }) => {
             <option hidden defaultValue>
               Selecciona una asignatura
             </option>
-            {listaAsignaturas?.asignaturas?.map((asignatura) => (
+            {listaAsignaturas?.map((asignatura) => (
               <option key={asignatura.id} value={asignatura.id}>
-                {asignatura.asignatura}
+                {asignatura.nombre}
               </option>
             ))}
           </select>

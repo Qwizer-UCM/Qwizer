@@ -81,6 +81,9 @@ class PreguntasManager(models.Manager):
     def get_by_id(self, id_pregunta):
         return self.get_queryset().get(id=id_pregunta)
 
+    def get_by_asignatura_titulo(self,id_asignatura, titulo):
+        return self.get_queryset().get(asignatura_id=id_asignatura, titulo=titulo)
+
     # TODO query extraña
     def get_by_asignatura_pregunta_titulo(self, pregunta, id_asignatura, titulo):
         return self.get_queryset().get(pregunta=pregunta, asignatura_id=id_asignatura, titulo=titulo)
@@ -211,6 +214,9 @@ class ImparteManager(models.Manager):
 
     def get_by_profesor(self, id_profesor):
         return self.get_queryset().filter(profesor_id=id_profesor)
+    
+    def get_by_profesor_in_asignatura(self, id_profesor,id_asignatura):
+        return self.get_queryset().get(profesor_id=id_profesor, asignatura_id=id_asignatura)
 
     def order_by_id_asignatura(self):
         return self.get_queryset().order_by_id_asignatura()
