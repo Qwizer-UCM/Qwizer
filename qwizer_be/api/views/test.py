@@ -1,6 +1,6 @@
 import random
 from datetime import datetime
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 
 import yaml
 from api.models import Asignatura, Cuestionario, InstanciaPreguntaTest, InstanciaPreguntaText, Intento, OpcionTest, Pregunta, SeleccionPregunta, PreguntaTest, PreguntaText, User
@@ -49,8 +49,8 @@ def shuffle(res):
 
 TIME_FORMAT = "%d/%m/%Y, %H:%M:%S"  # TODO fichero de constantes?
 
+
 def save_question(pregYaml, pregunta, asignatura):
-    
     if pregunta is None:
         pregunta = Pregunta.objects.create_preguntas(idAsignatura=asignatura.id, titulo=pregYaml["titulo"], pregunta=pregYaml["pregunta"])
 
@@ -74,7 +74,7 @@ def save_question(pregYaml, pregunta, asignatura):
         pregunta_text = PreguntaText.objects.create_pregunta_text(
             pregunta=pregYaml["pregunta"], idAsignatura=asignatura.id, titulo=pregYaml["titulo"], id_pregunta=pregunta.id, respuesta=pregYaml["opciones"]
         )
-        pregunta_text.save()    
+        pregunta_text.save()
 
     return pregunta
 
@@ -83,26 +83,242 @@ def save_question(pregYaml, pregunta, asignatura):
 @extend_schema_view(
     retrieve=extend_schema(
         summary="Descargar cuestionario",
+        parameters=[
+            OpenApiParameter(name="id", type=int, location=OpenApiParameter.PATH, description="Id del cuestionario"),
+        ],
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "integer"},
+                        "titulo": {"type": "string"},
+                        "duracion": {"type": "integer"},
+                        "secuencial": {"type": "boolean"},
+                        "password": {"type": "string"},
+                        "fecha_visible": {"type": "string", "format": "date-time"},
+                        "fecha_apertura": {"type": "string", "format": "date-time"},
+                        "fecha_cierre": {"type": "string", "format": "date-time"},
+                        "aleatorizar": {"type": "boolean"},
+                        "profesor": {"type": "integer"},
+                        "asignatura": {"type": "integer"},
+                        "iv": {"type": "string"},
+                        "encrypted_message": {"type": "string"},
+                        "formatted_fecha_apertura": {"type": "string", "example": "24/02/2024, 11:59:59"},
+                        "formatted_fecha_cierre": {"type": "string", "example": "24/02/2024, 11:59:59"},
+                    },
+                }
+            )
+        },
     ),
     create=extend_schema(
         summary="Crear cuestionario",
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "cuestionario": {
+                        "type": "object",
+                        "properties": {
+                            "testName": {"type": "string"},
+                            "testPass": {"type": "string"},
+                            "testSubject": {"type": "string"},
+                            "secuencial": {"type": "string"},
+                            "testDuration": {"type": "string"},
+                            "fechaApertura": {"type": "integer"},
+                            "fechaCierre": {"type": "integer"},
+                            "fechaVisible": {"type": "integer"},
+                            "questionList": {
+                                "type": "array",
+                                "items": {
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {"type": "integer"},
+                                                "question": {"type": "string"},
+                                                "title": {"type": "string"},
+                                                "tipo": {"type": "string"},
+                                                "correct_op": {"type": "string"},
+                                                "punt_positiva": {"type": "integer"},
+                                                "punt_negativa": {"type": "integer"},
+                                                "fijar": {"type": "boolean"},
+                                                "aleatorizar": {"type": "boolean"},
+                                            },
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {"type": "integer"},
+                                                "question": {"type": "string"},
+                                                "title": {"type": "string"},
+                                                "tipo": {"type": "string"},
+                                                "options": {"type": "array", "items": {"type": "object", "properties": {"id": {"type": "integer"}, "op": {"type": "string"}}}},
+                                                "correct_op": {"type": "integer"},
+                                                "punt_positiva": {"type": "integer"},
+                                                "punt_negativa": {"type": "integer"},
+                                                "fijar": {"type": "boolean"},
+                                                "aleatorizar": {"type": "boolean"},
+                                            },
+                                        },
+                                    ]
+                                },
+                            },
+                            "aleatorizar": {"type": "string"},
+                        },
+                    }
+                },
+            }
+        },
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "inserted": {"type": "string"},
+                        "message": {"type": "string"},
+                    },
+                }
+            )
+        },
     ),
     enviar=extend_schema(
         summary="Responder a un cuestionario",
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "respuestas": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "oneOf": [
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {"type": "integer", "format": "int32"},
+                                            "type": {
+                                                "type": "string",
+                                                "enum": ["text"],
+                                            },
+                                            "answr": {"type": "string"},
+                                        },
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {"type": "integer", "format": "int32"},
+                                            "type": {
+                                                "type": "string",
+                                                "enum": ["test"],
+                                            },
+                                            "answr": {"type": "integer", "format": "int32"},
+                                        },
+                                    },
+                                ]
+                            }
+                        },
+                    },
+                    "hash": {"type": "string"},
+                },
+            }
+        },
+        responses={200: OpenApiResponse(response={"type": "object", "properties": {"nota": {"type": "number"}}})},
     ),
     nota=extend_schema(
         summary="Nota de un cuestionario de un estudiante",
         description="También se devuelven las respuestas del usuario",
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "titulo": {"type": "string"},
+                        "nota": {"type": "number"},
+                        "questions": {
+                            "type": "array",
+                            "items": {
+                                "oneOf": [
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {"type": "integer", "format": "int32"},
+                                            "question": {"type": "string"},
+                                            "type": {"type": "string", "enum": ["text"]},
+                                            "correct_op": {"type": "string"},
+                                            "user_op": {"type": "string"},
+                                        },
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {"type": "integer", "format": "int32"},
+                                            "question": {"type": "string"},
+                                            "type": {"type": "string", "enum": ["test"]},
+                                            "correct_op": {"type": "integer"},
+                                            "user_op": {"type": "integer"},
+                                        },
+                                    },
+                                ]
+                            },
+                        },
+                    },
+                }
+            )
+        },
     ),
     notas=extend_schema(
         summary="Lista de notas de todos los alumnos de un cuestionario",
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "notas": {
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {"type": "integer", "format": "int32"},
+                                        "nombre": {"type": "string"},
+                                        "apellidos": {"type": "string"},
+                                        "nota": {"type": "number"},
+                                    },
+                                }
+                            },
+                        }
+                    },
+                }
+            )
+        },
     ),
     info=extend_schema(
         summary="Información de un cuestionario para un alumno",
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "duracion": {"type": "integer", "format": "int32"},
+                        "formatted_fecha_apertura": {"type": "string"},
+                        "formatted_fecha_cierre": {"type": "string"},
+                        "formatted_fecha_visible": {"type": "string"},
+                        "fecha_apertura": {"type": "string", "format": "date-time"},
+                        "fecha_cierre": {"type": "string", "format": "date-time"},
+                        "fecha_visible": {"type": "string", "format": "date-time"},
+                        "corregido": {"type": "integer", "format": "int32"},
+                        "nota": {"type": "number"},
+                    },
+                }
+            )
+        },
     ),
     subir=extend_schema(
         summary="Creación de un cuestionario a partir de un yaml",
-    )
+        request={"application/json": {"type": "object", "properties": {"fichero_yaml": {"type": "string"}}}},
+        responses={200: OpenApiResponse(response={"type": "object", "properties": {"inserted": {"type": "string"}, "message": {"type": "string"}}})},
+    ),
 )
 # TODO No se han indicado permisos todavia
 class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -198,6 +414,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
         return Response(quiz_encrypt)
 
+    @transaction.atomic
     def create(self, request):
         if str(request.user.role) == User.STUDENT:
             return Response(
@@ -417,8 +634,9 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             # -----
             # Corregir Un alumno solo puede tener una nota para un cuestionario, solo puede hacer un cuestionrio una vez
             # ......
+            # TODO cambiar a booleanos, y ver posibilidad de juntar las llamadas en una y no hacerlo para cada cuestionario
             nota = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=pk, id_alumno=request.user.id)  # <-- Salta excepcion si devuelve mas de uno
-            corregido = 1
+            corregido = 1 if Intento.Estado.ENTREGADO == nota.estado else 0
             nota_cuestionario = nota.nota
         except:
             corregido = 0

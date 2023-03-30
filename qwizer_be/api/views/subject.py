@@ -110,10 +110,14 @@ from rest_framework.response import Response
             OpenApiParameter(name="id", type=int, location=OpenApiParameter.PATH, description="Id de la asignatura"),
         ],
         request={
-            200: {
-                # TODO no funciona con array
+            "application/json": {
                 "type": "object",
-                "properties": {"alumnos": {"type": "object", "properties": {"id": {"type": "integer"}, "nombre": {"type": "string"}, "apellidos": {"type": "string"}}}},
+                "properties": {
+                    "alumnos": {
+                        "type": "array",
+                        "items": {"type": "object", "properties": {"id": {"type": "integer"}, "nombre": {"type": "string"}, "apellidos": {"type": "string"}}},
+                    }
+                },
             }
         },
         responses={
@@ -141,10 +145,14 @@ from rest_framework.response import Response
             OpenApiParameter(name="id", type=int, location=OpenApiParameter.PATH, description="Id de la asignatura"),
         ],
         request={
-            200: {
-                # TODO no funciona con array
+            "application/json": {
                 "type": "object",
-                "properties": {"alumnos": {"type": "object", "properties": {"id": {"type": "integer"}, "nombre": {"type": "string"}, "apellidos": {"type": "string"}}}},
+                "properties": {
+                    "alumnos": {
+                        "type": "array",
+                        "items": {"type": "object", "properties": {"id": {"type": "integer"}, "nombre": {"type": "string"}, "apellidos": {"type": "string"}}},
+                    }
+                },
             }
         },
         responses={
