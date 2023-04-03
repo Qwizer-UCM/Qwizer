@@ -12,28 +12,27 @@ const CuentaAtras = ({ startTime, endTest, duration }) => {
     return leftMiliseconds;
   };
 
-  const renderer = ({ hours, minutes, seconds, completed }) => {
+  const renderer = ({ hours, minutes, seconds, completed,total}) => {
     if (completed) {
       endTest();
       localStorage.removeItem('initTime');
       localStorage.removeItem('answers');
       return <h1>Test Enviado</h1>;
     }
-
-    const totalSeconds = duration * 60; // segundos
-    const leftSeconds = hours * 3600 + minutes * 60 + seconds;
-    const porcentaje = 100 - Math.floor((leftSeconds / totalSeconds) * 100) + Math.floor(100 / totalSeconds);
+    const totalms = duration * 60 * 1000; // milisegundos
+    const porcentaje = 100 - Math.floor(((totalms===total ? (total) : total-1000)/ totalms) * 100);
     const bg = porcentaje >= 80 && 'bg-danger';
+
     return (
       <div>
         <p className="text-center">
-          {hours}h:{minutes}min:{seconds}s
+          {hours}h:{minutes}min:{seconds-1}s
         </p>
         <div className="progress">
           <div
             className={`progress-bar progress-bar-striped progress-bar-animated ${bg}`}
             role="progressbar"
-            style={{ width: `${porcentaje}%` }}
+            style={{ width: `${porcentaje}%`, transition:`width linear ${Math.max(Math.floor(totalms/100),1000)}ms`}}
             aria-valuenow={porcentaje}
             aria-valuemin={0}
             aria-valuemax={100}

@@ -21,7 +21,7 @@ const TextQuestion = ({ respuesta, mode, id, type, infoPreg=null, addAnswerd }) 
   const revisionMode = () => (
     <div className="p-4 m-2 text-center">
       <div className="bg-light rounded">
-        <textarea className='form-control' style={{resize:"none"}} rows="9" cols="70" value={infoPreg.user_op} readOnly/>
+        <textarea className='form-control' style={{resize:"none"}} rows="9" cols="70" value={infoPreg.user_op ?? ''} readOnly/>
       </div>
       <div className="rounded p-2 mt-2" style={{backgroundColor:"#60d394"}}>Respuesta Correcta: {infoPreg.correct_op}</div>
     </div>

@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import 'katex/dist/katex.min.css'
+import localforage from 'localforage';
 import TestQuestion from '../TestQuestion';
 import TextQuestion from '../TextQuestion';
 import QuestionNav from '../QuestionNav';
@@ -16,21 +17,14 @@ import CuentaAtras from './CuentaAtras';
 import NavButtons from './NavButtons';
 import { INICIO, PATH_QR } from '../../constants';
 
-const QuestionContainerNoRevision = ({ role }) => {
+const QuestionContainerNoRevision = ({ role}) => {
   const navigate = useNavigate();
   const params = useParams();
   const paramsId = Number(params.id); // TODO error con ids invalidos(letras y cosas raras). TEST NOT FOUND o algo asi
-  const [localStorageTest, setLocalStorageTest] = useState(() => JSON.parse(localStorage.getItem('tests'))?.[paramsId] ?? null); // TODO no convence lo de guardarlo en localstorage
+  const [localStorageTest, setLocalStorageTest] = useState(); // TODO no convence lo de guardarlo en localstorage
 
-  const addTestToLocalStorage = (jsonObject) => {
-    const tests = localStorage.getItem('tests');
-    const test = tests ? JSON.stringify({ ...JSON.parse(tests), [jsonObject.id]: jsonObject }) : JSON.stringify({ [jsonObject.id]: jsonObject });
-    localStorage.setItem('tests', test);
-  };
   const { error } = useFetch(Tests.get, {
-    skip: localStorageTest,
     onSuccess: (d) => {
-      addTestToLocalStorage(d);
       setLocalStorageTest(d);
     },
     params: { idCuestionario: paramsId },
@@ -43,6 +37,24 @@ const QuestionContainerNoRevision = ({ role }) => {
 
   const descargado = Boolean(localStorageTest); // Si existe en localstorage true en caso contrario false
   const bloqueado = descargado && role === 'student' && (new Date(localStorageTest.fecha_apertura) > Date.now() || Date.now() > new Date(localStorageTest.fecha_cierre));
+
+  useEffect(() => {
+    localforage.getItem('tests').then(value => {
+      if (value && value[paramsId]) {
+        setLocalStorageTest(value[paramsId])
+      }
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (localStorageTest) {
+      localforage.getItem('tests').then(value => {
+          localforage.setItem('tests',{...value,[paramsId]:localStorageTest})
+      })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localStorageTest])
 
   useEffect(() => {
     if (answerList.respuestas.length !== 0) {
