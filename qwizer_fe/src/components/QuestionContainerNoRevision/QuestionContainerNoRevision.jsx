@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
-import ReactMarkdown from 'react-markdown';
-import rehypeKatex from 'rehype-katex';
-import remarkMath from 'remark-math';
-import 'katex/dist/katex.min.css'
+
 import localforage from 'localforage';
 import TestQuestion from '../TestQuestion';
 import TextQuestion from '../TextQuestion';
@@ -16,6 +13,7 @@ import CuestionarioPassword from './CuestionarioPassword';
 import CuentaAtras from './CuentaAtras';
 import NavButtons from './NavButtons';
 import { INICIO, PATH_QR } from '../../constants';
+import Markdown from '../common/Markdown';
 
 const QuestionContainerNoRevision = ({ role}) => {
   const navigate = useNavigate();
@@ -140,12 +138,9 @@ const QuestionContainerNoRevision = ({ role}) => {
               <div className="card-body">
                 <div key={pregunta.id}>
                   <h2 className="p-2 m-2">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkMath]}
-                      rehypePlugins={[rehypeKatex]}>
+                    <Markdown>
                       {`${indPregunta + 1}.-${pregunta.pregunta}`}
-                    </ReactMarkdown>
-
+                    </Markdown>
                   </h2>
                   {pregunta.tipoPregunta === 'test' ? (
                     <TestQuestion
@@ -175,10 +170,10 @@ const QuestionContainerNoRevision = ({ role}) => {
             <NavButtons index={indPregunta} size={questionList.length} setIndex={setindPregunta} end={endTest} />
           </div>
         </div>
-      </div>
+      </div >
     );
   }
-  return <h1>Loading...</h1>;
+return <h1>Loading...</h1>;
 };
 
 export default QuestionContainerNoRevision;

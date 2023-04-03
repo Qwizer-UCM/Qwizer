@@ -1,14 +1,12 @@
-
-
-.index-body{
+.index-body {
     background: #E9E9E9;
     min-height: 100vh;
     justify-content: center;
-    display: flow-root;   
+    display: flow-root;
     margin-right: 0px !important;
 }
 
-.card{
+.card {
     background: #fff;
     min-height: 50px;
     box-shadow: 0 2px 10px rgb(0 0 0 / 20%);
@@ -20,30 +18,30 @@
     display: flow-root !important;
 }
 
-.card .header{
+.card .header {
     color: black;
     padding: 20px;
     position: relative;
     border-bottom: 1px solid rgba(204, 204, 204, 0.35);
 }
 
-.card-container{
+.card-container {
     padding-top: 4vh;
     padding-right: 4vw;
     padding-left: 4vw;
 }
 
-.card-content{
+.card-content {
     padding: 10px;
 }
 
-.button-section{
+.button-section {
     justify-content: center;
     align-items: center;
     display: flex;
 }
 
-.upload-section{
+.upload-section {
     justify-content: center;
     align-items: center;
     display: block;
@@ -51,31 +49,31 @@
     border-radius: 10px !important;
 }
 
-.upload-body{
+.upload-body {
     background: #E9E9E9;
     min-height: 95vh;
     height: 100%;
     padding: 30px;
-    display:flex;
+    display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.bg-blue-grey{
+.bg-blue-grey {
     background: #607D8B;
     color: white !important;
     border-top-left-radius: 10px !important;
     border-top-right-radius: 10px !important;
 }
 
-.bg-blue-green{
+.bg-blue-green {
     background: #59ac79;
     color: white !important;
     border-top-left-radius: 10px !important;
     border-top-right-radius: 10px !important;
 }
 
-.upload-inner-body{
+.upload-inner-body {
     margin-top: 5%;
     margin-left: 5%;
     margin-right: 5%;
@@ -84,17 +82,17 @@
     display: block;
 }
 
-.btn-submit{
-    margin-top:5%;
+.btn-submit {
+    margin-top: 5%;
     justify-content: center;
     text-align: center;
 }
 
-.upload-message-section{
-    margin-top:5%;
+.upload-message-section {
+    margin-top: 5%;
 }
 
-.asignatura-section{
+.asignatura-section {
     justify-content: center;
     align-items: center;
     display: block;
@@ -105,12 +103,12 @@
     margin-top: 1vw;
 }
 
-.asignatura-inner-body{
+.asignatura-inner-body {
     margin-left: 1vw !important;
     margin-top: 1vh !important;
 }
 
-.section-title{
+.section-title {
     text-align: center;
     margin-top: 20px !important;
 }
@@ -121,7 +119,7 @@
     height: 200px;
     border: 2px dashed #4267b2;
     border-radius: 20px;
-    background-color:  #f5f8ff;
+    background-color: #f5f8ff;
     font-family: 'Open Sans';
     display: flex;
     justify-content: center;
@@ -139,11 +137,11 @@
 }
 
 .drag-and-drop-component:hover,
-.drag-and-drop-component.dragover{
+.drag-and-drop-component.dragover {
     opacity: 0.6;
 }
 
-.drag-and-drop-component-text{
+.drag-and-drop-component-text {
     text-align: center;
     color: #ccc;
     font-weight: 600;
@@ -183,7 +181,7 @@
     cursor: pointer;
 }
 
-.summary-quiz{
+.summary-quiz {
     text-align: center;
 }
 
@@ -212,7 +210,8 @@
     justify-content: start;
 }
 
-.pregOrder, .pregPunt{
+.pregOrder,
+.pregPunt {
     background-color: #ccc;
     width: 5%;
     padding: 5px;
@@ -230,7 +229,7 @@
     cursor: pointer !important;
 }
 
-.summary-questions li:focus{
+.summary-questions li:focus {
     outline: none;
     border: 2px solid #333;
 }
@@ -239,6 +238,7 @@
     margin-right: 5px;
     cursor: pointer;
 }
+
 .test-question-option {
     cursor: pointer;
     display: block;
@@ -248,24 +248,24 @@
     border-radius: 5px;
 }
 
-.test-question-option:hover{
+.test-question-option:hover {
     background-color: #ccc;
 }
 
-.test-question-option.correct{
+.test-question-option.correct {
     background-color: #60d394;
 }
 
-.test-question-option.wrong{
+.test-question-option.wrong {
     background-color: #ee6055;
     color: white;
 }
 
-.test-question-option.selected{
+.test-question-option.selected {
     background-color: #ccc;
 }
 
-
-
-
-
+.markdown img {
+    max-width: 100%;
+    height: auto;
+}

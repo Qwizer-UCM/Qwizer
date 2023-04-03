@@ -1,6 +1,16 @@
 preguntas:
-  - tipo: "text"
-    pregunta: "Tíldes no funcionan con mathjax\n$\\text{ávé}\\frac{3}{4}$\n![Image](Captura364.png)"
-    titulo: "Titulo temporal Markdown"
-    opciones: "Por eso uso katex"
+  - tipo: "test"
+    pregunta: "La formula de la energía es"
+    titulo: "Titulo Markdown Test 2"
+    opciones: 
+        - op: "$E = mc^2$"
+          fijar: False
+        - op: "$E = mc^3$"
+          fijar: False
+        - op: "$E = mc * 2$ ![Image](Captura364.png)"
+          fijar: False
+        - op: "Ninguna de las anteriores"
+          fijar: True
+    op_correcta: 0 #id de opcion correcta
+  
     

@@ -1,15 +1,12 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
-import rehypeKatex from 'rehype-katex';
-import remarkMath from 'remark-math';
-import 'katex/dist/katex.min.css'
 import TestQuestion from './TestQuestion';
 import TextQuestion from './TextQuestion';
 import QuestionNav from './QuestionNav';
 
 import { Tests } from '../services/API';
 import useFetch from '../hooks/useFetch';
+import Markdown from './common/Markdown';
 import NotFound404 from './common/NotFound404';
 
 const QuestionContainerRevision = ({ id, role }) => {
@@ -41,13 +38,10 @@ const QuestionContainerRevision = ({ id, role }) => {
             <div className="card">
               <div className="card-body">
                 <div key={pregunta.id}>
-
                   <h2 className="p-2 m-2 card">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkMath]}
-                      rehypePlugins={[rehypeKatex]}>
+                    <Markdown>
                       {`${indPregunta + 1}.-${pregunta.question}`}
-                    </ReactMarkdown>
+                    </Markdown>
                   </h2>
                   {pregunta.type === 'test' ? <TestQuestion key={pregunta.id} mode="revision" infoPreg={pregunta} id={pregunta.id} /> : <TextQuestion key={pregunta.id} mode="revision" infoPreg={pregunta} />}
                 </div>

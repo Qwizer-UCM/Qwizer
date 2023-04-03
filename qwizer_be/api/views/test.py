@@ -3,9 +3,12 @@ from datetime import datetime
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 
 import yaml
+import re
+import base64
 from api.models import Asignatura, Cuestionario, InstanciaPreguntaTest, InstanciaPreguntaText, Intento, OpcionTest, Pregunta, SeleccionPregunta, PreguntaTest, PreguntaText, User
 from api.utils.cifrado import encrypt_tests
 from django.utils.timezone import make_aware
+from django.core.files.storage import FileSystemStorage
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from django.db import transaction
@@ -569,23 +572,22 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
         questions = []
         for inst in instancia_preguntas:
-            pregunta = inst.pregunta
-            print(inst)
-            pregunta_json = {"id": pregunta.id, "question": pregunta.pregunta}
-            if hasattr(pregunta, "preguntatest"):
+            pregunta = PreguntasSerializer(inst.pregunta).data
+            pregunta_json = {"id": pregunta["id"], "question": pregunta["pregunta"]}
+            if hasattr(inst.pregunta, "preguntatest"):
                 pregunta_json["type"] = "test"
-                opciones = OpcionTest.objects.get_by_pregunta(id_pregunta=pregunta.id)
-                pregunta_json["options"] = [{"id": opcion.id, "op": opcion.opcion} for opcion in opciones]
-                pregunta_json["correct_op"] = PreguntaTest.objects.get_by_id(id_pregunta=pregunta.id).respuesta.id
+                opciones = pregunta["opciones_test"]
+                pregunta_json["options"] = [{"id": opcion["id"], "op": opcion["opcion"]} for opcion in opciones]
+                pregunta_json["correct_op"] = PreguntaTest.objects.get_by_id(id_pregunta=pregunta["id"]).respuesta.id #TODO esto que hacemos con ello no iran las imagenes
                 # TODO esto es un apaño para qe funcione hay que reescribirlo todo
                 pregunta_json["user_op"] = inst.instanciapreguntatest
                 if pregunta_json["user_op"].respuesta is not None:
                     pregunta_json["user_op"] = pregunta_json["user_op"].respuesta.id
                 else:
                     pregunta_json["user_op"] = None
-            if hasattr(pregunta, "preguntatext"):
+            if hasattr(inst.pregunta, "preguntatext"):
                 pregunta_json["type"] = "text"
-                pregunta_json["correct_op"] = PreguntaText.objects.get_by_id(id_pregunta=pregunta.id).respuesta
+                pregunta_json["correct_op"] = PreguntaText.objects.get_by_id(id_pregunta=pregunta["id"]).respuesta
                 pregunta_json["user_op"] = inst.instanciapreguntatext
                 if pregunta_json["user_op"] is not None:
                     pregunta_json["user_op"] = pregunta_json["user_op"].respuesta
@@ -752,7 +754,16 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                     pregunta = Pregunta.objects.get_by_asignatura_titulo(id_asignatura=asignatura.id,titulo=pregYaml["titulo"])
                 # TODO esto pa k eeh
             except Exception:
-                pregunta = Pregunta.objects.get_by_asignatura_pregunta_titulo(pregunta=pregYaml["pregunta"], id_asignatura=asignatura.id, titulo=pregYaml["titulo"]) #TODO DEVOLVER UN ERROR AL USUARIO
+                transaction.rollback()
+                preg_fallo = pregYaml["titulo"]
+                return Response(
+                                    {
+                                    "inserted": "false",
+                                    "message": f"Error: La pregunta {preg_fallo} ya existe, referenciela con la nomenclatura explicada",
+                                    },
+                                    status=status.HTTP_400_BAD_REQUEST,
+                                    )
+                #TODO DEVOLVER UN ERROR AL USUARIO
 
             pertenece = SeleccionPregunta.objects.create_seleccion_pregunta(
                 puntosAcierto=pregYaml["punt_positiva"],
@@ -766,7 +777,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             )
             pertenece.save()
 
-            if pregYaml["tipo"] != "ref": 
+            if pregYaml["tipo"] != "ref":
                 if pertenece.tipo == SeleccionPregunta.Tipo.PREGALEATORIA:
                     for preg_seleccionada in pregYaml["preguntas_elegidas"]:
                         if "ref" in preg_seleccionada:

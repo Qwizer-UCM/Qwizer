@@ -26,13 +26,20 @@ from django.core.files.storage import FileSystemStorage
 from django.db import transaction, IntegrityError
 
 def comprobar_imagenes(imagenes_form,imagenes_pregunta):
-    if len(imagenes_form) != len(imagenes_pregunta):
-        raise Exception("El número de imágenes subidos no es el correcto")
-    for img in imagenes_form:
-        print(img)
     for img in imagenes_pregunta:
         if img[1] not in (str(item) for item in imagenes_form):
             raise Exception(f"No se ha encontrado la imagen {img[1]} dentro de las imagenes subida")
+
+def exception_block(imagenes_guardadas, exception): #TODO preguntar tibi rollback
+    fs = FileSystemStorage()
+    for i in imagenes_guardadas:
+        fs.delete(i)
+    transaction.rollback()
+    content = {
+    "inserted": "false",
+    "message": "Error: " + exception.args[0],
+    }
+    return Response(content) 
 
 
 @extend_schema_view(
@@ -123,6 +130,8 @@ class QuestionViewSet(viewsets.ViewSet):
                 return Response(content)
             preguntas = yamlplscomeon["preguntas"]
 
+        fs = FileSystemStorage()
+        imagenes_guardadas = []
         for question in preguntas:
             if es_yaml:
                 p_texto = question["pregunta"]
@@ -141,34 +150,43 @@ class QuestionViewSet(viewsets.ViewSet):
 
             try:
                 imagenes_pregunta =  re.findall(r"!\[(.*?)\]\(([\w\/\-\:\._]+?)\)", p_texto)
-                comprobar_imagenes(imagenes_form, imagenes_pregunta)
-                print("Pase la comprobacion")
-                fs = FileSystemStorage()
-                for img in imagenes_form:
-                    name = str(img)
-                    store_name = fs.save(name, img)
-                    # TODO guardar el nombre que le de el FileSystem                
+                if len(imagenes_pregunta) > 0:
+                    comprobar_imagenes(imagenes_form, imagenes_pregunta)
+                    for img in imagenes_form:
+                        name = str(img)
+                        if re.search(name,p_texto):
+                            store_name = fs.save(name, img)
+                            imagenes_guardadas.append(store_name)
+                            p_texto = p_texto.replace(name, store_name)
                 pregunta = Pregunta.objects.create_preguntas(
                     pregunta=p_texto,
                     idAsignatura=asignatura.id,
                     titulo=p_titulo,
                 )
                 pregunta.save()
-            except Exception as exc:  # TODO hay que controlar mejor excepciones ni sabia que saltaba excepcion
-                print(exc)
-                
-                continue
+            except Exception as exc:  # TODO hay que controlar mejor excepciones ni sabia que                     
+                for i in imagenes_guardadas:
+                    fs.delete(i)
+                transaction.savepoint_rollback(sv_create_question)
+                content = {
+                "inserted": "false",
+                "message": "Error: " + exc.args[0],
+                }
+                return Response(content)
+            
                 # Guardamos las opciones
             if p_tipo_test:
                 pregunta_test = PreguntaTest.objects.create_pregunta_test(pregunta=p_texto, idAsignatura=asignatura.id, titulo=p_titulo, id_pregunta=pregunta.id)
 
                 try:
                     pregunta_test.save()
-                except Exception as excepction:
+                except Exception as exception:
+                    for i in imagenes_guardadas: 
+                        fs.delete(i)                    
                     transaction.savepoint_rollback(sv_create_question)
                     content = {
                     "inserted": "false",
-                    "message": "Error: " + excepction,
+                    "message": "Error: " + exception.args[0],
                     }
                     return Response(content)
 
@@ -182,17 +200,28 @@ class QuestionViewSet(viewsets.ViewSet):
                         p_opc = re.sub(r"<.*?>", "", opc.find("text").text)
                         p_fijar = False
                         p_correcta = opc.attrib["fraction"] == "100"
-                    opcion = OpcionTest.objects.create_opciones_test(opcion=p_opc, idPregunta=pregunta.id, orden=index, fijar=p_fijar)
                     try:
+                        imagenes_opc =  re.findall(r"!\[(.*?)\]\(([\w\/\-\:\._]+?)\)", p_opc)
+                        if len(imagenes_opc) > 0:
+                            comprobar_imagenes(imagenes_form, imagenes_opc)
+                            for img in imagenes_form:
+                                name = str(img)
+                                if re.search(name,p_opc):
+                                    store_name = fs.save(name, img)
+                                    imagenes_guardadas.append(store_name)
+                                    p_opc = p_opc.replace(name, store_name)
+                        opcion = OpcionTest.objects.create_opciones_test(opcion=p_opc, idPregunta=pregunta.id, orden=index, fijar=p_fijar)
                         opcion.save()
                         if p_correcta:
                             pregunta_test.respuesta_id = opcion.id
                             pregunta_test.save()
-                    except IntegrityError as excep:
+                    except Exception as excep:
+                        for i in imagenes_guardadas:
+                            fs.delete(i)
                         transaction.savepoint_rollback(sv_create_question)
                         content = {
                         "inserted": "false",
-                        "message": "Error: La pregunta ya existía" + excep,
+                        "message": "Error:" + excep.args[0],
                         }
                         return Response(content)
 
