@@ -1,0 +1,16 @@
+preguntas:
+  - tipo: "test"
+    pregunta: "La formula de la energía es"
+    titulo: "Titulo Markdown Test 2"
+    opciones: 
+        - op: "$E = mc^2$"
+          fijar: False
+        - op: "$E = mc^3$"
+          fijar: False
+        - op: "$E = mc * 2$ ![Image](Captura364.png)"
+          fijar: False
+        - op: "Ninguna de las anteriores"
+          fijar: True
+    op_correcta: 0 #id de opcion correcta
+  
+    

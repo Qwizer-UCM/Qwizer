@@ -4,8 +4,9 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
-            "type": "firefox",
+            "type": "chrome",
             "request": "launch",
             "reAttach": true,
             "name": "React: Vite",
@@ -13,12 +14,10 @@
             "webRoot": "${workspaceRoot}/qwizer_fe",
         },
         {
-            "env": {
-                "PYTHONPATH": "${workspaceRoot}/qwizer_be"
-            },
             "name": "Python: Django",
             "type": "python",
             "request": "launch",
+            "python": "${workspaceFolder}/qwizer_be/.venv/bin/python",
             "program": "${workspaceFolder}/qwizer_be/manage.py",
             "args": [
                 "runserver_plus",
@@ -27,6 +26,19 @@
             ],
             "django": true,
             "justMyCode": true
+        },
+        {
+            "name": "Django: Test",
+            "type": "python",
+            "request": "launch",
+            "python": "${workspaceFolder}/qwizer_be/.venv/bin/python",
+            "program": "${workspaceFolder}/qwizer_be/manage.py",
+            "args": [
+                "test",
+                "--debug-mode"
+            ],
+            "django": true,
+     
         }
     ]
 }

@@ -26,10 +26,10 @@ const columns = [
     name: 'Pregunta',
     selector: (row) => row.question,
     sortable: true,
-  },
+  }
 ];
 
-const ExpandedComponent = ({ data, selectedAsignatura, createQuiz, addQuestion, getPregAsignaturas }) => {
+const ExpandedComponent = ({ data, selectedAsignatura, createQuiz, getPregAsignaturas }) => {
   const deleteQuestion = (idPregunta) => {
     Questions.delete({ idPregunta })
       .then(() => getPregAsignaturas(selectedAsignatura.current.options[selectedAsignatura.current.selectedIndex].value))
@@ -43,17 +43,19 @@ const ExpandedComponent = ({ data, selectedAsignatura, createQuiz, addQuestion, 
 
   if (createQuiz) {
     // Componente cuando esta en CrearCuestionario.js
-    return <VisualizarPregunta data={data.objeto} createQuiz addQuestion={addQuestion} />;
+    return <VisualizarPregunta data={data.objeto} createQuiz />;
   } // Componente cuando esta en Banco de Preguntas solo
   return <VisualizarPregunta data={data.objeto} createQuiz={false} deleteQuestion={deleteQuestion} updateEditedQuestion={updateEditedQuestion} />;
 };
 
-const BancoPreguntas = ({ createQuiz, addQuestion }) => {
-  const { data: listaAsignaturas } = useFetch(Subjects.getAll); // lista de asignaturas del banco de preguntas
+const BancoPreguntas = ({ createQuiz = false, addMultipleQuestions }) => {
+  const { data: listaAsignaturas } = useFetch(Subjects.getFromStudentOrTeacher, { transform: (res) => res.asignaturas }); // lista de asignaturas del banco de preguntas
   const [preguntas, setPreguntas] = useState([]);
   const [preguntasSeleccionadas, setPreguntasSeleccionadas] = useState([]);
   const title = 'Preguntas de la asignatura';
   const selectedAsignatura = useRef();
+
+
 
   const getPregAsignaturas = (idAsignatura) => {
     Subjects.getQuestions({ idAsignatura }).then(({ data }) => {
@@ -92,11 +94,19 @@ const BancoPreguntas = ({ createQuiz, addQuestion }) => {
     window.URL.revokeObjectURL(elemx.href);
   };
 
-  const downloadButton = () => (
-    <button type="button" className="btn btn-success" onClick={downloadselectedList}>
-      Descargar
-    </button>
-  );
+
+  const addOrDownloadButton = () =>
+    !createQuiz ? (
+      <button type="button" className="btn btn-success" onClick={downloadselectedList}>
+        Descargar
+      </button>
+    )
+      :
+      (<button type="button" className="btn btn-success" onClick={() => addMultipleQuestions(preguntasSeleccionadas)}>
+        Añadir
+      </button>
+      )
+
 
   return (
     <div className="index-body">
@@ -105,16 +115,16 @@ const BancoPreguntas = ({ createQuiz, addQuestion }) => {
           <h4 className="d-flex justify-content-center">Banco de preguntas</h4>
           <label htmlFor="subject-selector">
             Selecciona una asignatura para visualizar sus preguntas</label>
-            <select ref={selectedAsignatura} className="form-select" id="subject-selector" onChange={handleSelectChange} aria-label="Default select example">
-              <option hidden defaultValue>
-                Selecciona una asignatura
+          <select ref={selectedAsignatura} className="form-select" id="subject-selector" onChange={handleSelectChange} aria-label="Default select example">
+            <option hidden defaultValue>
+              Selecciona una asignatura
+            </option>
+            {listaAsignaturas?.map((asignatura) => (
+              <option key={asignatura.id} value={asignatura.id}>
+                {asignatura.nombre}
               </option>
-              {listaAsignaturas?.asignaturas?.map((asignatura) => (
-                <option key={asignatura.id} value={asignatura.id}>
-                  {asignatura.asignatura}
-                </option>
-              ))}
-            </select>
+            ))}
+          </select>
           <br />
           <DataTable
             pointerOnHover
@@ -132,8 +142,8 @@ const BancoPreguntas = ({ createQuiz, addQuestion }) => {
             onSelectedRowsChange={handleChange}
             expandableRows
             expandableRowsComponent={ExpandedComponent}
-            expandableRowsComponentProps={{ selectedAsignatura, createQuiz, addQuestion, getPregAsignaturas }}
-            contextActions={downloadButton()}
+            expandableRowsComponentProps={{ selectedAsignatura, createQuiz, getPregAsignaturas }}
+            contextActions={addOrDownloadButton()}
           />
         </div>
       </div>

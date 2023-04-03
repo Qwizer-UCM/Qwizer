@@ -1,3 +1,4 @@
+import localforage from 'localforage';
 import { useState } from 'react';
 import { Users } from '../services/API';
 import useFetch from './useFetch';
@@ -20,6 +21,7 @@ const useAuth = () => {
       if (response.data?.detail) {
         console.error(response.data?.detail);
         localStorage.clear(); // TODO Seria correcto borrar localstorage?
+        localforage.clear()
       }
     },
   });
@@ -37,6 +39,7 @@ const useAuth = () => {
       if (response.data?.detail) {
         error = response.data?.detail;
         localStorage.clear(); // TODO Seria correcto borrar localstorage?
+        localforage.clear()
       }
       console.error(error);
       if (error) setError('El nombre de usuario o contraseña es incorrecto.');
@@ -47,6 +50,7 @@ const useAuth = () => {
     Users.logout()
       .then(() => {
         localStorage.clear();
+        localforage.clear()
         changeUser({ username: '', role: '', id: '' });
       })
       .catch(({ response }) => {

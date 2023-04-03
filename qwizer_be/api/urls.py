@@ -3,7 +3,12 @@ from djoser.views import UserViewSet, TokenCreateView, TokenDestroyView
 from rest_framework import routers
 
 from api.views import student
-from .views import qr, question, subject, test
+from .views import (
+    qr,
+    question,
+    subject,
+    test
+)
 
 router = routers.DefaultRouter(trailing_slash=False)
 

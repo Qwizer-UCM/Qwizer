@@ -1,0 +1,15 @@
+{
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./qwizer_be",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "python.linting.pylintArgs": [
+        "--rcfile=./qwizer_be/pyproject.toml"
+    ],
+    "todo-tree.tree.scanMode": "workspace only"
+}

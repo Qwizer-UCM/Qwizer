@@ -1,8 +1,18 @@
-import { useState } from 'react';
+import localforage from 'localforage';
+import { useEffect, useState } from 'react';
 import TarjetaCuestionario from './TarjetaCuestionario';
 
 const AvailableOffline = ({ role }) => {
-  const [cuestionarios] = useState(() => JSON.parse(localStorage.getItem('tests')) || []);
+  const [cuestionarios,setCuestionarios] = useState({});
+
+  useEffect(() => {
+    localforage.getItem('tests').then(value => {
+      if (value) {
+        setCuestionarios(value)
+      }
+    })
+  }, [])
+  
 
   if (Object.keys(cuestionarios)?.length !== 0) {
     return (

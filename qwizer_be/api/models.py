@@ -8,20 +8,21 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
 from api.manager import (
-    AsignaturasManager,
+    AsignaturaManager,
     CuestionariosManager,
-    EnvioOfflineManager,
-    EsAlumnoManager,
+    CursaManager,
     ImparteManager,
-    NotasManager,
+    InstanciaOpcionTestManager,
+    IntentoManager,
     OpcionesTestManager,
-    PerteneceACuestionarioManager,
+    SeleccionPreguntaManager,
+    OpcionPreguntaAleatoriaManager,
     PreguntasManager,
-    RespuestasEnviadasManager,
-    RespuestasEnviadasTestManager,
-    RespuestasEnviadasTextManager,
-    RespuestasTestManager,
-    RespuestasTextoManager,
+    PreguntasTestManager,
+    PreguntasTextManager,
+    InstanciaPreguntaManager,
+    InstanciaPreguntaTestManager,
+    InstanciaPreguntaTextManager,
     UserManager,
 )
 
@@ -35,13 +36,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(_("last name"), max_length=150, blank=True)
 
     # Añadir campo rol del usuario
-    userRole = models.TextChoices("userRole", "student teacher admin")
-    role = models.CharField(_("role"), choices=userRole.choices, max_length=7, blank=False)
+    STUDENT = 'student'
+    TEACHER = 'teacher'
+    ADMIN = 'admin'
+    ROLE_CHOICES = [
+        (STUDENT,"student"),
+        (TEACHER,"teacher"),
+        (ADMIN,"admin"),
+    ]
+    role = models.CharField(_("role"), choices=ROLE_CHOICES, max_length=7, blank=False)
 
     is_active = models.BooleanField(
         _("active"),
         default=True,
-        help_text=_("Designates whether this user should be treated as active. " "Unselect this instead of deleting accounts."),
+        help_text=_("Designates whether this user should be treated as active. Unselect this instead of deleting accounts."),
     )
     is_staff = models.BooleanField(
         _("staff status"),
@@ -83,10 +91,12 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
 
-class OpcionesTest(models.Model):
+class OpcionTest(models.Model):
     objects = OpcionesTestManager()
-    idPregunta = models.ForeignKey("Preguntas", related_name="opciones_test", on_delete=models.CASCADE)
+    pregunta = models.ForeignKey("PreguntaTest", related_name="opciones_test", on_delete=models.CASCADE)
     opcion = models.CharField(blank=True, max_length=254, verbose_name="opcion")
+    orden = models.PositiveSmallIntegerField()
+    fijar = models.BooleanField(default=False)
 
     # TODO no estoy seguro de que sea lo ideal pero nos permite refactorizar con facilidad
     # https://docs.djangoproject.com/en/4.1/ref/models/instances/
@@ -95,14 +105,16 @@ class OpcionesTest(models.Model):
         return self.opcion
 
     class Meta:
-        db_table = "opciones_test"
+        unique_together = (
+            "pregunta",
+            "opcion",
+        )
 
 
-class Preguntas(models.Model):
+class Pregunta(models.Model):
     objects = PreguntasManager()
-    tipoPregunta = models.CharField(blank=True, max_length=100, verbose_name="tipoPregunta")
-    pregunta = models.CharField(blank=True, max_length=254, verbose_name="pregunta")
-    idAsignatura = models.ForeignKey("Asignaturas", on_delete=models.CASCADE)
+    pregunta = models.CharField(blank=True, max_length=254, verbose_name="enunciado")
+    asignatura = models.ForeignKey("Asignatura", on_delete=models.CASCADE)
     titulo = models.CharField(blank=True, max_length=254, verbose_name="titulo")
 
     def __str__(self):
@@ -110,134 +122,128 @@ class Preguntas(models.Model):
 
     class Meta:
         ordering = ["pregunta"]
-        db_table = "preguntas"
-        unique_together = [
-            "pregunta",
-            "tipoPregunta",
-            "idAsignatura",
-        ]  # No pueden haber preguntas iguales para una asignatura
+        unique_together = (
+            "asignatura",
+            "titulo",
+        )
 
+class PreguntaTest(Pregunta):
+    objects = PreguntasTestManager()
+    respuesta = models.ForeignKey(OpcionTest,null=True ,on_delete=models.CASCADE)
 
-class Cuestionarios(models.Model):
+class PreguntaText(Pregunta):
+    objects = PreguntasTextManager()
+    respuesta = models.TextField()
+
+class Cuestionario(models.Model):
     objects = CuestionariosManager()
     titulo = models.CharField(blank=True, max_length=100, verbose_name="titulo")
-    idProfesor = models.ForeignKey(User, on_delete=models.CASCADE)
-    idAsignatura = models.ForeignKey("Asignaturas", on_delete=models.CASCADE)
+    profesor = models.ForeignKey(User, on_delete=models.CASCADE)
+    asignatura = models.ForeignKey("Asignatura", on_delete=models.CASCADE)
     duracion = models.IntegerField(default=10, verbose_name="duracion")
-    secuencial = models.IntegerField(default=1, verbose_name="secuencial")  # 0 no es secuencial, 1 es secuencial
+    secuencial = models.BooleanField(default=False, verbose_name="secuencial")  # 0 no es secuencial, 1 es secuencial
     password = models.CharField(blank=True, max_length=300, verbose_name="password")
+    fecha_visible = models.DateTimeField(blank=False, verbose_name="fecha_visible")
     fecha_apertura = models.DateTimeField(blank=False, verbose_name="fecha_apertura")
     fecha_cierre = models.DateTimeField(blank=False, verbose_name="fecha_cierre")
-    preguntas = models.ManyToManyField(Preguntas, through="PerteneceACuestionario")
+    aleatorizar = models.BooleanField(default=False)
 
     def __str__(self):
         return self.titulo
 
     class Meta:
         ordering = ["titulo"]
-        db_table = "cuestionarios"
         unique_together = (
-            "idAsignatura",
+            "asignatura",
             "titulo",
         )  # No puede haber dos cuestionarios con el mismo nombre para una asignatura
 
 
-class PerteneceACuestionario(models.Model):
-    objects = PerteneceACuestionarioManager()
-    idPregunta = models.ForeignKey("Preguntas", related_name="preguntas", on_delete=models.CASCADE)
-    idCuestionario = models.ForeignKey("Cuestionarios", on_delete=models.CASCADE)
-    nQuestion = models.IntegerField(verbose_name="nPregunta")
+class SeleccionPregunta(models.Model):
+    objects = SeleccionPreguntaManager()
+    pregunta = models.ForeignKey(Pregunta, related_name="preguntas", on_delete=models.CASCADE, default=None, null=True)
+    cuestionario = models.ForeignKey(Cuestionario, on_delete=models.CASCADE)
     puntosAcierto = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name="puntosAcierto")
     puntosFallo = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name="puntosFallo")
+    orden = models.PositiveSmallIntegerField()
+    fijar = models.BooleanField(default=False)
+    aleatorizar = models.BooleanField(default=False)
+
+    class Tipo(models.TextChoices):
+        PREGBANCO = 'PRB', _('PreguntaBanco')
+        PREGALEATORIA = 'PRA', _('PreguntaAleatoria')
+
+    tipo = models.CharField(
+        max_length=3,
+        choices=Tipo.choices
+    )
 
     def __str__(self):
-        return str(self.idPregunta) + "/" + str(self.idCuestionario)
+        return str(self.pregunta) + "/" + str(self.cuestionario)
 
     class Meta:
-        ordering = ["idPregunta"]
-        db_table = "pertenece_cuestionario"
+        ordering = ["cuestionario"]
+
+# TODO NAMING 
+class OpcionPreguntaAleatoria(models.Model):
+    objects = OpcionPreguntaAleatoriaManager()
+    pregunta_aleatoria = models.ForeignKey(SeleccionPregunta, related_name="opciones_preguntas", on_delete=models.CASCADE)
+    pregunta = models.ForeignKey(Pregunta, related_name="preguntas_opciones", on_delete=models.CASCADE)
 
 
-class RespuestasTexto(models.Model):
-    objects = RespuestasTextoManager()
-    idPregunta = models.ForeignKey("Preguntas", on_delete=models.CASCADE)
-    respuesta = models.CharField(blank=True, max_length=254, verbose_name="respuesta")
+
+
+class Asignatura(models.Model):
+    objects = AsignaturaManager()
+    nombreAsignatura = models.CharField(blank=True, max_length=254, verbose_name="nombreAsignatura", unique=True)
 
     def __str__(self):
-        return self.respuesta
+        return self.nombreAsignatura
 
     class Meta:
-        ordering = ["respuesta"]
-        db_table = "respuestas_texto"
-
-
-class RespuestasTest(models.Model):
-    objects = RespuestasTestManager()
-    idPregunta = models.ForeignKey("Preguntas", on_delete=models.CASCADE)
-    idOpcion = models.ForeignKey("OpcionesTest", on_delete=models.CASCADE)
-
-    def __str__(self):
-        return str(self.idPregunta) + "/" + str(self.idOpcion)
-
-    class Meta:
-        db_table = "respuestas_test"
-        unique_together = ["idPregunta", "idOpcion"]
-
-
-class Asignaturas(models.Model):
-    objects = AsignaturasManager()
-    asignatura = models.CharField(blank=True, max_length=254, verbose_name="asignatura")
-
-    def __str__(self):
-        return self.asignatura
-
-    class Meta:
-        ordering = ["asignatura"]
-        db_table = "asignaturas"
+        ordering = ["nombreAsignatura"]
 
 
 class Imparte(models.Model):
     objects = ImparteManager()
-    idProfesor = models.ForeignKey(User, on_delete=models.CASCADE)
-    idAsignatura = models.ForeignKey("Asignaturas", on_delete=models.CASCADE)
+    profesor = models.ForeignKey(User, on_delete=models.CASCADE)
+    asignatura = models.ForeignKey(Asignatura, on_delete=models.CASCADE)
 
     class Meta:
-        db_table = "imparte"
-        unique_together = ["idProfesor", "idAsignatura"]
+        verbose_name_plural = "Imparte"
+        unique_together = ["profesor", "asignatura"]
 
 
-class EsAlumno(models.Model):
-    objects = EsAlumnoManager()
-    idAlumno = models.ForeignKey(User, on_delete=models.CASCADE)
-    idAsignatura = models.ForeignKey("Asignaturas", on_delete=models.CASCADE)
+class Cursa(models.Model):
+    objects = CursaManager()
+    alumno = models.ForeignKey(User, on_delete=models.CASCADE)
+    asignatura = models.ForeignKey(Asignatura, on_delete=models.CASCADE)
 
     class Meta:
-        db_table = "es_alumno"
-        unique_together = ["idAlumno", "idAsignatura"]
+        unique_together = ["alumno", "asignatura"]
 
-
-class Notas(models.Model):
-    objects = NotasManager()
-    idAlumno = models.ForeignKey(User, on_delete=models.CASCADE)
-    idCuestionario = models.ForeignKey("Cuestionarios", on_delete=models.CASCADE)
+class Intento(models.Model):
+    objects = IntentoManager()
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    cuestionario = models.ForeignKey(Cuestionario, on_delete=models.CASCADE)
     nota = models.DecimalField(default=0, max_digits=10, decimal_places=2, verbose_name="nota")
     hash = models.CharField(blank=True, max_length=254, verbose_name="hash")
+    hash_offline = models.CharField(blank=True, max_length=254, verbose_name="hash_offline")
+    fecha_inicio = models.DateTimeField(null=True,blank=False, verbose_name="fecha_inicio")
+    fecha_fin = models.DateTimeField(null=True,blank=False, verbose_name="fecha_fin")
+
+    class Estado(models.TextChoices):
+        PENDIENTE = 'PEN', _('Pendiente')
+        ENTREGADO = 'ENT', _('Entregado')
+
+    estado = models.CharField(
+        max_length=3,
+        choices=Estado.choices,
+        default=Estado.PENDIENTE,
+    )
 
     class Meta:
-        db_table = "notas"
-        unique_together = ("idCuestionario", "idAlumno")
-
-
-class EnvioOffline(models.Model):
-    objects = EnvioOfflineManager()
-    idAlumno = models.ForeignKey(User, on_delete=models.CASCADE)
-    idCuestionario = models.ForeignKey("Cuestionarios", on_delete=models.CASCADE)
-    hash = models.CharField(blank=True, max_length=254, verbose_name="hash")
-
-    class Meta:
-        db_table = "Envio_offline"
-        unique_together = ("idCuestionario", "idAlumno")
-
+        unique_together = ("usuario","cuestionario")
 
 # TODO existen modelos abstractos revisar docs
 # https://docs.djangoproject.com/en/dev/topics/db/models/#multi-table-inheritance
@@ -246,47 +252,27 @@ class EnvioOffline(models.Model):
 # Aún haciendolo asi no lo veo muy claro para luego en las vistas no hacer distincion entre las instancias
 
 
-class RespuestasEnviadas(models.Model):
-    objects = RespuestasEnviadasManager()
-    # TODO Cambiar atributos, no son id's son referencias a la propia tabla
-    idCuestionario = models.ForeignKey("Cuestionarios", on_delete=models.CASCADE)
-    idAlumno = models.ForeignKey(User, on_delete=models.CASCADE)  # TODO puede ser profesor tambien, vaya nombres :/
-    idPregunta = models.ForeignKey("Preguntas", on_delete=models.CASCADE)
+class InstanciaPregunta(models.Model):
+    objects = InstanciaPreguntaManager()
+    intento = models.ForeignKey(Intento, on_delete=models.CASCADE)
+    seleccion = models.ForeignKey(SeleccionPregunta, on_delete=models.CASCADE)
+    pregunta = models.ForeignKey(Pregunta, on_delete=models.CASCADE)
+    orden = models.PositiveSmallIntegerField()
 
     class Meta:
-        abstract = True
-        ordering = ["idPregunta"]
+        ordering = ["pregunta"]
 
-    @classmethod
-    def calcular_nota(cls, respuesta, id_cuestionario):
-        # TODO alguna manera mejor de calcular nota?
-        pregunta_info = PerteneceACuestionario.objects.get_by_pregunta_cuestionario(id_pregunta=respuesta["id"], id_cuestionario=id_cuestionario)
-        opcion_usuario, opcion_correcta = None, None
-
-        if respuesta["type"] == "test":
-            opcion_usuario = int(respuesta["answr"])
-            opcion_correcta = RespuestasTest.objects.get_by_pregunta(id_pregunta=respuesta["id"]).idOpcion.id
-        elif respuesta["type"] == "text":
-            opcion_usuario = respuesta["answr"].lower().replace(" ", "")
-            opcion_correcta = RespuestasTexto.objects.get_by_pregunta(id_pregunta=respuesta["id"]).respuesta.lower().replace(" ", "")
-
-        if opcion_usuario == opcion_correcta:
-            return pregunta_info.puntosAcierto
-        else:
-            return pregunta_info.puntosFallo
+class InstanciaPreguntaTest(InstanciaPregunta):  # No debería ser on delete cascade
+    objects = InstanciaPreguntaTestManager()
+    respuesta = models.ForeignKey(OpcionTest, on_delete=models.CASCADE,null=True, blank=True)
 
 
-class RespuestasEnviadasTest(RespuestasEnviadas):  # No debería ser on delete cascade
-    objects = RespuestasEnviadasTestManager()
-    idRespuesta = models.ForeignKey("OpcionesTest", on_delete=models.CASCADE)
+class InstanciaPreguntaText(InstanciaPregunta):
+    objects = InstanciaPreguntaTextManager()
+    respuesta = models.CharField(null=True, blank=True, max_length=254, verbose_name="respuesta")
 
-    class Meta:
-        db_table = "respuestas_enviadas_test"
-
-
-class RespuestasEnviadasText(RespuestasEnviadas):
-    objects = RespuestasEnviadasTextManager()
-    Respuesta = models.CharField(blank=True, max_length=254, verbose_name="respuesta")
-
-    class Meta:
-        db_table = "respuestas_enviadas_text"
+class InstanciaOpcionTest(models.Model):
+    objects = InstanciaOpcionTestManager()
+    instancia = models.ForeignKey(InstanciaPreguntaTest, on_delete=models.CASCADE)
+    respuesta = models.ForeignKey(OpcionTest, on_delete=models.CASCADE, null=True, blank=True)
+    orden = models.PositiveSmallIntegerField()

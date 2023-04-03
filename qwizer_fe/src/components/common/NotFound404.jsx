@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { INICIO } from '../../constants';
 
 const NotFound404 = () => (
   <div className="d-flex align-items-center justify-content-center h-75">
@@ -8,7 +9,7 @@ const NotFound404 = () => (
         <span className="text-danger">Oops!</span> Página no encontrada.
       </p>
       <p className="lead">Lo sentimos, no podemos encontrar la página que solicitaste.</p>
-      <Link to="/" className="btn btn-primary">
+      <Link to={INICIO} className="btn btn-primary">
         Ir a pagina de inicio
       </Link>
     </div>

@@ -1,7 +1,7 @@
 version: '3.9'
 services:
-  db_2:
-    container_name: db_2
+  db:
+    container_name: db
     image: postgres
     restart: always
     environment:
@@ -46,14 +46,13 @@ services:
     build: 
       context: ../
       dockerfile: ./.docker/back/Dockerfile
+    command: sh -c "./start.sh"
     depends_on:
-      db_2:
+      db:
         condition: service_healthy
-    # ports:
-    #   - '8000:8000'
     environment:
       - DEBUG=False
-      - DATABASE_HOST=db_2
+      - DATABASE_HOST=db
     volumes:
       - back:/app/staticfiles
 
@@ -61,16 +60,39 @@ services:
     build: 
       context: ../
       dockerfile: ./.docker/front/Dockerfile
-    # depends_on:
-    #   - back
     environment:
       - REACT_APP_API_URL=/api
-      - REACT_PORT=3000 #Vite
+      - REACT_PORT=3000
       - REACT_HOST=0.0.0.0
-    # ports:
-    #   - "3000:3000"
     volumes:
       - front:/app/dist
+
+  # TODO back_dev y front_dev solo para entorno DEV
+  back_dev:
+    build: 
+      context: ../
+      dockerfile: ./.docker/back/Dockerfile
+    command: sh -c "python manage.py runserver 0.0.0.0:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - '8080:8080'
+    environment:
+      - DEBUG=True
+      - DATABASE_HOST=db
+
+  front_dev:
+    build: 
+      context: ../
+      dockerfile: ./.docker/front/Dockerfile
+    command: sh -c "npm run start"
+    environment:
+      - REACT_APP_API_URL=http://127.0.0.1:8080/api
+      - REACT_PORT=3000 #Vite
+      - REACT_HOST=0.0.0.0
+    ports:
+      - "3000:3000"
 
 volumes:
   pg_data:

@@ -5,6 +5,7 @@ import useFetch from '../hooks/useFetch';
 
 const UploadQuestions = () => {
   const [file, setFile] = useState('');
+  const [images, setImages] = useState([])
   const [errorModal, setErrorModal] = useState({ show: false, message: '' });
   const [successModal, setSuccessModal] = useState({ show: false, message: '' });
   const [idAsignatura, setIdAsignatura] = useState('');
@@ -12,23 +13,26 @@ const UploadQuestions = () => {
 
   const uploadFile = () => {
     if (file.name !== '' && idAsignatura) {
-      const reader = new FileReader();
-      reader.readAsText(file, 'utf-8');
-      reader.onload = (e) => {
-        Questions.upload({ ficheroYAML: e.target.result, idAsignatura })
-          .then(({ data }) => {
-            setFile('');
-            if (data.inserted === 'false') {
-              setErrorModal({ show: true, message: data.message });
-            } else {
-              setSuccessModal({ show: true, message: data.message });
-            }
-          })
-          .catch((error) => {
-            setErrorModal({ show: true, message: 'Error' });
-            console.log(error);
-          });
-      };
+      const formData = new FormData();
+      formData.append('fichero_yaml', file);
+      formData.append('idAsignatura', idAsignatura);
+      images.forEach(image => {
+        formData.append('images', image)
+      })
+
+      Questions.upload({ formData })
+        .then(({ data }) => {
+          setFile('');
+          if (data.inserted === 'false') {
+            setErrorModal({ show: true, message: data.message });
+          } else {
+            setSuccessModal({ show: true, message: data.message });
+          }
+        })
+        .catch((error) => {
+          setErrorModal({ show: true, message: 'Error' });
+          console.log(error);
+        });
     }
   };
 
@@ -53,7 +57,7 @@ const UploadQuestions = () => {
       <div className="upload-body">
         <div className="card upload-section ">
           <div className="card-header header bg-blue-grey">
-            <h2>Sube tus preguntas en formato : YAML</h2>
+            <h2>Sube tus preguntas en formato YAML / Moodle XML</h2>
           </div>
           <div className="card-body upload-inner-body">
             <h4>Selecciona un archivo:</h4>
@@ -63,6 +67,9 @@ const UploadQuestions = () => {
                 <label className="form-label" htmlFor="myfile">
                   {file.name}
                 </label>
+
+                <h4>Selecciona las imagenes:</h4>
+                <input type="file" className='form-control' onChange={(e) => setImages([...e.target.files])} id="myfile" name="myfile" multiple />
               </div>
             </div>
 

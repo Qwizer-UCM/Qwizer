@@ -9,8 +9,11 @@ from import_export import resources
 
 # Register your models here.
 from .models import (
-    Asignaturas,
+    Asignatura,
+    Cuestionario,
     Imparte,
+    Intento,
+    Pregunta,
     # Cuestionarios,
     # EsAlumno,
     # Notas,
@@ -85,16 +88,19 @@ class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
     filter_horizontal = ()
 
 
+class ImparteAdmin(admin.ModelAdmin):
+    list_display = ('profesor','asignatura')
+
+class IntentoAdmin(admin.ModelAdmin):
+    list_display = ('usuario','cuestionario','nota','estado')
+
 admin.site.register(User, UserAdmin)
-# admin.site.register(Cuestionarios)
-# admin.site.register(Preguntas)
-# admin.site.register(PerteneceACuestionario)
-# admin.site.register(OpcionesTest)
-# admin.site.register(RespuestasTexto)
-# admin.site.register(RespuestasTest)
-admin.site.register(Asignaturas)    # TODO no hay otra manera de crear asignaturas!!!
-admin.site.register(Imparte)
-# admin.site.register(EsAlumno)
-# admin.site.register(Notas)
+admin.site.register(Asignatura)    # TODO no hay otra manera de crear asignaturas!!!
+admin.site.register(Imparte,ImparteAdmin)
+admin.site.register(Intento, IntentoAdmin)
+admin.site.register(Pregunta)
+admin.site.register(Cuestionario)
+
+
 
 admin.site.unregister(Group)

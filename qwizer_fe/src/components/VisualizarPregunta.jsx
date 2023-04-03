@@ -4,7 +4,7 @@ import TextQuestion from './TextQuestion';
 import EditTextQuestion from './EditTextQuestion';
 import EditTestQuestion from './EditTestQuestion';
 
-export default function VisualizarPregunta({ data, createQuiz, addQuestion, deleteQuestion, updateEditedQuestion }) {
+export default function VisualizarPregunta({ data, createQuiz, deleteQuestion, updateEditedQuestion }) {
   const [editQuestion, seteditQuestion] = useState(false);
 
   const visualizeQuestion = () => (
@@ -14,10 +14,7 @@ export default function VisualizarPregunta({ data, createQuiz, addQuestion, dele
       {data.type === 'text' && <TextQuestion mode="visualize" infoPreg={data} />}
       <div className="d-flex justify-content-center">
         {createQuiz ? (
-          <button type="button" className="btn btn-success m-1" onClick={() => addQuestion(data)}>
-            {' '}
-            Añadir Pregunta{' '}
-          </button>
+          <div/>
         ) : (
           <>
             <button type="button" className="btn btn-danger m-1" onClick={() => deleteQuestion(data.id)}>

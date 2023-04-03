@@ -1,0 +1,28 @@
+<!doctype html>
+  <html>
+  <head>
+    <script src="https://unpkg.com/rapipdf/dist/rapipdf-min.js"></script>
+  </head>
+  <body>
+    <rapi-pdf id="thedoc"
+      style = "width:700px; height:40px; font-size:18px;" 
+    > </rapi-pdf>
+
+    <input type="file" id="file">
+    <button id="btn" class="btn-default" type="button">Generate PDF from JSON </button>    
+    <script>
+    file.addEventListener("change",(e) => {
+        console.log(e.target.files[0]);
+        let reader =new FileReader()
+        reader.onload = ()=>{
+            let objSpec = JSON.parse(reader.result);
+            document.querySelector("#thedoc").generatePdf(objSpec);
+
+        }
+        reader.readAsText(e.target.files[0])
+    })
+    </script>
+    
+  </body> 
+  </html>
+  
