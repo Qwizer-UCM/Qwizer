@@ -1,4 +1,4 @@
-const NavButtons = ({ index, size, setIndex, end }) => {
+const NavButtons = ({ index, size, setIndex, end, secuencial }) => {
   const updateIndNext = () => {
     if (index + 1 <= size - 1) setIndex((prev) => prev + 1);
   };
@@ -8,7 +8,7 @@ const NavButtons = ({ index, size, setIndex, end }) => {
 
   return (
     <div className="p-2 text-center">
-      {index > 0 && index <= size - 1 && (
+      {index > 0 && index <= size - 1 && !secuencial && (
         <button type="button" className="btn btn-success" onClick={updateIndPrev}>
           Atrás
         </button>

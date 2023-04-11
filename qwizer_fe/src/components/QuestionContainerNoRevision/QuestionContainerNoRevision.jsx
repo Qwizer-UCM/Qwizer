@@ -71,10 +71,12 @@ const QuestionContainerNoRevision = ({ role}) => {
 
   const endTest = () => {
     const { respuestas } = answerList;
+    const initTime = answerList.initTime
+    const endTime = new Date().toISOString();
     const hash = CryptoJS.SHA256(JSON.stringify(respuestas)).toString();
 
     // TODO por qué no se espera respuesta de esta peticion??
-    Tests.sendTest({ respuestas, hash, idCuestionario: paramsId })
+    Tests.sendTest({ respuestas, hash, initTime, endTime, idCuestionario: paramsId })
       .then(() => navigate(INICIO, { replace: true }))
       .catch((e) => console.error(e));
 
@@ -160,14 +162,15 @@ const QuestionContainerNoRevision = ({ role}) => {
             </div>
           </div>
 
-          <div className="p-2 col-md-3 col-sm-12 order-first order-md-last" id="question-nav">
+
+          {!localStorageTest.secuencial && <div className="p-2 col-md-3 col-sm-12 order-first order-md-last" id="question-nav">
             <QuestionNav index={indPregunta} listaPreguntas={questionList} setIndex={setindPregunta} />
-          </div>
+          </div>}
         </div>
 
         <div className="p-4 row">
           <div className="col">
-            <NavButtons index={indPregunta} size={questionList.length} setIndex={setindPregunta} end={endTest} />
+            <NavButtons index={indPregunta} size={questionList.length} setIndex={setindPregunta} end={endTest} secuencial={localStorageTest.secuencial}/>
           </div>
         </div>
       </div >

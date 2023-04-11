@@ -506,6 +506,8 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         """
         respuestas = request.data["respuestas"]
         hash_enviado = request.data["hash"]
+        inicio_cuestionario = request.data["initTime"]
+        fin_cuestionario = request.data["endTime"]
         id_cuestionario = pk
         alumno = request.user
         try:
@@ -550,6 +552,8 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
         intento.nota = nota
         intento.hash = hash_enviado
+        intento.fecha_inicio = inicio_cuestionario
+        intento.fecha_fin = fin_cuestionario
         intento.estado = Intento.Estado.ENTREGADO
         intento.save()
         return Response({"nota": nota})
@@ -656,7 +660,6 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 "nota": nota_cuestionario,
             }
         )
-    
 
     @action(detail=False, methods=["POST"])
     @transaction.atomic

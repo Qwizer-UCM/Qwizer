@@ -47,11 +47,14 @@ const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) =>
   const fechas = {
     fecha_apertura_formateada: source?.formatted_fecha_apertura || '',
     fecha_cierre_formateada: source?.formatted_fecha_cierre || '',
+    fecha_visible_formateada: source?.formatted_visible_cierre || '',
     fecha_apertura: source?.fecha_apertura || '',
     fecha_cierre: source?.fecha_cierre || '',
+    fecha_visible: source?.fecha_visible || '',
   };
   const bloqueado = role === 'student' &&  (new Date(fechas.fecha_apertura) > Date.now() || Date.now() > new Date(fechas.fecha_cierre));
   const downloaded = Boolean(localStorageTest);
+  const visible = (Date.now() > new Date(fechas.fecha_visible));
 
   const getTest = (id) => {
     Tests.get({ idCuestionario: id }).then(({ data: res }) => {
@@ -68,7 +71,7 @@ const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) =>
   };
 
   return (
-    !isLoading && ((offline && downloaded) || !offline) && (
+    !isLoading && ((offline && downloaded) || !offline) && visible && (
       <div className="card asignatura-section " name={!offline ? cuestionario : cuestionario.title} id={idCuestionario}>
         <div id={`cuestionario_${idCuestionario}`} style={{ backgroundColor: corregido && calificacion >= 5 ? '#59ac79' : corregido && '#9c2400' }} className="card-header header bg-blue-grey">
           <h2>{!offline ? cuestionario : cuestionario.titulo}</h2>
@@ -81,7 +84,7 @@ const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) =>
             <p>Fecha de cierre: {fechas.fecha_cierre_formateada}</p>
           </div>
           <div className="col-md-3 col-sm-auto d-flex justify-content-center align-items-center">
-            {!offline && !downloaded && !corregido && (
+            {!offline && !downloaded && !corregido &&(
               <button type="button" className="btn btn-success me-2" onClick={() => getTest(idCuestionario)}>
                 Descargar test
               </button>
