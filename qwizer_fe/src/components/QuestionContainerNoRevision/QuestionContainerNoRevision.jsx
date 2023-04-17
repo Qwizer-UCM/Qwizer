@@ -15,7 +15,7 @@ import NavButtons from './NavButtons';
 import { INICIO, PATH_QR } from '../../constants';
 import Markdown from '../common/Markdown';
 
-const QuestionContainerNoRevision = ({ role}) => {
+const QuestionContainerNoRevision = ({ role }) => {
   const navigate = useNavigate();
   const params = useParams();
   const paramsId = Number(params.id); // TODO error con ids invalidos(letras y cosas raras). TEST NOT FOUND o algo asi
@@ -42,16 +42,16 @@ const QuestionContainerNoRevision = ({ role}) => {
         setLocalStorageTest(value[paramsId])
       }
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
     if (localStorageTest) {
       localforage.getItem('tests').then(value => {
-          localforage.setItem('tests',{...value,[paramsId]:localStorageTest})
+        localforage.setItem('tests', { ...value, [paramsId]: localStorageTest })
       })
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localStorageTest])
 
   useEffect(() => {
@@ -134,6 +134,10 @@ const QuestionContainerNoRevision = ({ role}) => {
           </div>
         </div>
 
+        <div className='p-4 info-question'>
+          <h6>Pregunta {indPregunta + 1}</h6>
+          <p>Puntuada sobre {pregunta.nota.replaceAll('"',"")}</p>
+        </div>
         <div className="p-4 row">
           <div className="p-2 col-md-9 col-sm-12 order-last order-md-first" id="question">
             <div className="card">
@@ -141,7 +145,7 @@ const QuestionContainerNoRevision = ({ role}) => {
                 <div key={pregunta.id}>
                   <h2 className="p-2 m-2">
                     <Markdown>
-                      {`${indPregunta + 1}.-${pregunta.pregunta}`}
+                      {pregunta.pregunta}
                     </Markdown>
                   </h2>
                   {pregunta.tipoPregunta === 'test' ? (
@@ -170,13 +174,13 @@ const QuestionContainerNoRevision = ({ role}) => {
 
         <div className="p-4 row">
           <div className="col">
-            <NavButtons index={indPregunta} size={questionList.length} setIndex={setindPregunta} end={endTest} secuencial={localStorageTest.secuencial}/>
+            <NavButtons index={indPregunta} size={questionList.length} setIndex={setindPregunta} end={endTest} secuencial={localStorageTest.secuencial} />
           </div>
         </div>
       </div >
     );
   }
-return <h1>Loading...</h1>;
+  return <h1>Loading...</h1>;
 };
 
 export default QuestionContainerNoRevision;

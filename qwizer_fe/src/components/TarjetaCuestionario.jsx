@@ -42,7 +42,7 @@ const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) =>
   
   const source = offline ? localStorageTest : data;
 
-  const { duracion, nota: calificacion } = source ?? {};
+  const { duracion, nota: calificacion, notaMax: calificacionMax } = source ?? {};
   const corregido = offline ? false : data?.corregido !== 0;
   const fechas = {
     fecha_apertura_formateada: source?.formatted_fecha_apertura || '',
@@ -73,9 +73,9 @@ const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) =>
   return (
     !isLoading && ((offline && downloaded) || !offline) && visible && (
       <div className="card asignatura-section " name={!offline ? cuestionario : cuestionario.title} id={idCuestionario}>
-        <div id={`cuestionario_${idCuestionario}`} style={{ backgroundColor: corregido && calificacion >= 5 ? '#59ac79' : corregido && '#9c2400' }} className="card-header header bg-blue-grey">
+        <div id={`cuestionario_${idCuestionario}`} style={{ backgroundColor: corregido && calificacion >= calificacionMax/2 ? '#59ac79' : corregido && '#9c2400' }} className="card-header header bg-blue-grey">
           <h2>{!offline ? cuestionario : cuestionario.titulo}</h2>
-          {!offline && corregido && <h5>Calificación: {calificacion}</h5>}
+          {!offline && corregido && <h5>Calificación: {calificacion} / {calificacionMax}</h5>}
         </div>
         <div className="card-body asignatura-inner-body row">
           <div className="col-md-9 col-sm-auto">

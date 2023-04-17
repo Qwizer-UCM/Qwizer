@@ -1,3 +1,4 @@
+
 .index-body {
     background: #E9E9E9;
     min-height: 100vh;
@@ -268,4 +269,29 @@
 .markdown img {
     max-width: 100%;
     height: auto;
+}
+
+.info-question {
+    float: left;
+    width: 9em;
+    padding: 0.5em;
+    margin-bottom: 1.8em;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border: 2px solid #cad0d7;
+
+}
+
+.info-question p {
+    font-family: 'Open Sans';
+    font-size: 0.8em;
+    margin-top: 0.7em;
+
+}
+
+@media (max-width: 767px) {
+    .info-question {
+        float: none;
+        width: auto;
+    }
 }

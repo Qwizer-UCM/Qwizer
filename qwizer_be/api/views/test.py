@@ -1,10 +1,10 @@
 import random
 from datetime import datetime
+import json
+from django.core.serializers.json import DjangoJSONEncoder 
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 
 import yaml
-import re
-import base64
 from api.models import Asignatura, Cuestionario, InstanciaPreguntaTest, InstanciaPreguntaText, Intento, OpcionTest, Pregunta, SeleccionPregunta, PreguntaTest, PreguntaText, User
 from api.utils.cifrado import encrypt_tests
 from django.utils.timezone import make_aware
@@ -349,6 +349,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 pertenece = inst.seleccion
                 inst_serialzed = PreguntasSerializer(inst.pregunta).data
                 inst_serialzed["fijar"], inst_serialzed["orden"], inst_serialzed["aleatorizar"] = pertenece.fijar, pertenece.orden, pertenece.aleatorizar
+                inst_serialzed["nota"]  = json.dumps(pertenece.puntosAcierto, cls=DjangoJSONEncoder)
                 res.append(inst_serialzed)
 
             # Recuperar orden de las preguntas
@@ -375,6 +376,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 preg = PreguntasSerializer(pregunta).data
                 preg["fijar"], preg["orden"], preg["aleatorizar"] = inst.fijar, inst.orden, inst.aleatorizar
                 preg["id_seleccion"] = inst.id
+                preg["nota"] = json.dumps(inst.puntosAcierto, cls=DjangoJSONEncoder)
                 res.append(preg)
 
 
@@ -469,14 +471,14 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             "text": SeleccionPregunta.Tipo.PREGBANCO
         }
         for i, pregunta in enumerate(lista_preguntas):
-            tipo_seleccionada = keys_preg[pregunta["tipo"]] if pregunta["tipo"] in keys_preg else None # TODO tratamiento de excepciones 
+            tipo_seleccionada = keys_preg[pregunta["type"]] if pregunta["type"] in keys_preg else None # TODO tratamiento de excepciones 
             if tipo_seleccionada is None:
                 continue
             pertenece = SeleccionPregunta.objects.create_seleccion_pregunta(
                 puntosAcierto=pregunta["punt_positiva"],
                 puntosFallo=pregunta["punt_negativa"],
                 idCuestionario=cuestionario.id,
-                idPregunta=pregunta["id"] if pregunta["tipo"] != "aleatoria" else None,
+                idPregunta=pregunta["id"] if pregunta["type"] != "aleatoria" else None,
                 orden=i,
                 fijar=pregunta["fijar"] if ("fijar" in pregunta) else False,
                 aleatorizar=pregunta["aleatorizar"] if ("aleatorizar" in pregunta) else False,
@@ -619,10 +621,14 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
         alumnos = User.objects.get_users_from_test(id_asignatura=cuestionario.asignatura.id, id_cuestionario=pk)
         notas = {}
+        nota_max = 0
+        preguntas_cuestionario = SeleccionPregunta.objects.get_by_cuestionario(cuestionario.id)
+        for pregunta in preguntas_cuestionario:
+            nota_max += pregunta.puntosAcierto
         for alumno in alumnos:
             nota = "No presentado" if alumno["intento__nota"] is None else alumno["intento__nota"]
             notas[alumno["email"]] = ({"id": alumno["id"], "nombre": alumno["first_name"], "apellidos": alumno["last_name"], "nota": nota})
-        return Response({"notas": notas})
+        return Response({"notas": notas,  "notaMax": nota_max})
 
     @action(detail=True, methods=["GET"])
     def info(self, request, pk):
@@ -635,6 +641,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         fecha_cierre = cuestionario.fecha_cierre
         fecha_visible = cuestionario.fecha_visible
         nota_cuestionario = 0
+        nota_max = 0
         try:
             # TODO no creo que este arreglado y no entiendo bien a que se refiere
             # -----
@@ -644,6 +651,9 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             nota = Intento.objects.get_by_cuestionario_alumno(id_cuestionario=pk, id_alumno=request.user.id)  # <-- Salta excepcion si devuelve mas de uno
             corregido = 1 if Intento.Estado.ENTREGADO == nota.estado else 0
             nota_cuestionario = nota.nota
+            preguntas_cuestionario = SeleccionPregunta.objects.get_by_cuestionario(cuestionario.id)
+            for pregunta in preguntas_cuestionario:
+                nota_max += pregunta.puntosAcierto
         except:
             corregido = 0
 
@@ -658,6 +668,7 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 "fecha_visible": fecha_visible,
                 "corregido": corregido,
                 "nota": nota_cuestionario,
+                "notaMax": nota_max
             }
         )
 
