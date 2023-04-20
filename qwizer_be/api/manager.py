@@ -3,7 +3,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
 
-
 class UserManager(BaseUserManager):
     def create_user(self, email, first_name, last_name, password=None, commit=True, **extra_fields):
         """
@@ -267,7 +266,8 @@ class IntentoManager(models.Manager):
         return self.get_queryset().get(cuestionario_id=id_cuestionario, usuario_id=id_alumno)
 
     def count_corregidos(self, cuestionarios, id_alumno):
-        return self.get_queryset().filter(cuestionario__in=cuestionarios, usuario_id=id_alumno).count()
+        from api.models import Intento  # TODO dependencia circular si no se importa aqui
+        return self.get_queryset().filter(cuestionario__in=cuestionarios, usuario_id=id_alumno, estado=Intento.Estado.ENTREGADO).count()
 
 class InstanciaPreguntaManager(models.Manager):
     def create_instancia(self, id_intento, id_pregunta,orden,id_seleccion, commit=False, **extra_fields):

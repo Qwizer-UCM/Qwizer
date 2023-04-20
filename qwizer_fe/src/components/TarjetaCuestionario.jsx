@@ -77,13 +77,13 @@ const TarjetaCuestionario = ({ offline, cuestionario, idCuestionario, role }) =>
           <h2>{!offline ? cuestionario : cuestionario.titulo}</h2>
           {!offline && corregido && <h5>Calificación: {calificacion} / {calificacionMax}</h5>}
         </div>
-        <div className="card-body asignatura-inner-body row">
-          <div className="col-md-9 col-sm-auto">
+        <div className="card-body row">
+          <div className="col-md-7 col-sm-auto">
             <p>Duración: {duracion} minutos</p>
             <p>Fecha de apertura: {fechas.fecha_apertura_formateada}</p>
             <p>Fecha de cierre: {fechas.fecha_cierre_formateada}</p>
           </div>
-          <div className="col-md-3 col-sm-auto d-flex justify-content-center align-items-center">
+          <div className="col-md-5 col-sm-auto d-flex justify-content-start justify-content-sm-end align-items-center">
             {!offline && !downloaded && !corregido &&(
               <button type="button" className="btn btn-success me-2" onClick={() => getTest(idCuestionario)}>
                 Descargar test

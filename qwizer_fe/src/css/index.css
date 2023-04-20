@@ -242,7 +242,7 @@
 
 .test-question-option {
     cursor: pointer;
-    display: block;
+    display: flex;
     padding: 10px;
     margin: 10px 0;
     border: 1px solid #ccc;
@@ -273,7 +273,6 @@
 
 .info-question {
     float: left;
-    width: 9em;
     padding: 0.5em;
     margin-bottom: 1.8em;
     background-color: #f8f9fa;
@@ -294,4 +293,69 @@
         float: none;
         width: auto;
     }
+}
+
+#questions {  display: grid;
+    grid-template-columns: 0.3fr 2fr 0.7fr;
+    grid-template-rows: 0.1fr 2fr;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-template-areas:
+      "time time time"
+      "score question navigation";
+}
+  
+.time { 
+    grid-area: time;
+}
+
+.score { 
+    margin-left: 1.5em;
+    grid-area: score; 
+    align-self: start;
+    justify-self: start;
+}
+  
+  .navigation { 
+    grid-area: navigation; 
+    padding: 0.5em;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border: 2px solid #cad0d7;
+    align-self: start;
+}
+  
+  .question {  display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 2fr 0.1fr;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-template-areas:
+      "."
+      ".";
+    grid-area: question;
+  }
+  
+
+@media (max-width: 500px) {
+    #questions  {
+        grid-template-columns: 0.3fr 2fr 0.7fr;
+        grid-template-rows: 0.1fr 0.1fr 0.1fr 2fr;
+        grid-template-areas:
+            "time time time"
+            "navigation navigation navigation"
+            "score score score"
+            "question question question";
+    }
+
+    .score { 
+        align-self: stretch;
+        justify-self: stretch;
+    }
+}
+  
+#question-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
 }

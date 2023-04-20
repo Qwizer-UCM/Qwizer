@@ -47,7 +47,7 @@ const TestQuestion = ({ respuesta, mode, id, type, options, infoPreg = null, add
         ))}
         <div className="rounded p-2" style={{ backgroundColor: "#60d394" }}>
           <Markdown>
-            {"Respuesta Correcta: " + questionData.options.find((option) => questionData.correct_op === option.id).op}
+            {`Respuesta Correcta: ${questionData.options.find((option) => questionData.correct_op === option.id).op}`}
           </Markdown>
         </div>
       </div>

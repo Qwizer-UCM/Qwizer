@@ -1,75 +1,75 @@
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { BANCO_PREGUNTAS, CREAR_CUESTIONARIO, INICIO, MARKDOWN_TEST, NOTAS, OFFLINE, REGISTRO, SUBIR_CUESTIONARIO, SUBIR_PREGUNTAS } from '../../constants';
 
 const NavBar = ({ role, username, logout, isOffline }) => (
   <nav className="navbar navbar-expand-lg  bg-light">
     <div className="container-fluid">
-      <Link to={INICIO} className="navbar-brand">
+      <NavLink to={INICIO} className="navbar-brand">
         Qwizer <span className={`material-icons fs-5 align-middle rounded shadow  p-1 ${isOffline ? 'bg-danger' : 'bg-success text-white'}`}>{!isOffline ? 'wifi' : 'wifi_off'}</span>
-      </Link>
+      </NavLink>
       <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
         <span className="navbar-toggler-icon" />
       </button>
       <div className="collapse navbar-collapse" id="navbarText">
         <ul className="navbar-nav me-auto">
           <li className="nav-item">
-            <Link to={INICIO} className="nav-link active">
+            <NavLink to={INICIO} className="nav-link">
               Inicio <span className="sr-only" />
-            </Link>
+            </NavLink>
           </li>
           {!isOffline && (
             <>
               {role === 'teacher' && (
                 <>
                   <li className="nav-item">
-                    <Link to={REGISTRO} className="nav-link active">
+                    <NavLink to={REGISTRO} className="nav-link">
                       Añadir alumno
                       <span className="sr-only" />
-                    </Link>
+                    </NavLink>
                   </li>
                   <li className="nav-item dropdown ">
-                    <a href="##" className="nav-link dropdown-toggle active" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a href="##" className="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                       Crear cuestionarios
                     </a>
                     <ul className="dropdown-menu" style={{ margin: 0 }}>
                       <li>
-                        <Link to={SUBIR_PREGUNTAS} className="dropdown-item">
+                        <NavLink to={SUBIR_PREGUNTAS} className="dropdown-item">
                           Subir preguntas
                           <span className="sr-only" />
-                        </Link>
+                        </NavLink>
                       </li>
-                      <Link to={SUBIR_CUESTIONARIO} className="dropdown-item">
+                      <NavLink to={SUBIR_CUESTIONARIO} className="dropdown-item">
                         Subir test <span className="sr-only" />
-                      </Link>
-                      <Link to={CREAR_CUESTIONARIO} className="dropdown-item">
+                      </NavLink>
+                      <NavLink to={CREAR_CUESTIONARIO} className="dropdown-item">
                         Crear cuestionario
                         <span className="sr-only" />
-                      </Link>
-                      <Link to={BANCO_PREGUNTAS} className="dropdown-item">
+                      </NavLink>
+                      <NavLink to={BANCO_PREGUNTAS} className="dropdown-item">
                         Banco de preguntas
                         <span className="sr-only" />
-                      </Link>
+                      </NavLink>
                     </ul>
                   </li>
                   <li className="nav-item">
-                    <Link to={NOTAS} className="nav-link active">
+                    <NavLink to={NOTAS} className="nav-link">
                       Notas
                       <span className="sr-only" />
-                    </Link>
+                    </NavLink>
                   </li>
                 </>
               )}
-              <li className="nav-item active">
-                <Link to={OFFLINE} className="nav-link active">
+              <li className="nav-item">
+                <NavLink to={OFFLINE} className="nav-link">
                   Offline
                   <span className="sr-only" />
-                </Link>
+                </NavLink>
               </li>
-              <li className="nav-item active">
-                <Link to={MARKDOWN_TEST} className="nav-link active">
+              <li className="nav-item">
+                <NavLink to={MARKDOWN_TEST} className="nav-link">
                   MARKDOWN Y MATHJAX
                   <span className="sr-only" />
-                </Link>
+                </NavLink>
               </li>
             </>
           )}

@@ -71,7 +71,7 @@ const QuestionContainerNoRevision = ({ role }) => {
 
   const endTest = () => {
     const { respuestas } = answerList;
-    const initTime = answerList.initTime
+    const {initTime} = answerList
     const endTime = new Date().toISOString();
     const hash = CryptoJS.SHA256(JSON.stringify(respuestas)).toString();
 
@@ -84,7 +84,12 @@ const QuestionContainerNoRevision = ({ role }) => {
       const respBase64 = Buffer.from(JSON.stringify(respuestas)).toString('base64url');
       navigate(PATH_QR(paramsId, hash, respBase64), { replace: true });
     }
-    localStorage.removeItem('answers');
+    const ans = JSON.parse(localStorage.getItem('answers'))
+    console.log(ans);
+    delete ans[paramsId]
+
+    console.log(ans);
+    localStorage.setItem('answers',JSON.stringify(ans));
   };
 
   const unlockTest = (questList) => {
@@ -127,19 +132,19 @@ const QuestionContainerNoRevision = ({ role }) => {
     const pregunta = questionList[indPregunta];
     return (
       <div className="index-body container-fluid" id="questions">
-        <div className="p-4 row-1">
+        <div className="time m-4 row-1">
           <div className="col card">
             <h1 className="text-center">{localStorageTest?.titulo || ''}</h1>
             <CuentaAtras startTime={answerList.initTime} duration={localStorageTest.duracion} endTest={endTest} />
           </div>
         </div>
 
-        <div className='p-4 info-question'>
+        <div className='score m-4 info-question'>
           <h6>Pregunta {indPregunta + 1}</h6>
           <p>Puntuada sobre {pregunta.nota.replaceAll('"',"")}</p>
         </div>
-        <div className="p-4 row">
-          <div className="p-2 col-md-9 col-sm-12 order-last order-md-first" id="question">
+        <div className="question m-4">
+          <div id="question">
             <div className="card">
               <div className="card-body">
                 <div key={pregunta.id}>
@@ -165,18 +170,18 @@ const QuestionContainerNoRevision = ({ role }) => {
               </div>
             </div>
           </div>
+          <div className="p-4 row">
+            <div className="col">
+              <NavButtons index={indPregunta} size={questionList.length} setIndex={setindPregunta} end={endTest} secuencial={localStorageTest.secuencial} />
+            </div>
+          </div>
 
 
-          {!localStorageTest.secuencial && <div className="p-2 col-md-3 col-sm-12 order-first order-md-last" id="question-nav">
+        </div>
+          {!localStorageTest.secuencial && <div className="navigation m-4">
             <QuestionNav index={indPregunta} listaPreguntas={questionList} setIndex={setindPregunta} />
           </div>}
-        </div>
 
-        <div className="p-4 row">
-          <div className="col">
-            <NavButtons index={indPregunta} size={questionList.length} setIndex={setindPregunta} end={endTest} secuencial={localStorageTest.secuencial} />
-          </div>
-        </div>
       </div >
     );
   }

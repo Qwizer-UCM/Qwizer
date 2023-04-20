@@ -23,7 +23,7 @@ const QuestionContainerRevision = ({ id, role }) => {
   const pregunta = testCorregido?.questions[indPregunta];
   if (testCorregido && !error && pregunta) {
     return (
-      <div className="index-body container-fluid" id="questions">
+      <div className="index-body container-fluid" >
         <div className="p-4">
           <div className="card">
             <h1 className="text-center">{testCorregido.titulo}</h1>
@@ -38,7 +38,7 @@ const QuestionContainerRevision = ({ id, role }) => {
             <div className="card">
               <div className="card-body">
                 <div key={pregunta.id}>
-                  <h2 className="p-2 m-2 card">
+                  <h2 className="p-2 m-2">
                     <Markdown>
                       {`${indPregunta + 1}.-${pregunta.question}`}
                     </Markdown>
@@ -49,7 +49,7 @@ const QuestionContainerRevision = ({ id, role }) => {
             </div>
           </div>
 
-          <div className="p-2 col-md-3 col-sm-12 order-first order-md-last" id="question-nav">
+          <div className="p-2 col-md-3 col-sm-12 order-first order-md-last">
             <QuestionNav setIndex={setindPregunta} listaPreguntas={testCorregido.questions} selectedIdx={indPregunta} />
           </div>
         </div>
