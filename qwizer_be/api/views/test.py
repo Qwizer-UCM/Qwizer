@@ -343,6 +343,8 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             intento = None
 
         if intento:
+            if intento.estado == Intento.Estado.ENTREGADO:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
             # Serializar las preguntas
             res = []
             for inst in InstanciaPregunta.objects.get_by_intento(id_intento=intento.id):
@@ -517,6 +519,9 @@ class TestsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         except Intento.DoesNotExist:
             return Response(data="No se pueden enviar respuestas sin haber comenzado el intento.", status=status.HTTP_400_BAD_REQUEST)
 
+        if intento.estado == Intento.Estado.ENTREGADO:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        
         nota = 0
         for key, respuesta in respuestas.items():
             pregunta = Pregunta.objects.get_by_id(id_pregunta=respuesta["id"])

@@ -78,7 +78,7 @@ const QuestionContainerNoRevision = ({ role }) => {
     // TODO por qué no se espera respuesta de esta peticion??
     Tests.sendTest({ respuestas, hash, initTime, endTime, idCuestionario: paramsId })
       .then(() => navigate(INICIO, { replace: true }))
-      .catch((e) => console.error(e));
+      .catch(() => alert("Envío fallido"));
 
     if (!navigator.onLine) {
       const respBase64 = Buffer.from(JSON.stringify(respuestas)).toString('base64url');
