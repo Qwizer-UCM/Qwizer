@@ -89,15 +89,16 @@ const UploadNotas = () => {
           <h4>Selecciona un archivo:</h4>
           <div className="input-group">
             <div>
-              <input type="file" className="form-control" aria-describedby="inputGroupFileAddon01" onChange={handleChange} id="myfile" name="myfile" />
+              <input type="file" accept='.csv' className="form-control" aria-describedby="inputGroupFileAddon01" onChange={handleChange} id="myfile" name="myfile" />
               <label className="form-label" htmlFor="myfile">
-                {file.name}
+                {file ? file.name : null}
               </label>
             </div>
           </div>
           {file !== '' && (
             <div className="upload-message-section mt-0">
-              <select className="form-select" name="headers" value={selectedOption} onChange={(e) => setSelectedOption(e.target.value)}>
+               <label htmlFor="column-selected">Columna a rellenar:</label>
+              <select id='column-selected' className="form-select mt-1" name="headers" value={selectedOption} onChange={(e) => setSelectedOption(e.target.value)}>
                 <option value={-1}>Selecciona la columna de las notas</option>
                 {optionsCSVHeaders.map((option) => (
                   <option key={option} value={option}>
@@ -105,7 +106,8 @@ const UploadNotas = () => {
                   </option>
                 ))}
               </select>
-              <select className="form-select" name="subjects" value={selectedSubject} onChange={(e) => setSelectedSubject(e.target.value)}>
+              <label htmlFor="subject-selected" className='mt-2'>Asignatura:</label>
+              <select id='subject-selected' className="form-select " name="subjects" value={selectedSubject} onChange={(e) => setSelectedSubject(e.target.value)}>
                 <option value={-1}>Selecciona una asignatura</option>
                 {data.asignaturas.map((option) => (
                   <option key={option.id} value={option.id}>
@@ -114,7 +116,9 @@ const UploadNotas = () => {
                 ))}
               </select>
               {selectedSubject !== '-1' && (
-                <select className="form-select" name="tests" value={selectedTest} onChange={(e) => setSelectedTest(e.target.value)}>
+                <>
+                <label htmlFor="quiz-selected">Cuestionario:</label>
+                <select id='quiz-selected' className="form-select mt-2" name="tests" value={selectedTest} onChange={(e) => setSelectedTest(e.target.value)}>
                   <option value={-1}>Selecciona un cuestionario</option>
                   {optionsTests.map((option) => (
                     <option key={option.id} value={option.id}>
@@ -123,10 +127,11 @@ const UploadNotas = () => {
                   ))}
                   )
                 </select>
+                </>
               )}
               <div className="d-flex flex-column px-5 justify-content-center">
                 <button type="button" className="btn btn-success btn-submit" onClick={uploadFile} disabled={file === '' || selectedOption === "-1" || selectedSubject === "-1" || selectedTest === "-1"}>
-                  Subir Preguntas
+                  Descargar notas
                 </button>
               </div>
             </div>

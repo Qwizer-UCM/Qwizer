@@ -17,6 +17,8 @@ class OpcionesTestSerializer(serializers.ModelSerializer):
         for img in imagenes_devolver:
             name = str(img[1])
             format = name.split(".")[1]
+            if format == "svg":
+                format +="+xml"
             path = fs.path(name)
             with open(path, "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
@@ -61,6 +63,8 @@ class PreguntasTestSerializer(serializers.ModelSerializer):
         for img in imagenes_devolver:
             name = str(img[1])
             format = name.split(".")[1]
+            if format == "svg":
+                format +="+xml"
             path = fs.path(name)
             with open(path, "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
@@ -84,8 +88,10 @@ class PreguntasTextSerializer(serializers.ModelSerializer):
         for img in imagenes_devolver:
             name = str(img[1])
             format = name.split(".")[1]
+            if format == "svg":
+                format +="+xml"            
             path = fs.path(name)
-            with open(path, "rb") as image_file:
+            with fs.open(path, "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
                 imagen_base64 = 'data:image/%s;base64,%s' % (format, encoded_string)
                 pregunta_enunciado = pregunta_enunciado.replace(name, imagen_base64)
