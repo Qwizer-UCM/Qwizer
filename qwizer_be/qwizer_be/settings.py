@@ -175,8 +175,8 @@ CORS_ORIGIN_WHITELIST = env.list("CORS_ORIGIN_WHITELIST")
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Student API",
-    "DESCRIPTION": "This is a student official API documentation.",
+    "TITLE": "Qwizer API",
+    "DESCRIPTION": "This is Qwizer's official API documentation.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "SCHEMA_PATH_PREFIX": r"/api/",
