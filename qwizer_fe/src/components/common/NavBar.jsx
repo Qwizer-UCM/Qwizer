@@ -7,14 +7,12 @@ const NavBar = ({ role, username, logout, isOffline }) => (
       <NavLink to={INICIO} className="navbar-brand">
         Qwizer <span className={`material-icons fs-5 align-middle rounded shadow  p-1 ${isOffline ? 'bg-danger' : 'bg-success text-white'}`}>{!isOffline ? 'wifi' : 'wifi_off'}</span>
       </NavLink>
-      <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-        <span className="navbar-toggler-icon" />
-      </button>
       <div className="collapse navbar-collapse" id="navbarText">
         <ul className="navbar-nav me-auto">
           <li className="nav-item">
-            <NavLink to={INICIO} className="nav-link">
-              Inicio <span className="sr-only" />
+            <NavLink to={INICIO} className="nav-link" end>
+              <span className="material-icons-outlined">home</span>
+              <span>Inicio</span> 
             </NavLink>
           </li>
           {!isOffline && (
@@ -23,62 +21,64 @@ const NavBar = ({ role, username, logout, isOffline }) => (
                 <>
                   <li className="nav-item">
                     <NavLink to={REGISTRO} className="nav-link">
-                      Añadir alumno
-                      <span className="sr-only" />
+                      <span className="material-icons-outlined">person_add</span>
+                      <span>Añadir alumno</span>
                     </NavLink>
                   </li>
                   <li className="nav-item dropdown ">
                     <a href="##" className="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      Crear cuestionarios
+                      <span className="material-icons-outlined">quiz</span>
+                      <span>Cuestionarios</span>
                     </a>
                     <ul className="dropdown-menu" style={{ margin: 0 }}>
                       <li>
                         <NavLink to={SUBIR_PREGUNTAS} className="dropdown-item">
-                          Subir preguntas
-                          <span className="sr-only" />
+                          <span>Subir preguntas</span>
+                          <span className="material-icons-outlined">post_add</span>
                         </NavLink>
                       </li>
                       <NavLink to={SUBIR_CUESTIONARIO} className="dropdown-item">
-                        Subir test <span className="sr-only" />
+                        <span>Subir test</span>
+                        <span className="material-icons-outlined">home</span>
                       </NavLink>
                       <NavLink to={CREAR_CUESTIONARIO} className="dropdown-item">
-                        Crear cuestionario
-                        <span className="sr-only" />
+                        <span>Crear cuestionario</span>
+                        <span className="material-icons-outlined">home</span>
                       </NavLink>
                       <NavLink to={BANCO_PREGUNTAS} className="dropdown-item">
-                        Banco de preguntas
-                        <span className="sr-only" />
+                        <span>Banco de preguntas</span>
+                        <span className="material-icons-outlined">home</span>
                       </NavLink>
                     </ul>
                   </li>
                   <li className="nav-item">
                     <NavLink to={NOTAS} className="nav-link">
-                      Notas
-                      <span className="sr-only" />
+                      <span className="material-icons-outlined">grading</span>
+                      <span>Notas</span>
                     </NavLink>
                   </li>
                 </>
               )}
               <li className="nav-item">
                 <NavLink to={OFFLINE} className="nav-link">
-                  Offline
-                  <span className="sr-only" />
+                  <span className="material-icons-outlined">cloud_off</span>
+                  <span>Offline</span>
                 </NavLink>
               </li>
-             
             </>
           )}
+          <li className="nav-item dropdown">
+            <a href="##" className="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+              <span className="material-icons-outlined">account_circle</span>
+              <span>{username}</span>
+            </a>
+            <div className="dropdown-menu dropdown-menu-lg-end" aria-labelledby="navbarDropdownMenuLink" style={{ margin: 0 }}>
+              <button type="button" className="dropdown-item" onClick={logout}>
+                Cerrar sesión
+              </button>
+            </div>
+          </li>
         </ul>
-        <div className="nav-item dropdown ">
-          <a href="##" className="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-            {username}
-          </a>
-          <div className="dropdown-menu dropdown-menu-lg-end" aria-labelledby="navbarDropdownMenuLink" style={{ margin: 0 }}>
-            <button type="button" className="dropdown-item" onClick={logout}>
-              Cerrar sesión
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   </nav>

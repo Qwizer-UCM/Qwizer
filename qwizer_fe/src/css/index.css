@@ -299,6 +299,21 @@ nav a.active {
     text-decoration: underline;
 }
 
+.nav-item {
+    position: relative;
+}
+
+nav .nav-item:has(.nav-link.active) {
+    transition: 300ms;
+    display: block;
+    width: 100%;
+    bottom: 0px;
+    height: 5px;
+    content: "";
+    position: absolute;
+    background-color: red;
+}
+
 nav li {
     font-size: 1.05em;
     padding-top: .2975em;
@@ -389,3 +404,90 @@ nav .navbar-brand{
     flex-wrap: wrap;
     gap: 4px;
 }
+
+.navbar {
+    flex-direction: row;
+}
+.navbar-expand-lg .navbar-collapse {
+display: flex !important;
+flex-basis: auto;
+}
+
+.nav-link span.material-icons-outlined{
+    display: none;
+}
+
+.navbar-nav{
+    width: 100%;
+}
+
+.nav-item:last-child {
+    margin-left: auto;
+}
+
+@media (max-width: 991px) {
+    .navbar{
+        padding-bottom: 0px;
+        border-bottom-width: 0px;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+    }
+
+    .navbar::before {
+        position: absolute;
+        content: "";
+        height: 40px;
+        width: 1px;
+        bottom: 0px;
+    }
+
+    .navbar-nav{
+        flex-direction: row;
+        width: 100%;
+        justify-content: stretch;
+    }
+    
+    .nav-item:last-child {
+        margin-left: 0;
+    }
+
+    .nav-item {
+        flex-grow: 1;
+    }
+    .nav-link {
+        text-align: center;
+    }
+
+    .nav-link span:not(.material-icons-outlined) {
+        display: inline;
+    }
+
+    .nav-link span.material-icons-outlined{
+        display: block;
+    }
+
+    /*Dropdown navbar hacia arriba cuando se colocan los iconos abajo*/
+    .navbar-nav .dropdown-menu{
+        position: absolute;
+    }
+
+    .dropdown-menu[data-bs-popper] {
+        top: auto;
+        bottom: 100%;
+        margin-top: 0;
+        margin-bottom: var(--bs-dropdown-spacer);
+    }
+
+    .dropdown-toggle::after {
+        display: inline-block;
+        margin-left: .255em;
+        vertical-align: .255em;
+        content: "";
+        border-top: 0;
+        border-right: .3em solid transparent;
+        border-bottom: .3em solid;
+        border-left: .3em solid transparent;
+    }
+}
+
