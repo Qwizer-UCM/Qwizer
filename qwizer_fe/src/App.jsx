@@ -25,8 +25,7 @@ import QuestionContainerNoRevision from './components/QuestionContainerNoRevisio
 import QuestionContainerRevision from './components/QuestionContainerRevision';
 import useOnline from './hooks/useOnline';
 import UploadNotas from './components/UploadNotas';
-import MarkdownRender from './components/ATestOfMD';
-import { BANCO_PREGUNTAS, CREAR_CUESTIONARIO, CUESTIONARIO, INICIO, LOGIN, MARKDOWN_TEST, NOTAS, NOT_FOUND, OFFLINE, QR, QR_INSERT, REGISTRO, REVISION, REVISION_NOTAS_ALUMNO, REVISION_NOTAS_CUESTIONARIO, SUBIR_CUESTIONARIO, SUBIR_PREGUNTAS, TEST } from './constants';
+import { BANCO_PREGUNTAS, CREAR_CUESTIONARIO, CUESTIONARIO, INICIO, LOGIN, NOTAS, NOT_FOUND, OFFLINE, QR, QR_INSERT, REGISTRO, REVISION, REVISION_NOTAS_ALUMNO, REVISION_NOTAS_CUESTIONARIO, SUBIR_CUESTIONARIO, SUBIR_PREGUNTAS, TEST } from './constants';
 
 const App = () => {
   const { user, isLogged, isLoading, login, logout } = useAuth();
@@ -46,7 +45,6 @@ const App = () => {
             </ProtectedRoutes>
           }
         >
-          <Route path={MARKDOWN_TEST} element={<MarkdownRender />} />
           <Route path={INICIO} element={isOnline ? <IndexContainer /> : <AvailableOffline role={user.role} />} />
           <Route path={CUESTIONARIO} element={<CuestionariosContainer role={user.role} />} />
           <Route path={OFFLINE} element={isOnline ? <AvailableOffline role={user.role} /> : <Navigate to={NOT_FOUND} />} />
