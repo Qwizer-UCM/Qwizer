@@ -1,13 +1,26 @@
 preguntas:
   - tipo: "test"
-    pregunta: "La formula de la energía es"
-    titulo: "Titulo Markdown Test 2"
+    pregunta: "La fórmula de la energía es"
+    titulo: "Titulo Markdown 2"
     opciones: 
         - op: "$E = mc^2$"
           fijar: False
         - op: "$E = mc^3$"
           fijar: False
         - op: "$E = mc * 2$"
+          fijar: False
+        - op: "Ninguna de las anteriores"
+          fijar: True
+    op_correcta: 0 #id de opcion correcta
+  - tipo: "test"
+    pregunta: "¿Cúal es el símbolo de React?"
+    titulo: "Titulo Imagen"
+    opciones: 
+        - op: "![Image](react.svg)"
+          fijar: False
+        - op: "![Image](html.svg)"
+          fijar: False
+        - op: "React no tiene símbolo corporativo"
           fijar: False
         - op: "Ninguna de las anteriores"
           fijar: True

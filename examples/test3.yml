@@ -9,7 +9,7 @@ cuestionario:
   fecha_visible: '21/02/20 11:00:00' #Formato esperado: yy:mm:dd hh:mm:ss
   preguntas:
     - tipo: "ref" #Pregunta referenciada del banco de pregunta
-      titulo: "Titulo Markdown SVG" #Titulo para referenciar pregunta
+      titulo: "Titulo Imagen" #Titulo para referenciar pregunta
       punt_positiva: 10    #puntos que suma
       punt_negativa: 0.3 #puntos que resta
       

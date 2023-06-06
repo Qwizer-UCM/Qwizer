@@ -10,10 +10,18 @@ cuestionario:
   preguntas:
     - tipo: "aleatoria" #Nuevo tipo de pregunta: pregunta aleatoria
       preguntas_elegidas: #Subconjunto de preguntas que podría salir
-        - ref: "Titulo temporal2"
-        - ref: "Titulo temporal1"
-      punt_positiva: 10.0    #puntos que suma
+        - ref: "Titulo Markdown 2"
+        - ref: "Titulo Imagen"
+      punt_positiva: 5.0    #puntos que suma
       punt_negativa: 0.0 #puntos que resta  
+    - tipo: "aleatoria" #Nuevo tipo de pregunta: pregunta aleatoria
+      preguntas_elegidas: #Subconjunto de preguntas que podría salir
+        - ref: "Titulo temporal1"
+        - ref: "Titulo temporal2"
+      punt_positiva: 5.0    #puntos que suma
+      punt_negativa: 0.0 #puntos que resta  
+    
+
         
        
 
