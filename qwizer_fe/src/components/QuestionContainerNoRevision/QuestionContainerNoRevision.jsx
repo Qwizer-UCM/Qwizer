@@ -10,7 +10,7 @@ import { Tests } from '../../services/API';
 import useFetch from '../../hooks/useFetch';
 import NotFound404 from '../common/NotFound404';
 import CuestionarioPassword from './CuestionarioPassword';
-import CuentaAtras from './CuentaAtras';
+import CuentaAtras from './CuentaAtras';  
 import NavButtons from './NavButtons';
 import { INICIO, PATH_QR } from '../../constants';
 import Markdown from '../common/Markdown';
@@ -20,13 +20,7 @@ const QuestionContainerNoRevision = ({ role }) => {
   const params = useParams();
   const paramsId = Number(params.id); // TODO error con ids invalidos(letras y cosas raras). TEST NOT FOUND o algo asi
   const [localStorageTest, setLocalStorageTest] = useState(); // TODO no convence lo de guardarlo en localstorage
-
-  const { error } = useFetch(Tests.get, {
-    onSuccess: (d) => {
-      setLocalStorageTest(d);
-    },
-    params: { idCuestionario: paramsId },
-  });
+  const [error, setError] = useState(false);
 
   const [indPregunta, setindPregunta] = useState(0);
   const [questionList, setQuestionList] = useState([]);
@@ -40,6 +34,12 @@ const QuestionContainerNoRevision = ({ role }) => {
     localforage.getItem('tests').then(value => {
       if (value && value[paramsId]) {
         setLocalStorageTest(value[paramsId])
+      } else {
+        Tests.get({idCuestionario: paramsId}).then(d => {
+          setLocalStorageTest(d);
+        }).catch(err => {
+          setError(err);
+        })
       }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,11 +78,10 @@ const QuestionContainerNoRevision = ({ role }) => {
     // TODO por qué no se espera respuesta de esta peticion??
     Tests.sendTest({ respuestas, hash, initTime, endTime, idCuestionario: paramsId })
       .then(() => navigate(INICIO, { replace: true }))
-      .catch(() => alert("Envío fallido"));
-
+      .catch(() => alert("Nope"));
+    console.log(respuestas);
     if (!navigator.onLine) {
-      const respBase64 = Buffer.from(JSON.stringify(respuestas)).toString('base64url');
-      navigate(PATH_QR(paramsId, hash, respBase64), { replace: true });
+      navigate(PATH_QR(paramsId, hash), { replace: true });
     }
     const ans = JSON.parse(localStorage.getItem('answers'))
     console.log(ans);

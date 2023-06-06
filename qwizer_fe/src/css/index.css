@@ -1,9 +1,11 @@
 .index-body {
     background: #E9E9E9;
-    min-height: 100vh;
     justify-content: center;
     display: flow-root;
     margin-right: 0px !important;
+    height: 100%;
+    width: 100%;
+    overflow: scroll;
 }
 
 .card {
@@ -51,12 +53,12 @@
 
 .upload-body {
     background: #E9E9E9;
-    min-height: 95vh;
     height: 100%;
     padding: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
 }
 
 .bg-blue-grey {
@@ -416,11 +418,11 @@ div.navbar-mobile {
     display: none;
 }
 
+
 @media (max-width: 991px) {
 
     #root {
-        padding-bottom: 8em;
-        overflow: scroll;
+
     }
 
     .navbar-desktop{
@@ -430,7 +432,8 @@ div.navbar-mobile {
     div.navbar-mobile {
         display: flex;
         overflow: scroll;
-        jus
+        bottom: -3.5em;
+        z-index: 10;
     }
 
     .navbar::before {

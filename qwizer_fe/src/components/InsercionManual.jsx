@@ -10,7 +10,7 @@ const InsercionManual = ({ userId }) => {
   const [successModal, setSuccessModal] = useState({ show: false });
 
   const onSuccess = () => (!inserted ? setErrorModal({ show: true }) : setSuccessModal({ show: true }));
-  const { data } = useFetch(Otro.insertQR, { params: { idUsuario: userId, idCuestionario: params.test, hash: params.hash, respuestas: params.resp }, onSuccess });
+  const { data } = useFetch(Otro.insertQR, { params: { idUsuario: userId, idCuestionario: params.test, hash: params.hash}, onSuccess });
   const { message, inserted } = data ?? {};
 
   return (

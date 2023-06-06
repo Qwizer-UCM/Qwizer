@@ -27,10 +27,10 @@ precacheAndRoute(self.__WB_MANIFEST); // cachea cuando el service worker se esta
 Si no hay conexion cuando el usuario va a enviar el test,
 cachear esa peticion y cuando haya conexion enviarla.
 */
-const sentTestUrl = `${import.meta.env.REACT_APP_API_URL}/response`;
+const sentTestUrl = `${import.meta.env.REACT_APP_API_URL}/test/\\d+/enviar$`;
 
 registerRoute(
-  sentTestUrl,
+  new RegExp(sentTestUrl),
   new NetworkOnly({
     plugins: [
       new BackgroundSyncPlugin('test-post-requests', {
