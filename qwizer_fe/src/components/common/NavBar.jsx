@@ -1,8 +1,32 @@
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { Home, Favorite, Person } from '@mui/icons-material';
+import { BottomNavigation, BottomNavigationAction } from '@mui/material';
 import { BANCO_PREGUNTAS, CREAR_CUESTIONARIO, INICIO, NOTAS, OFFLINE, REGISTRO, SUBIR_CUESTIONARIO, SUBIR_PREGUNTAS } from '../../constants';
 
-const NavBar = ({ role, username, logout, isOffline }) => (
-  <nav className="navbar navbar-expand-lg  bg-light">
+
+
+const BottomNavigationBar = ({ role, username, logout, isOffline }) => {
+  const [value, setValue] = useState(0);
+  return (
+    <BottomNavigation sx={{ width: '100%', position: 'absolute', bottom: 0 }} value={value} onChange={(event, newValue) => setValue(newValue)} className="navbar-mobile">
+      <BottomNavigationAction component={NavLink} to={INICIO} label='Inicio' icon={<Home/>} />
+
+      {role === 'teacher' && !isOffline && <BottomNavigationAction component={NavLink} to={REGISTRO} label='Alumnos' icon={<Favorite />} />}
+      
+      {role === 'teacher' && !isOffline && <BottomNavigationAction component={NavLink} to="/cuestionariostest/1" label='Cuestionarios' icon={<Person />} />}
+
+      {role === 'teacher' && !isOffline && <BottomNavigationAction component={NavLink} to={NOTAS} label='Notas' icon={<Person />} />}
+      
+      
+
+      <BottomNavigationAction component={NavLink} to={OFFLINE} label='Cuenta' icon={<Person />} />
+    </BottomNavigation>
+  )
+}
+
+const NormalNavbar = ({ role, username, logout, isOffline }) => (
+  <nav className="navbar navbar-expand-lg bg-light navbar-desktop">
     <div className="container-fluid">
       <NavLink to={INICIO} className="navbar-brand">
         Qwizer <span className={`material-icons fs-5 align-middle rounded shadow  p-1 ${isOffline ? 'bg-danger' : 'bg-success text-white'}`}>{!isOffline ? 'wifi' : 'wifi_off'}</span>
@@ -12,7 +36,7 @@ const NavBar = ({ role, username, logout, isOffline }) => (
           <li className="nav-item">
             <NavLink to={INICIO} className="nav-link" end>
               <span className="material-icons-outlined">home</span>
-              <span>Inicio</span> 
+              <span>Inicio</span>
             </NavLink>
           </li>
           {!isOffline && (
@@ -57,6 +81,12 @@ const NavBar = ({ role, username, logout, isOffline }) => (
                       <span>Notas</span>
                     </NavLink>
                   </li>
+                  <li className='nav-item'>
+                    <NavLink to="/cuestionariostest/1" className="nav-link">
+                      <span className="material-icons-outlined">home</span>
+                      <span>Prueba cuestionarios</span>
+                    </NavLink>
+                  </li>
                 </>
               )}
               <li className="nav-item">
@@ -82,6 +112,16 @@ const NavBar = ({ role, username, logout, isOffline }) => (
       </div>
     </div>
   </nav>
+)
+
+
+
+
+const NavBar = ({ role, username, logout, isOffline }) => (
+  <>
+    <BottomNavigationBar role={role} username={username} logout={logout} isOffline={isOffline} />
+    <NormalNavbar role={role} username={username} logout={logout} isOffline={isOffline} />
+  </>
 );
 
 export default NavBar;

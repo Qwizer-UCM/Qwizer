@@ -12,6 +12,7 @@ import App from './App';
 import './css/main.css';
 import './css/login.css';
 import './css/index.css';
+import './css/sidebar.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

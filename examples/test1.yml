@@ -7,14 +7,8 @@ cuestionario:
   fecha_apertura: '21/02/20 11:00:00' #Formato esperado: yy:mm:dd hh:mm:ss
   fecha_cierre: '23/03/24 11:59:59' #Formato esperado: yy:mm:dd hh:mm:ss
   fecha_visible: '21/02/20 11:00:00' #Formato esperado: yy:mm:dd hh:mm:ss
+  aleatorizar: True #Indica que se quiere aleatorizar el cuestionario
   preguntas:
-    - tipo: "text"
-      pregunta: "¿Con qué TADs se puede implementar un diccionario?"
-      titulo: "Titulo 1"
-      opciones: "Con un árbol de búsqueda o una tabla dispersa"
-      punt_positiva: 3    #puntos que suma
-      punt_negativa: 0.3 #puntos que resta
-      
     - tipo: "test"
       pregunta: "El problema de la mochila usa el esquema de :"
       titulo: "Titulo 3"
@@ -22,10 +16,18 @@ cuestionario:
         - op: "Divide y Vencerás"
           fijar: False
         - op: "Vuelta atrás"
-          fijar: False
+          fijar: True
       op_correcta: 1 #id de opcion correcta
       punt_positiva: 1.0    #puntos que suma
       punt_negativa: 0.3 #puntos que resta
+
+    - tipo: "text"
+      pregunta: "¿Con qué TADs se puede implementar un diccionario?"
+      titulo: "Titulo 1"
+      opciones: "Con un árbol de búsqueda o una tabla dispersa"
+      punt_positiva: 3    #puntos que suma
+      punt_negativa: 0.3 #puntos que resta
+      
 
     - tipo: "test"
       pregunta: "Indica qué TAD no es lineal:"

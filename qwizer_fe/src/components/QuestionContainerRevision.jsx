@@ -33,6 +33,10 @@ const QuestionContainerRevision = ({ id, role }) => {
           </div>
         </div>
 
+        <div className='score m-4 info-question'>
+          <h6>Pregunta {indPregunta + 1}</h6>
+        </div>
+
         <div className="p-4 row">
           <div className="col-md-9 col-sm-12 order-last order-md-first" id="question">
             <div className="card">
@@ -40,7 +44,7 @@ const QuestionContainerRevision = ({ id, role }) => {
                 <div key={pregunta.id}>
                   <h2 className="p-2 m-2">
                     <Markdown>
-                      {`${indPregunta + 1}.-${pregunta.question}`}
+                      {pregunta.question}
                     </Markdown>
                   </h2>
                   {pregunta.type === 'test' ? <TestQuestion key={pregunta.id} mode="revision" infoPreg={pregunta} id={pregunta.id} /> : <TextQuestion key={pregunta.id} mode="revision" infoPreg={pregunta} />}

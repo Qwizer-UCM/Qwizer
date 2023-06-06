@@ -169,6 +169,9 @@ class SeleccionPreguntaManager(models.Manager):
     def get_by_cuestionario(self, id_cuestionario):
         return self.get_queryset().filter(cuestionario_id=id_cuestionario)
     
+    def get_by_pregunta(self, id_pregunta):
+        return self.get_queryset().filter(pregunta_id=id_pregunta)
+    
 
 class OpcionPreguntaAleatoriaManager(models.Manager):
     def create_opcion_pregunta_aleatoria(self, id_pregunta, id_pregunta_aleatoria, commit=False, **extra_fields):

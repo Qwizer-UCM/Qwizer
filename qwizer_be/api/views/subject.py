@@ -220,7 +220,7 @@ class SubjectViewSet(viewsets.ViewSet):
             if hasattr(pregunta, "preguntatest"):
                 pregunta_json["type"] = "test"
                 opciones_lista = []
-                opciones = OpcionTest.objects.get_by_pregunta(id_pregunta=pregunta.id)
+                opciones = OpcionTest.objects.get_by_pregunta(id_pregunta=pregunta.id).order_by('orden')
                 for opcion in opciones:
                     opciones_json = {}
                     opciones_json["id"] = opcion.id

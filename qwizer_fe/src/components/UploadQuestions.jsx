@@ -22,7 +22,6 @@ const UploadQuestions = () => {
 
       Questions.upload({ formData })
         .then(({ data }) => {
-          setFile('');
           if (data.inserted === 'false') {
             setErrorModal({ show: true, message: data.message });
           } else {

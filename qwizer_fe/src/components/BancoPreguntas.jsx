@@ -33,7 +33,7 @@ const ExpandedComponent = ({ data, selectedAsignatura, createQuiz, getPregAsigna
   const deleteQuestion = (idPregunta) => {
     Questions.delete({ idPregunta })
       .then(() => getPregAsignaturas(selectedAsignatura.current.options[selectedAsignatura.current.selectedIndex].value))
-      .catch((e) => console.log(e));
+      .catch((e) => alert(e.response.data.message)); // TODO ver que hacemos con error de borrar pregunta
   };
 
   const updateEditedQuestion = (question) =>

@@ -299,20 +299,6 @@ nav a.active {
     text-decoration: underline;
 }
 
-.nav-item {
-    position: relative;
-}
-
-nav .nav-item:has(.nav-link.active) {
-    transition: 300ms;
-    display: block;
-    width: 100%;
-    bottom: 0px;
-    height: 5px;
-    content: "";
-    position: absolute;
-    background-color: red;
-}
 
 nav li {
     font-size: 1.05em;
@@ -382,6 +368,7 @@ nav .navbar-brand{
   }
   
 
+
 @media (max-width: 576px) {
     #questions  {
         grid-template-columns: 0.3fr 2fr 0.7fr;
@@ -425,13 +412,25 @@ flex-basis: auto;
     margin-left: auto;
 }
 
+div.navbar-mobile {
+    display: none;
+}
+
 @media (max-width: 991px) {
-    .navbar{
-        padding-bottom: 0px;
-        border-bottom-width: 0px;
-        position: absolute;
-        bottom: 0;
-        width: 100%;
+
+    #root {
+        padding-bottom: 8em;
+        overflow: scroll;
+    }
+
+    .navbar-desktop{
+        display: none;
+    }
+
+    div.navbar-mobile {
+        display: flex;
+        overflow: scroll;
+        jus
     }
 
     .navbar::before {
@@ -490,4 +489,5 @@ flex-basis: auto;
         border-left: .3em solid transparent;
     }
 }
+
 

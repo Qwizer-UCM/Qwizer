@@ -26,6 +26,7 @@ import QuestionContainerRevision from './components/QuestionContainerRevision';
 import useOnline from './hooks/useOnline';
 import UploadNotas from './components/UploadNotas';
 import { BANCO_PREGUNTAS, CREAR_CUESTIONARIO, CUESTIONARIO, INICIO, LOGIN, NOTAS, NOT_FOUND, OFFLINE, QR, QR_INSERT, REGISTRO, REVISION, REVISION_NOTAS_ALUMNO, REVISION_NOTAS_CUESTIONARIO, SUBIR_CUESTIONARIO, SUBIR_PREGUNTAS, TEST } from './constants';
+import MainComponent from './components/TrialComponent/MainComponent';
 
 const App = () => {
   const { user, isLogged, isLoading, login, logout } = useAuth();
@@ -60,6 +61,7 @@ const App = () => {
             <Route path={REVISION_NOTAS_ALUMNO} element={<QuestionContainerRevision role={user.role}/>} />
             <Route path={REGISTRO} element={<RegisterContainer />} />
             <Route path={NOTAS} element={<UploadNotas />} />
+            <Route path='cuestionariostest/*' element={<MainComponent />}/>
 
           </Route>
           <Route path={QR} element={<QrContainer userId={user.userId} />} />

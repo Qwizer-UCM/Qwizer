@@ -7,7 +7,7 @@ preguntas:
           fijar: False
         - op: "$E = mc^3$"
           fijar: False
-        - op: "$E = mc * 2$ ![Image](Captura364.png)"
+        - op: "$E = mc * 2$"
           fijar: False
         - op: "Ninguna de las anteriores"
           fijar: True

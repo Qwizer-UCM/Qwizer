@@ -14,8 +14,6 @@ export const Questions = {
   upload: ({ formData }, config = {}) => client.post('question', formData, { ...config, headers: { 'Content-Type': 'multipart/form-data' } }),
   update: ({ question }, config = {}) => client.put(`question/${question.id}`, { preguntaActualizada: question }, config),
   delete: ({ idPregunta }, config = {}) => client.delete(`question/${idPregunta}`, { idPregunta }, config),
-  testpruebaImagen: ({ formData }, config = {}) => client.post('question/imagen', formData, { ...config, headers: { 'Content-Type': 'multipart/form-data' } }),
-
 };
 
 export const Subjects = {
