@@ -5,7 +5,8 @@
     margin-right: 0px !important;
     height: 100%;
     width: 100%;
-    overflow: scroll;
+    overflow-y: auto;
+    padding-bottom: 56px;
 }
 
 .card {
@@ -49,6 +50,7 @@
     display: block;
     background-color: white;
     border-radius: 10px !important;
+    margin: auto;
 }
 
 .upload-body {
@@ -56,9 +58,8 @@
     height: 100%;
     padding: 30px;
     display: flex;
-    justify-content: center;
-    align-items: center;
     width: 100%;
+    overflow-y: auto;
 }
 
 .bg-blue-grey {
@@ -298,7 +299,7 @@
 nav a.active {
     font-weight: bold;
     border-radius: 4px;
-    text-decoration: underline;
+    background: #02b875;
 }
 
 
@@ -421,8 +422,8 @@ div.navbar-mobile {
 
 @media (max-width: 991px) {
 
-    #root {
-
+    .wrapper-cuestionarios {
+        padding-bottom: 56px;
     }
 
     .navbar-desktop{
@@ -431,9 +432,7 @@ div.navbar-mobile {
 
     div.navbar-mobile {
         display: flex;
-        overflow: scroll;
-        bottom: -3.5em;
-        z-index: 10;
+        z-index: 11;
     }
 
     .navbar::before {

@@ -44,11 +44,11 @@ const PreguntasSeleccionadas = ({ selectedList, setSelectedList }) => {
                         {pregunta.type === 'test' && <TestQuestion mode="visualize" infoPreg={pregunta} id={pregunta.id} />}
                         <div className="d-flex flex-column justify-content-center visualize-container">
                             <div className="row m-1 justify-content-center align-items-center">
-                                <label className="col-md-2 col-sm-auto col-form-label" htmlFor="substractPunt">Puntuación positiva: &nbsp;{/* TODO revisar validacion Puntuación */}</label>
+                                <label className="col-md-3 col-sm-auto col-form-label" htmlFor="substractPunt">Puntuación positiva: &nbsp;{/* TODO revisar validacion Puntuación */}</label>
                                 <input id="substractPunt" className="col-md-8 col-sm-auto m-input" type="number" min="0" step="any" onChange={(e) => modificarPuntuacion(pregunta.id, true, Number(e.target.value))} />
                             </div>
                             <div className='row m-1 justify-content-center align-items-center'>
-                                <label className="col-md-2 col-sm-auto col-form-label" htmlFor="addPunt">Puntuación negativa: &nbsp;</label>
+                                <label className="col-md-3 col-sm-auto col-form-label" htmlFor="addPunt">Puntuación negativa: &nbsp;</label>
                                 <input id="addPunt" className="col-md-8 col-sm-auto m-input" type="number" min="0" step="any" onChange={(e) => modificarPuntuacion(pregunta.id, false, Number(e.target.value))} />
                             </div>
                             

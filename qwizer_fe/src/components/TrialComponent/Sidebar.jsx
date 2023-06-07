@@ -13,7 +13,7 @@ const Sidebar = () => {
             <nav className={sidebar ? 'side-menu active' : 'side-menu'}>
                 <ul className="side-menu-items">
                     <li className="sidebar-text" >
-                        <button type="button" className="icons"  onClick={showSidebar}><span className="material-icons-outlined ">close</span></button>
+                        <button type="button" className="icons" onClick={showSidebar}><span className="material-icons-outlined ">close</span></button>
                     </li>
                     <li className="sidebar-text">
                         <NavLink to={REGISTRO}>Añadir alumno</NavLink>

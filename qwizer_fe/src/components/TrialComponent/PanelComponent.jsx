@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, Navigate } from "react-router-dom"
 import Sidebar from "./Sidebar";
 import UploadQuestions from "../UploadQuestions";
 import CrearCuestionario from "../CrearCuestionario/CrearCuestionario";
@@ -15,14 +15,13 @@ const PanelComponent = () => (
         <div className="wrapper-cuestionarios">
             <Sidebar/>
             <Routes>
-                <Route index element={<UploadQuestions/>}/>
-                <Route index path={SUBIR_PREGUNTAS} element={<UploadQuestions/>}/>
+                <Route path={SUBIR_PREGUNTAS} element={<UploadQuestions/>}/>
                 <Route path={SUBIR_CUESTIONARIO} element={<UploadTest/>}/>
                 <Route path={CREAR_CUESTIONARIO} element={<CrearCuestionario/>}/>
                 <Route path={BANCO_PREGUNTAS} element={<BancoPreguntas/>}/>
                 <Route path={REGISTRO} element={<RegisterContainer/>}/>
                 <Route path={NOTAS} element={<UploadNotas/>}/>
-
+                <Route path='*' element={<Navigate to={REGISTRO} />} />
             </Routes>
         </div>
     )

@@ -27,4 +27,4 @@ export const LOGIN = '/login';
 export const NOT_FOUND = '/404';
 export const NOTAS = 'notas';
 export const PANEL = "/panel/*";
-export const PANEL_LINK = "/panel/register"
+export const PANEL_LINK = "/panel/"

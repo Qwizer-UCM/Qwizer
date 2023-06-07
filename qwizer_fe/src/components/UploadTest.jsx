@@ -43,7 +43,7 @@ const UploadTest = () => {
 
     return (
         <div className="upload-body">
-            <div className="card">
+            <div className="card m-auto">
                 <div className="card-header header bg-blue-grey">
                     <h2>Sube tu cuestionario en formato : YAML</h2>
                 </div>
@@ -54,7 +54,7 @@ const UploadTest = () => {
                     onDrop={onDrop}>
                     <div className='text-center'>
                         <span className='material-icons' style={{ fontSize: "120px", width: "100px" }}>cloud_upload</span>
-                        <p className='drag-and-drop-component-text'>Arrastre y suelte aqui su fichero con el cuestionario</p>
+                        <p className='drag-and-drop-component-text'>Arrastre y suelte aquí su fichero con el cuestionario</p>
                     </div>
                     <input type="file" onChange={(e) => setFile(e.target.files[0])} id="myfile" name="myfile" />
 

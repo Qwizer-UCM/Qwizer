@@ -41,7 +41,7 @@ const BottomNavigationBar = ({ isShow, setShow, role, isOffline }) => {
 const NormalNavbar = ({ role, username, logout, isOffline }) => (
     <nav className="navbar navbar-expand-lg bg-light navbar-desktop">
         <div className="container-fluid">
-            <NavLink to={INICIO} className="navbar-brand">
+            <NavLink end to={INICIO} className={() =>  "navbar-brand" }>
                 Qwizer <span className={`material-icons fs-5 align-middle rounded shadow  p-1 ${isOffline ? 'bg-danger' : 'bg-success text-white'}`}>{!isOffline ? 'wifi' : 'wifi_off'}</span>
             </NavLink>
             <div className="collapse navbar-collapse" id="navbarText">

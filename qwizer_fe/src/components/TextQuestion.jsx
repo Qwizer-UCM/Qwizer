@@ -30,15 +30,15 @@ const TextQuestion = ({ respuesta, mode, id, type, infoPreg=null, addAnswerd }) 
   const visualizeMode = () => (
     <div className="d-flex flex-column justify-content-center visualize-container">
       <div className="row m-1 justify-content-center">
-        <label className="col-md-2 col-sm-3">Título: &nbsp;</label>
+        <label className="col-md-3 col-sm-4">Título: &nbsp;</label>
         <input className="col-md-8 col-sm-7 m-input" type="text" value={infoPreg.title} disabled />
       </div>
       <div className="row m-1 justify-content-center">
-        <label className="col-md-2 col-sm-3">Pregunta: &nbsp;</label>
+        <label className="col-md-3 col-sm-4">Pregunta: &nbsp;</label>
         <input className="col-md-8 col-sm-7 m-input" type="text" value={infoPreg.question} disabled />
       </div>
       <div className="row m-1 justify-content-center">
-        <label className="col-md-2 col-sm-3">Respuesta: &nbsp;</label>
+        <label className="col-md-3 col-sm-4">Respuesta: &nbsp;</label>
         <input className="col-md-8 col-sm-7 m-input" type="text" value={infoPreg.correct_op} disabled />
       </div>
     </div>

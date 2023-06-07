@@ -6,7 +6,7 @@ authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "3.11.2"
+python = "3.11.3"
 django = "^4.1.7"
 django-cors-headers = "^3.14.0"
 django-createuser = "^0.1.0"

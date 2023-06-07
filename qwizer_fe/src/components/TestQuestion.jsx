@@ -61,19 +61,19 @@ const TestQuestion = ({ respuesta, mode, id, type, options, infoPreg = null, add
     return (
       <div className="d-flex flex-column justify-content-center visualize-container">
         <div className="row m-1 justify-content-center">
-          <label className="col-md-2 col-sm-3">Título: &nbsp;</label>
+          <label className="col-md-3 col-sm-3">Título: &nbsp;</label>
           <input className="col-md-8 col-sm-7 m-input" type="text" value={questionData.title} disabled />
         </div>
 
         <div className="row m-1 justify-content-center">
-          <label className="col-md-2 col-sm-3">Pregunta: &nbsp;</label>
+          <label className="col-md-3 col-sm-3">Pregunta: &nbsp;</label>
           <input className="col-md-8 col-sm-7 m-input" type="text" value={questionData.question} disabled />
         </div>
 
         {questionData.options.map((option) => (
           <div key={option.id}>
             <div className="row m-1 justify-content-center">
-              <div className="col-md-2 col-sm-3">
+              <div className="col-md-3 col-sm-3">
                 <input type="radio" id={option.id} name={`opciones${preguntaId}`} value={option.id} checked={questionData.correct_op === option.id} disabled />
                 <label htmlFor={option.id}> Opción: &nbsp;</label>
               </div>
