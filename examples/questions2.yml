@@ -1,7 +1,7 @@
 preguntas:
   - tipo: "test"
     pregunta: "La fórmula de la energía es"
-    titulo: "Titulo Markdown 2"
+    titulo: "Titulo Markdown"
     opciones: 
         - op: "$E = mc^2$"
           fijar: False

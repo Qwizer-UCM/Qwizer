@@ -10,7 +10,7 @@ cuestionario:
   preguntas:
     - tipo: "aleatoria" #Nuevo tipo de pregunta: pregunta aleatoria
       preguntas_elegidas: #Subconjunto de preguntas que podría salir
-        - ref: "Titulo Markdown 2"
+        - ref: "Titulo Markdown"
         - ref: "Titulo Imagen"
       punt_positiva: 5.0    #puntos que suma
       punt_negativa: 0.0 #puntos que resta  
