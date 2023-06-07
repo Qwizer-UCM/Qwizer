@@ -11,11 +11,9 @@ export const Otro = {
 };
 
 export const Questions = {
-  upload: ({ formData }, config = {}) => client.post('question', formData , {...config, headers: { 'Content-Type': 'multipart/form-data' }}),
+  upload: ({ formData }, config = {}) => client.post('question', formData, { ...config, headers: { 'Content-Type': 'multipart/form-data' } }),
   update: ({ question }, config = {}) => client.put(`question/${question.id}`, { preguntaActualizada: question }, config),
   delete: ({ idPregunta }, config = {}) => client.delete(`question/${idPregunta}`, { idPregunta }, config),
-  testpruebaImagen: ({ formData }, config = {}) => client.post('question/imagen', formData , {...config,headers: { 'Content-Type': 'multipart/form-data' }}),
-
 };
 
 export const Subjects = {
@@ -30,7 +28,7 @@ export const Subjects = {
 export const Tests = {
   get: ({ idCuestionario }, config = {}) => client.get(`test/${idCuestionario}`, config), // Test especifico para la descarga del usuario
   createQuiz: ({ cuestionario }, config = {}) => client.post('test', { cuestionario }, config), // Creación de cuestionario
-  sendTest: ({ respuestas, hash, idCuestionario }, config = {}) => client.post(`test/${idCuestionario}/enviar`, { respuestas, hash }, config), // Envio de cuestionario por parte de un usuario
+  sendTest: ({ respuestas, hash, initTime, endTime, idCuestionario }, config = {}) => client.post(`test/${idCuestionario}/enviar`, { respuestas, hash , initTime, endTime}, config), // Envio de cuestionario por parte de un usuario
   getCorrectedTest: ({ idCuestionario, idAlumno }, config = {}) => client.get(`test/${idCuestionario}/nota/${idAlumno}`, config), // Test corregido de un alumno
   getQuizGrades: ({ idCuestionario }, config = {}) => client.get(`test/${idCuestionario}/notas`, config), // Todas las notas de un cuestionario
   getInfo: ({ idCuestionario }, config = {}) => client.get(`test/${idCuestionario}/info`, config), // Información general de un cuestionario especifico

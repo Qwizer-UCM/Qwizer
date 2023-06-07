@@ -13,7 +13,7 @@ const CuestionariosContainer = ({ role }) => {
 
   if (!isLoading && !error)
     return (
-      <div className="index-body row">
+      <div className="index-body">
         <div className="section-title">
           <h1>{nombre}</h1>
         </div>

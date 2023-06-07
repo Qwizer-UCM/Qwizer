@@ -8,8 +8,8 @@ import { PATH_REVISION_NOTAS_ALUMNO } from '../constants';
 
 const CustomCell = ({ nota, id, idCuestionario }) => {
   const navigate = useNavigate();
-  return ( nota !== "No presentado" &&
-    <button type="button" className="btn btn-primary" id={id} onClick={() => navigate(PATH_REVISION_NOTAS_ALUMNO(idCuestionario,id))}>
+  return (nota !== "No presentado" &&
+    <button type="button" className="btn btn-primary" id={id} onClick={() => navigate(PATH_REVISION_NOTAS_ALUMNO(idCuestionario, id))}>
       Revisar
     </button>
   );
@@ -53,21 +53,21 @@ const columns = [
     conditionalCellStyles: [
       {
         // TODO cambiar estilos por classNames https://react-data-table-component.netlify.app/?path=/docs/api-custom-conditional-formatting--page
-        when: (row) => row.nota > 6,
+        when: (row) => row.nota > (row.notaMaxima / 2) + 1,
         style: {
           backgroundColor: 'rgba(63, 195, 128, 0.9)',
           color: 'white',
         },
       },
       {
-        when: (row) => row.nota >= 5 && row.nota <= 6,
+        when: (row) => row.nota >= row.notaMaxima / 2 && row.nota <= (row.notaMaxima / 2) + 1,
         style: {
           backgroundColor: 'rgba(248, 148, 6, 0.9)',
           color: 'white',
         },
       },
       {
-        when: (row) => row.nota < 5 || row.nota === 'No presentado',
+        when: (row) => row.nota < row.notaMaxima / 2 || row.nota === 'No presentado',
         style: {
           backgroundColor: '#963d46',
           color: 'white',
@@ -86,17 +86,18 @@ const RevisionNotasContainer = () => {
   const params = useParams();
   const { data: dataNotas, error, isLoading } = useFetch(Tests.getQuizGrades, {
     params: { idCuestionario: params.id },
-    transform: ({ notas }) =>
+    transform: ({ notas, notaMax }) =>
       Object.values(notas).map((nota) => ({
         id: nota.id,
         idCuestionario: params.id,
         nombre: nota.nombre,
         apellidos: nota.apellidos,
         nota: nota.nota,
+        notaMaxima: notaMax
       })),
   });
 
-  if(isLoading) return null;
+  if (isLoading) return null;
 
   if (dataNotas && !error) {
     return (
@@ -118,7 +119,7 @@ const RevisionNotasContainer = () => {
     );
   }
 
-  return <NotFound404/>
+  return <NotFound404 />
 };
 
 export default RevisionNotasContainer;

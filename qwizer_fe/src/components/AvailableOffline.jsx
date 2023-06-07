@@ -16,7 +16,7 @@ const AvailableOffline = ({ role }) => {
 
   if (Object.keys(cuestionarios)?.length !== 0) {
     return (
-      <div className="index-body row">
+      <div className="index-body">
         <div className="section-title">
           <h1>Cuestionarios Descargados</h1>
         </div>
@@ -29,7 +29,7 @@ const AvailableOffline = ({ role }) => {
     );
   }
   return (
-    <div className="index-body row">
+    <div className="index-body">
       <div className="section-title">
         <h1>Cuestionarios Descargados</h1>
         <div className="text-center">

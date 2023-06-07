@@ -9,9 +9,9 @@ const InsercionManual = ({ userId }) => {
   const [errorModal, setErrorModal] = useState({ show: false });
   const [successModal, setSuccessModal] = useState({ show: false });
 
-  const onSuccess = () => (!inserted ? setErrorModal({ show: true }) : setSuccessModal({ show: true }));
-  const { data } = useFetch(Otro.insertQR, { params: { idUsuario: userId, idCuestionario: params.test, hash: params.hash, respuestas: params.resp }, onSuccess });
-  const { message, inserted } = data ?? {};
+  const onSuccess = () => setSuccessModal({ show: true });
+  const { data } = useFetch(Otro.insertQR, { params: { idUsuario: userId, idCuestionario: params.test, hash: params.hash}, onSuccess });
+  const { message } = data ?? {};
 
   return (
     <div className="index-body">

@@ -11,8 +11,7 @@ const LoginComponent = ({ login }) => {
   return (
     <div className="main-container login-body">
       <form className="login" onSubmit={(e) => e.preventDefault()}>
-        <div className="form-inputs">
-          <h2 className="title">Qwizer</h2>
+          <h2 className="title text-center">Qwizer</h2>
 
           {error && (
             <div className="alert alert-danger d-flex align-items-center" role="alert">
@@ -22,20 +21,18 @@ const LoginComponent = ({ login }) => {
           )}
 
           <div>
-            <h5>Nombre de usuario</h5>
             <input className="form-control" id="username" placeholder="Nombre de usuario" onChange={(e) => setUser({ ...currentUser, user: e.target.value })} />
           </div>
           <div className="mt-4">
-            <h5>Contraseña</h5>
             <input type="password" className="form-control" id="password" placeholder="Contraseña" onChange={(e) => setUser({ ...currentUser, pass: e.target.value })} />
           </div>
-        </div>
-        <div className="mt-3">
-          <button className="btn btn-primary login-button" type="submit" onClick={() => login(currentUser.user, currentUser.pass, handleLogin)}>
+  
+          <button className="btn btn-primary login-button rounded-2 mt-4" type="submit" onClick={() => login(currentUser.user, currentUser.pass, handleLogin)}>
             Login
           </button>
-          <a href='""'>¿Has olvidado la contraseña?</a>
-        </div>
+
+
+
       </form>
     </div>
   );

@@ -14,7 +14,7 @@ const IndexContainer = () => {
     return (
       <div className="index-body">
         {asignaturas?.map((asignatura) => (
-          <div key={asignatura.id} className="d-flex justify-content-center mt-1">
+          <div key={asignatura.id} className="d-flex flex-column align-items-center mt-1">
             <TarjetaAsignatura asignatura={asignatura.nombre} idAsignatura={asignatura.id} cuestionarios={asignatura.cuestionarios} />
           </div>
         ))}

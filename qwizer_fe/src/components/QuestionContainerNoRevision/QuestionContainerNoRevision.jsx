@@ -10,23 +10,17 @@ import { Tests } from '../../services/API';
 import useFetch from '../../hooks/useFetch';
 import NotFound404 from '../common/NotFound404';
 import CuestionarioPassword from './CuestionarioPassword';
-import CuentaAtras from './CuentaAtras';
+import CuentaAtras from './CuentaAtras';  
 import NavButtons from './NavButtons';
 import { INICIO, PATH_QR } from '../../constants';
 import Markdown from '../common/Markdown';
 
-const QuestionContainerNoRevision = ({ role}) => {
+const QuestionContainerNoRevision = ({ role }) => {
   const navigate = useNavigate();
   const params = useParams();
   const paramsId = Number(params.id); // TODO error con ids invalidos(letras y cosas raras). TEST NOT FOUND o algo asi
   const [localStorageTest, setLocalStorageTest] = useState(); // TODO no convence lo de guardarlo en localstorage
-
-  const { error } = useFetch(Tests.get, {
-    onSuccess: (d) => {
-      setLocalStorageTest(d);
-    },
-    params: { idCuestionario: paramsId },
-  });
+  const [error, setError] = useState(false);
 
   const [indPregunta, setindPregunta] = useState(0);
   const [questionList, setQuestionList] = useState([]);
@@ -40,18 +34,24 @@ const QuestionContainerNoRevision = ({ role}) => {
     localforage.getItem('tests').then(value => {
       if (value && value[paramsId]) {
         setLocalStorageTest(value[paramsId])
+      } else {
+        Tests.get({idCuestionario: paramsId}).then(d => {
+          setLocalStorageTest(d);
+        }).catch(err => {
+          setError(err);
+        })
       }
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
     if (localStorageTest) {
       localforage.getItem('tests').then(value => {
-          localforage.setItem('tests',{...value,[paramsId]:localStorageTest})
+        localforage.setItem('tests', { ...value, [paramsId]: localStorageTest })
       })
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localStorageTest])
 
   useEffect(() => {
@@ -71,18 +71,24 @@ const QuestionContainerNoRevision = ({ role}) => {
 
   const endTest = () => {
     const { respuestas } = answerList;
+    const {initTime} = answerList
+    const endTime = new Date().toISOString();
     const hash = CryptoJS.SHA256(JSON.stringify(respuestas)).toString();
 
     // TODO por qué no se espera respuesta de esta peticion??
-    Tests.sendTest({ respuestas, hash, idCuestionario: paramsId })
+    Tests.sendTest({ respuestas, hash, initTime, endTime, idCuestionario: paramsId })
       .then(() => navigate(INICIO, { replace: true }))
-      .catch((e) => console.error(e));
-
+      .catch(() => console.error("Failed"));
+    console.log(respuestas);
     if (!navigator.onLine) {
-      const respBase64 = Buffer.from(JSON.stringify(respuestas)).toString('base64url');
-      navigate(PATH_QR(paramsId, hash, respBase64), { replace: true });
+      navigate(PATH_QR(paramsId, hash), { replace: true });
     }
-    localStorage.removeItem('answers');
+    const ans = JSON.parse(localStorage.getItem('answers'))
+    console.log(ans);
+    delete ans[paramsId]
+
+    console.log(ans);
+    localStorage.setItem('answers',JSON.stringify(ans));
   };
 
   const unlockTest = (questList) => {
@@ -125,21 +131,25 @@ const QuestionContainerNoRevision = ({ role}) => {
     const pregunta = questionList[indPregunta];
     return (
       <div className="index-body container-fluid" id="questions">
-        <div className="p-4 row-1">
+        <div className="time m-4 row-1">
           <div className="col card">
             <h1 className="text-center">{localStorageTest?.titulo || ''}</h1>
             <CuentaAtras startTime={answerList.initTime} duration={localStorageTest.duracion} endTest={endTest} />
           </div>
         </div>
 
-        <div className="p-4 row">
-          <div className="p-2 col-md-9 col-sm-12 order-last order-md-first" id="question">
+        <div className='score m-4 info-question'>
+          <h6>Pregunta {indPregunta + 1}</h6>
+          <p>Puntuada sobre {pregunta.nota.replaceAll('"',"")}</p>
+        </div>
+        <div className="question m-4">
+          <div id="question">
             <div className="card">
               <div className="card-body">
                 <div key={pregunta.id}>
                   <h2 className="p-2 m-2">
                     <Markdown>
-                      {`${indPregunta + 1}.-${pregunta.pregunta}`}
+                      {pregunta.pregunta}
                     </Markdown>
                   </h2>
                   {pregunta.tipoPregunta === 'test' ? (
@@ -159,21 +169,22 @@ const QuestionContainerNoRevision = ({ role}) => {
               </div>
             </div>
           </div>
+          <div className="p-4 row">
+            <div className="col">
+              <NavButtons index={indPregunta} size={questionList.length} setIndex={setindPregunta} end={endTest} secuencial={localStorageTest.secuencial} />
+            </div>
+          </div>
 
-          <div className="p-2 col-md-3 col-sm-12 order-first order-md-last" id="question-nav">
+
+        </div>
+          {!localStorageTest.secuencial && <div className="navigation m-4">
             <QuestionNav index={indPregunta} listaPreguntas={questionList} setIndex={setindPregunta} />
-          </div>
-        </div>
+          </div>}
 
-        <div className="p-4 row">
-          <div className="col">
-            <NavButtons index={indPregunta} size={questionList.length} setIndex={setindPregunta} end={endTest} />
-          </div>
-        </div>
       </div >
     );
   }
-return <h1>Loading...</h1>;
+  return <h1>Loading...</h1>;
 };
 
 export default QuestionContainerNoRevision;

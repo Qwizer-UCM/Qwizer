@@ -1,5 +1,5 @@
 cuestionario:
-  titulo: "Tema 10"
+  titulo: "Tema 12"
   password: "1234"
   asignatura: "Estructura de datos"
   secuencial: 0 #0 es que no es secuencial, 1 es secuencial
@@ -8,12 +8,20 @@ cuestionario:
   fecha_cierre: '24/02/24 11:59:59' #Formato esperado: yy:mm:dd hh:mm:ss
   fecha_visible: '21/02/20 11:00:00' #Formato esperado: yy:mm:dd hh:mm:ss
   preguntas:
-    - tipo: "aleatoria"
-      preguntas_elegidas:
-        - ref: "Titulo temporal2"
-        - ref: "Titulo temporal1"
-      punt_positiva: 10.0    #puntos que suma
+    - tipo: "aleatoria" #Nuevo tipo de pregunta: pregunta aleatoria
+      preguntas_elegidas: #Subconjunto de preguntas que podría salir
+        - ref: "Titulo Markdown"
+        - ref: "Titulo Imagen"
+      punt_positiva: 5.0    #puntos que suma
       punt_negativa: 0.0 #puntos que resta  
+    - tipo: "aleatoria" #Nuevo tipo de pregunta: pregunta aleatoria
+      preguntas_elegidas: #Subconjunto de preguntas que podría salir
+        - ref: "Titulo temporal1"
+        - ref: "Titulo temporal2"
+      punt_positiva: 5.0    #puntos que suma
+      punt_negativa: 0.0 #puntos que resta  
+    
+
         
        
 

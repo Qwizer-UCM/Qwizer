@@ -23,7 +23,7 @@ const QuestionContainerRevision = ({ id, role }) => {
   const pregunta = testCorregido?.questions[indPregunta];
   if (testCorregido && !error && pregunta) {
     return (
-      <div className="index-body container-fluid" id="questions">
+      <div className="index-body container-fluid" >
         <div className="p-4">
           <div className="card">
             <h1 className="text-center">{testCorregido.titulo}</h1>
@@ -33,14 +33,18 @@ const QuestionContainerRevision = ({ id, role }) => {
           </div>
         </div>
 
+        <div className='score m-4 info-question'>
+          <h6>Pregunta {indPregunta + 1}</h6>
+        </div>
+
         <div className="p-4 row">
           <div className="col-md-9 col-sm-12 order-last order-md-first" id="question">
             <div className="card">
               <div className="card-body">
                 <div key={pregunta.id}>
-                  <h2 className="p-2 m-2 card">
+                  <h2 className="p-2 m-2">
                     <Markdown>
-                      {`${indPregunta + 1}.-${pregunta.question}`}
+                      {pregunta.question}
                     </Markdown>
                   </h2>
                   {pregunta.type === 'test' ? <TestQuestion key={pregunta.id} mode="revision" infoPreg={pregunta} id={pregunta.id} /> : <TextQuestion key={pregunta.id} mode="revision" infoPreg={pregunta} />}
@@ -49,7 +53,7 @@ const QuestionContainerRevision = ({ id, role }) => {
             </div>
           </div>
 
-          <div className="p-2 col-md-3 col-sm-12 order-first order-md-last" id="question-nav">
+          <div className="p-2 col-md-3 col-sm-12 order-first order-md-last">
             <QuestionNav setIndex={setindPregunta} listaPreguntas={testCorregido.questions} selectedIdx={indPregunta} />
           </div>
         </div>

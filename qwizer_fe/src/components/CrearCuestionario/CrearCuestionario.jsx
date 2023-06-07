@@ -235,8 +235,7 @@ const CrearCuestionario = () => {
 
   // TODO cosa extraña al añadir una pregunta tipo test, desaparece el checkbox seleccionado del componente banco preguntas
   return (
-    <div>
-      <h1 className="text-center">Crear cuestionario</h1>
+    <div className='index-body create-test'>
       <form onSubmit={enviarCuestionarioCreado} ref={testForm}>
         {datosCuestionario()}
         <div className="d-flex justify-content-center mb-3">

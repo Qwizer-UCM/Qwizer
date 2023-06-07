@@ -5,16 +5,10 @@ cuestionario:
   secuencial: 0 #0 es que no es secuencial, 1 es secuencial
   duracion: 10 #minutos que durara el test
   fecha_apertura: '21/02/20 11:00:00' #Formato esperado: yy:mm:dd hh:mm:ss
-  fecha_cierre: '23/03/24 11:59:59' #Formato esperado: yy:mm:dd hh:mm:ss
+  fecha_cierre: '24/03/24 11:59:59' #Formato esperado: yy:mm:dd hh:mm:ss
   fecha_visible: '21/02/20 11:00:00' #Formato esperado: yy:mm:dd hh:mm:ss
+  aleatorizar: True #Indica que se quiere aleatorizar el cuestionario
   preguntas:
-    - tipo: "text"
-      pregunta: "¿Con qué TADs se puede implementar un diccionario?"
-      titulo: "Titulo 1"
-      opciones: "Con un árbol de búsqueda o una tabla dispersa"
-      punt_positiva: 3    #puntos que suma
-      punt_negativa: 0.3 #puntos que resta
-      
     - tipo: "test"
       pregunta: "El problema de la mochila usa el esquema de :"
       titulo: "Titulo 3"
@@ -26,6 +20,14 @@ cuestionario:
       op_correcta: 1 #id de opcion correcta
       punt_positiva: 1.0    #puntos que suma
       punt_negativa: 0.3 #puntos que resta
+
+    - tipo: "text"
+      pregunta: "¿Con qué TADs se puede implementar un diccionario?"
+      titulo: "Titulo 1"
+      opciones: "Con un árbol de búsqueda o una tabla dispersa"
+      punt_positiva: 3    #puntos que suma
+      punt_negativa: 0.3 #puntos que resta
+      
 
     - tipo: "test"
       pregunta: "Indica qué TAD no es lineal:"
@@ -65,6 +67,13 @@ cuestionario:
       op_correcta: 0 #id de opcion correcta
       punt_positiva: 0.5    #puntos que suma
       punt_negativa: 0.3 #puntos que resta
+    - tipo: "aleatoria" #Nuevo tipo de pregunta: pregunta aleatoria
+      preguntas_elegidas: #Subconjunto de preguntas que podría salir
+        - ref: "Titulo Markdown"
+        - ref: "Titulo Imagen"
+      punt_positiva: 4.0    #puntos que suma
+      punt_negativa: 0.0 #puntos que resta 
+
 
     
     

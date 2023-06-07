@@ -1,7 +1,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
+import { Buffer } from 'buffer';
 import App from './App';
+
 
 // Bootstrap CSS
 // import 'bootstrap/dist/css/bootstrap.min.css';
@@ -12,6 +14,10 @@ import App from './App';
 import './css/main.css';
 import './css/login.css';
 import './css/index.css';
+import './css/sidebar.css'
+
+// @ts-ignore
+window.Buffer = Buffer;
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

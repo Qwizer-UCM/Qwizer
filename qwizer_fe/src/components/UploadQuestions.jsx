@@ -22,7 +22,6 @@ const UploadQuestions = () => {
 
       Questions.upload({ formData })
         .then(({ data }) => {
-          setFile('');
           if (data.inserted === 'false') {
             setErrorModal({ show: true, message: data.message });
           } else {
@@ -78,7 +77,7 @@ const UploadQuestions = () => {
             <div className="upload-message-section">
               {file !== '' && idAsignatura && (
                 <button type="button" className="btn btn-success btn-submit" onClick={uploadFile}>
-                  Subir Preguntas
+                  Subir preguntas
                 </button>
               )}
             </div>

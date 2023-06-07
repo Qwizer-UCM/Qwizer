@@ -1,7 +1,6 @@
 import re
 import xml.etree.ElementTree as ET
 
-import base64
 import yaml
 from api.models import (
     Asignatura,
@@ -11,6 +10,7 @@ from api.models import (
     PreguntaTest,
     PreguntaText,
     User,
+    SeleccionPregunta
 )
 from drf_spectacular.utils import (
     OpenApiExample,
@@ -243,7 +243,7 @@ class QuestionViewSet(viewsets.ViewSet):
             return Response(content)
         updated_question = request.data["preguntaActualizada"]
 
-        pregunta = Pregunta.objects.get_by_id(id_pregunta=pk)  # TODO cambiar al servicio
+        pregunta = Pregunta.objects.get_by_id(id_pregunta=pk) 
         pregunta.titulo = updated_question["title"]
         pregunta.pregunta = updated_question["question"]
         pregunta.save(update_fields=["titulo", "pregunta"])
@@ -273,31 +273,19 @@ class QuestionViewSet(viewsets.ViewSet):
             content = {"message": "Error: Para eliminar una pregunta debes ser un profesor."}
             return Response(content)
 
-        pregunta = Pregunta.objects.get_by_id(id_pregunta=pk)
-        pregunta.delete()  # TODO comprobar que pasa aqui con los hijos
+        uso = SeleccionPregunta.objects.get_by_pregunta(id_pregunta=pk)
+        if not uso: #TODO hacerlo con en el on cascade referenciar a ptr_id y front mensaje con referencias a los cuestionarios
+            pregunta = Pregunta.objects.get_by_id(id_pregunta=pk)
+            pregunta.delete()  # TODO comprobar que pasa aqui con los hijos
+            content = {
+                "message": "Pregunta eliminada correctamente",
+            }
+            return Response(content)
 
-        content = {
-            "message": "Pregunta eliminada correctamente",
-        }
-        return Response(content)
-    
+            
 
-    @action(methods=["POST"], detail=False)
-    def imagen(self, request):
-    
-        imgs = request.FILES.getlist('files')
-        fs = FileSystemStorage()
-        photos = {}
-        format = 'png'
-        for img in imgs:
-            name = str(img)
-            store_name = fs.save(name, img)
-            path = fs.path(store_name)
-            with open(path, "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-                photos[name] = 'data:image/%s;base64,%s' % (format, encoded_string)
-        return Response(photos)
-
-        # # encoded_string = ''
-        # # encoded_string = base64.b64encode(img)
-        # return Response(str(imgs))
+        else:
+            content = {
+                "message": "No se puede borrar esta pregunta porque pertenece a un cuestionario"
+            } 
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
