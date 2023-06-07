@@ -78,7 +78,7 @@ const QuestionContainerNoRevision = ({ role }) => {
     // TODO por qué no se espera respuesta de esta peticion??
     Tests.sendTest({ respuestas, hash, initTime, endTime, idCuestionario: paramsId })
       .then(() => navigate(INICIO, { replace: true }))
-      .catch(() => alert("Nope"));
+      .catch(() => console.error("Failed"));
     console.log(respuestas);
     if (!navigator.onLine) {
       navigate(PATH_QR(paramsId, hash), { replace: true });
